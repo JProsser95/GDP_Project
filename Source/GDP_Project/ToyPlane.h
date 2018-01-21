@@ -31,7 +31,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	float fPlaneSpeed;
+	float fSpeed;
+	bool bIsBoosting;
 
 protected:
 
@@ -48,4 +49,7 @@ protected:
 	void MoveRight(float AxisValue);
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);
+	void StartBoost();
+	void EndBoost();
+
 };

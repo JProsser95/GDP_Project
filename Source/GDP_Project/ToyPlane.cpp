@@ -2,7 +2,6 @@
 
 #include "ToyPlane.h"
 
-
 // Sets default values
 AToyPlane::AToyPlane()
 {
@@ -21,7 +20,8 @@ AToyPlane::AToyPlane()
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	fPlaneSpeed = 200.0f;
+	fSpeed = 400.0f;
+	bIsBoosting = false;
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -39,30 +39,40 @@ void AToyPlane::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsBoosting) {
+		fSpeed += DeltaTime * 500.0f;
+	}
+	else {
+		fSpeed -= DeltaTime * 500.0f;
+	}
+
+	fSpeed = FMath::Clamp(fSpeed, 400.0f, 1000.0f);
+
 	//Scale our movement input axis values by 100 units per second
 	MovementInput = MovementInput.GetSafeNormal() * 100.0f;
 	FVector NewLocation = GetActorLocation();
 	FRotator NewRotation = GetActorRotation();
 
-	NewLocation += GetActorForwardVector() * DeltaTime * fPlaneSpeed;
+	NewLocation += GetActorForwardVector() * DeltaTime * fSpeed;
 
-	if (!MovementInput.IsZero()) {
-
+	if (MovementInput.Y != 0) {
 		//A or D pressed
 		NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
 		NewRotation.Roll += MovementInput.Y * DeltaTime;
-		NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -30.0f, 30.0f);
+		NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f, 90.0f);
 		NewRotation.Yaw += MovementInput.Y * DeltaTime;
-
-		//W or S press
-		NewRotation.Pitch += MovementInput.X * DeltaTime;
-		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -30.0f, 30.0f);
-
 	}
 	else {
-
 		NewRotation = FMath::Lerp(NewRotation, FRotator(0, NewRotation.Yaw, 0), 2.0f * DeltaTime);
+	}
 
+	if (MovementInput.X != 0) {
+		//W or S press
+		NewRotation.Pitch += MovementInput.X * DeltaTime;
+		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f, 60.0f);
+	}
+	else {
+		NewRotation = FMath::Lerp(NewRotation, FRotator(0, NewRotation.Yaw, 0), 2.0f * DeltaTime);
 	}
 
 	SetActorRotation(NewRotation);
@@ -73,6 +83,9 @@ void AToyPlane::Tick(float DeltaTime)
 void AToyPlane::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("PlaneBoost", IE_Pressed, this, &AToyPlane::StartBoost);
+	PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
 
 	//Hook up every-frame handling for our four axes
 	PlayerInputComponent->BindAxis("PlaneMoveUp", this, &AToyPlane::MoveUp);
@@ -100,4 +113,14 @@ void AToyPlane::PitchCamera(float AxisValue)
 void AToyPlane::YawCamera(float AxisValue)
 {
 	CameraInput.X = AxisValue;
+}
+
+void AToyPlane::StartBoost() 
+{
+	bIsBoosting = true;
+}
+
+void AToyPlane::EndBoost()
+{
+	bIsBoosting = false;
 }
