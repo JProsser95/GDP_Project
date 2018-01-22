@@ -9,6 +9,8 @@
 
 #include "ToyPlane.generated.h"
 
+
+
 UCLASS()
 class GDP_PROJECT_API AToyPlane : public APawn
 {
@@ -22,7 +24,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+private:
+
+	enum CameraType {
+		FIRST_PERSON,
+		THIRD_PERSON
+	};
 
 public:	
 	// Called every frame
@@ -39,6 +46,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
+
+	CameraType eCameraType;
 	
 	//Input variables
 	FVector2D MovementInput;
@@ -51,5 +60,6 @@ protected:
 	void YawCamera(float AxisValue);
 	void StartBoost();
 	void EndBoost();
+	void CameraZoom();
 
 };

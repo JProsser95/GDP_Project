@@ -12,13 +12,15 @@ AToyPlane::AToyPlane()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
-	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-60.0f, 0.0f, 0.0f));
+	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-30.0f, 0.0f, 0.0f));
 	OurCameraSpringArm->TargetArmLength = 700.f;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 3.0f;
 
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
+
+	eCameraType = THIRD_PERSON;
 
 	fSpeed = 400.0f;
 	bIsBoosting = false;
@@ -41,6 +43,7 @@ void AToyPlane::Tick(float DeltaTime)
 
 	if (bIsBoosting) {
 		fSpeed += DeltaTime * 500.0f;
+
 	}
 	else {
 		fSpeed -= DeltaTime * 500.0f;
@@ -86,6 +89,7 @@ void AToyPlane::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("PlaneBoost", IE_Pressed, this, &AToyPlane::StartBoost);
 	PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
+	PlayerInputComponent->BindAction("PlaneCameraZoom", IE_Released, this, &AToyPlane::CameraZoom);
 
 	//Hook up every-frame handling for our four axes
 	PlayerInputComponent->BindAxis("PlaneMoveUp", this, &AToyPlane::MoveUp);
@@ -124,3 +128,21 @@ void AToyPlane::EndBoost()
 {
 	bIsBoosting = false;
 }
+
+void AToyPlane::CameraZoom()
+{
+	if (eCameraType == FIRST_PERSON) {
+		eCameraType = THIRD_PERSON;
+		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-30.0f, 0.0f, 0.0f));
+		OurCameraSpringArm->TargetArmLength = 700.f;
+		OurCameraSpringArm->bEnableCameraLag = true;
+	}
+	else {
+		eCameraType = FIRST_PERSON;
+		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 0.0f), FRotator(0.0f, 0.0f, 0.0f));
+		OurCameraSpringArm->TargetArmLength = 0.0f;
+		OurCameraSpringArm->bEnableCameraLag = false;
+	}
+}
+
+	
