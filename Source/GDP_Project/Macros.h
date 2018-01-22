@@ -9,7 +9,3 @@
 #define OUTPUT_FLOAT(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::SanitizeFloat(x));}
 
 
-
-class GDP_PROJECT_API Macros
-{
-};

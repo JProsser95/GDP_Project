@@ -43,10 +43,14 @@ void AToyPlane::Tick(float DeltaTime)
 
 	if (bIsBoosting) {
 		fSpeed += DeltaTime * 500.0f;
-
 	}
 	else {
 		fSpeed -= DeltaTime * 500.0f;
+	}
+
+	if (fSpeed > 800.0f) {
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		PC->ClientPlayCameraShake(CameraShake, 1);
 	}
 
 	fSpeed = FMath::Clamp(fSpeed, 400.0f, 1000.0f);
