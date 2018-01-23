@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyPlane.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AToyPlane::AToyPlane()
@@ -22,6 +23,8 @@ AToyPlane::AToyPlane()
 
 	eCameraType = THIRD_PERSON;
 
+	fInitialBoost = 100.0f;
+	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
 
@@ -33,7 +36,6 @@ AToyPlane::AToyPlane()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -41,12 +43,22 @@ void AToyPlane::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (fCurrentBoost <= 0) {
+		bIsBoosting = false;
+	}
+
 	if (bIsBoosting) {
 		fSpeed += DeltaTime * 500.0f;
-
+		UpdateCurrentBoost(-DeltaTime * 0.3f * fInitialBoost);
 	}
 	else {
 		fSpeed -= DeltaTime * 500.0f;
+		UpdateCurrentBoost(DeltaTime * 0.2f * fInitialBoost);
+	}
+
+	if (fSpeed > 800.0f) {
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		PC->ClientPlayCameraShake(CameraShake, 1);
 	}
 
 	fSpeed = FMath::Clamp(fSpeed, 400.0f, 1000.0f);
@@ -121,7 +133,9 @@ void AToyPlane::YawCamera(float AxisValue)
 
 void AToyPlane::StartBoost() 
 {
-	bIsBoosting = true;
+	if (fCurrentBoost >= 10.0f) {
+		bIsBoosting = true;
+	}
 }
 
 void AToyPlane::EndBoost()
@@ -143,6 +157,11 @@ void AToyPlane::CameraZoom()
 		OurCameraSpringArm->TargetArmLength = 0.0f;
 		OurCameraSpringArm->bEnableCameraLag = false;
 	}
+}
+
+void AToyPlane::UpdateCurrentBoost(float currentBoost)
+{
+	fCurrentBoost += currentBoost;
 }
 
 	
