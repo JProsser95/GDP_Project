@@ -32,6 +32,20 @@ private:
 		THIRD_PERSON
 	};
 
+	// Players initial boost
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float fInitialBoost;
+
+	// Players current boost
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float fCurrentBoost;
+
+	// Is the plane currently boosting
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	bool bIsBoosting;
+
+	float fSpeed;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -39,13 +53,37 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	float fSpeed;
-	bool bIsBoosting;
+	// Accessor for InitialBoost
+	UFUNCTION(BlueprintPure, Category = "Plane")
+	float GetInitialBoost() { return fInitialBoost; }
+
+	// Accessor for CurrentBoost
+	UFUNCTION(BlueprintPure, Category = "Plane")
+	float GetCurrentBoost() { return fCurrentBoost; }
+
+	// Accessor for isBoosting
+	UFUNCTION(BlueprintPure, Category = "Plane")
+	bool GetIsBoosting() { return bIsBoosting; }
+
+	/* Updates current boost
+	* @param Boost The amount the boost of the plane will change 
+	*/
+	UFUNCTION(BluePrintCallable, Category = "Plane")
+	void UpdateCurrentBoost(float currentBoost);
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gameplay")
+	// The buleprint for the camera shake 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Plane")
 	TSubclassOf<UCameraShake> CameraShake;
+
+	// Widget class to use for HUD screen
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Plane", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUSerWidget> HUDWidgetClass;
+
+	// Instance of the HUD
+	UPROPERTY()
+	class UUserWidget* CurrentWidget;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
