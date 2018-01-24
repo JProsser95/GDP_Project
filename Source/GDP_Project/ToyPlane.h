@@ -10,8 +10,6 @@
 
 #include "ToyPlane.generated.h"
 
-
-
 UCLASS()
 class GDP_PROJECT_API AToyPlane : public APawn
 {
