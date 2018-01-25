@@ -18,7 +18,10 @@ class GDP_PROJECT_API AGDP_ProjectGameModeBase : public AGameModeBase
 	
 public:
 
-	void ChangeHUD(FString test);
+	/* Updates the current HUD Widget
+	* @param Name the name of the current pawn.
+	*/
+	void ChangeHUD(FString name);
 
 
 protected:

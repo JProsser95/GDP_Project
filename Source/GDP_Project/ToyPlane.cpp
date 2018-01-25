@@ -3,6 +3,7 @@
 #include "ToyPlane.h"
 #include "Blueprint/UserWidget.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Macros.h"
 
 // Sets default values
 AToyPlane::AToyPlane()
@@ -12,6 +13,10 @@ AToyPlane::AToyPlane()
 
 	//Create our components
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-30.0f, 0.0f, 0.0f));
@@ -37,8 +42,9 @@ void AToyPlane::Restart()
 {
 	Super::Restart();
 
+
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("Plane");
+	GameMode->ChangeHUD("ToyPlane");
 }
 
 // Called when the game starts or when spawned

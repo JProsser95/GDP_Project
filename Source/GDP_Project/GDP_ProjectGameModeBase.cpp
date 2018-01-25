@@ -4,26 +4,23 @@
 #include "ToyPlane.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
-#include "Macros.h"
 
 
 void AGDP_ProjectGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OUTPUT_STRING("IN BEGIN");
 }
 
 void AGDP_ProjectGameModeBase::ChangeHUD(FString name)
 {
-	OUTPUT_STRING("CHANGE HUD");
 
-	if (name == "Plane") 
+	if (name == "ToyPlane") 
 	{
 		ChangeMenuWidget(PlaneHUDClass);
 	}
 	
-	if (name == "Train")
+	if (name == "ToyTrain")
 	{
 		ChangeMenuWidget(TrainHUDClass);
 	}

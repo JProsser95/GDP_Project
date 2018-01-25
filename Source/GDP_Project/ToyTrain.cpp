@@ -18,8 +18,12 @@ AToyTrain::AToyTrain()
 
 	//Create our components
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	OurCameraSpringArm->SetupAttachment(RootComponent);
+	OurCameraSpringArm->SetupAttachment(MeshComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-30.0f, 0.0f, 0.0f));
 	OurCameraSpringArm->TargetArmLength = 700.f;
 	OurCameraSpringArm->bEnableCameraLag = true;
@@ -78,7 +82,7 @@ void AToyTrain::Restart()
 	Super::Restart();
 
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("Train");
+	GameMode->ChangeHUD("ToyTrain");
 }
 
 // Called every frame
