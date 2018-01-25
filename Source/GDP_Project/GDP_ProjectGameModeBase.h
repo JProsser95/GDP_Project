@@ -18,17 +18,23 @@ class GDP_PROJECT_API AGDP_ProjectGameModeBase : public AGameModeBase
 	
 public:
 
-
+	void ChangeHUD(FString test);
 
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Plane", Meta = (BlueprintProtected = true))
-	TSubclassOf<class UUserWidget> PlayerHUDClass;
+	/** Remove the current menu widget and create a new one from the specified class, if provided. */
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> PlaneHUDClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> TrainHUDClass;
 
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
 	
-
 	
 };
