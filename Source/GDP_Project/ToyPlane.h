@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 
+
 #include "ToyPlane.generated.h"
 
 UCLASS()

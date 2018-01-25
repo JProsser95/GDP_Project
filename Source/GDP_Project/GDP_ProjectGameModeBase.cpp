@@ -14,15 +14,16 @@ void AGDP_ProjectGameModeBase::BeginPlay()
 	OUTPUT_STRING("IN BEGIN");
 }
 
-void AGDP_ProjectGameModeBase::ChangeHUD(FString test)
+void AGDP_ProjectGameModeBase::ChangeHUD(FString name)
 {
 	OUTPUT_STRING("CHANGE HUD");
 
-	if (test == "Plane") 
+	if (name == "Plane") 
 	{
 		ChangeMenuWidget(PlaneHUDClass);
 	}
-	else
+	
+	if (name == "Train")
 	{
 		ChangeMenuWidget(TrainHUDClass);
 	}

@@ -35,8 +35,10 @@ AToyPlane::AToyPlane()
 
 void AToyPlane::Restart()
 {
+	Super::Restart();
+
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("");
+	GameMode->ChangeHUD("Plane");
 }
 
 // Called when the game starts or when spawned
