@@ -2,6 +2,7 @@
 
 #include "ToyPlane.h"
 #include "Blueprint/UserWidget.h"
+#include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
 AToyPlane::AToyPlane()
@@ -30,6 +31,12 @@ AToyPlane::AToyPlane()
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+}
+
+void AToyPlane::Restart()
+{
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->ChangeHUD("");
 }
 
 // Called when the game starts or when spawned

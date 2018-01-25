@@ -4,20 +4,42 @@
 #include "ToyPlane.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
-
+#include "Macros.h"
 
 
 void AGDP_ProjectGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AToyPlane* MyPlane = Cast<AToyPlane>(UGameplayStatics::GetPlayerPawn(this, 0));
+	OUTPUT_STRING("IN BEGIN");
+}
 
-	if (PlayerHUDClass != nullptr) 
+void AGDP_ProjectGameModeBase::ChangeHUD(FString test)
+{
+	OUTPUT_STRING("CHANGE HUD");
+
+	if (test == "Plane") 
 	{
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDClass);
+		ChangeMenuWidget(PlaneHUDClass);
+	}
+	else
+	{
+		ChangeMenuWidget(TrainHUDClass);
+	}
 
-		if (CurrentWidget != nullptr) 
+}
+
+void AGDP_ProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)
+{
+	if (CurrentWidget != nullptr)
+	{
+		CurrentWidget->RemoveFromViewport();
+		CurrentWidget = nullptr;
+	}
+	if (NewWidgetClass != nullptr)
+	{
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), NewWidgetClass);
+		if (CurrentWidget != nullptr)
 		{
 			CurrentWidget->AddToViewport();
 		}

@@ -51,6 +51,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Called when the Pawn is possesed
+	virtual void Restart() override;
+
 	// Accessor for InitialBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
 	float GetInitialBoost() { return fInitialBoost; }
