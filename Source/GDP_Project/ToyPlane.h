@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
+#include "Components/StaticMeshComponent.h"
 
 
 #include "ToyPlane.generated.h"
@@ -73,6 +74,8 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float currentBoost);
 
+	
+
 protected:
 
 	// The buleprint for the camera shake 
@@ -90,6 +93,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
+
+	// Allows the addition of a static mesh componenet in the editor
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* MeshComponent;
 
 	CameraType eCameraType;
 	

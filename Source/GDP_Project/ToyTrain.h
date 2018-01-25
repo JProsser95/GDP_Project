@@ -35,6 +35,9 @@ public:
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
 
+	// Allows the addition of a static mesh componenet in the editor
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* MeshComponent;
 
 protected:
 
