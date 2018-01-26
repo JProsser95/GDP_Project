@@ -13,13 +13,13 @@ AToyPlane::AToyPlane()
 
 	//Create our components
 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	//MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
+	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
+	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
 
-	RootComponent = MeshComponent;
-
-	MeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
-	MeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+	PlanePropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanePropMeshComponent"));
+	PlanePropMeshComponent->AttachToComponent(PlaneBodyMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
@@ -37,6 +37,7 @@ AToyPlane::AToyPlane()
 	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
+	fPropRotation = 0.0f;
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -111,6 +112,8 @@ void AToyPlane::Tick(float DeltaTime)
 	SetActorRotation(NewRotation);
 	SetActorLocation(NewLocation);
 
+	fPropRotation += DeltaTime * 500.0f;
+	PlanePropMeshComponent->SetRelativeRotation(FRotator(fPropRotation, 0, 0));
 }
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)

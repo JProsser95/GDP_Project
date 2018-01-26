@@ -45,6 +45,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsBoosting;
 
+	float fPropRotation;
+
 	float fSpeed;
 
 public:	
@@ -95,7 +97,9 @@ protected:
 
 	// Allows the addition of a static mesh component in the editor
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* MeshComponent;
+	UStaticMeshComponent* PlaneBodyMeshComponent;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* PlanePropMeshComponent;
 
 	// Allows the additions of a collider component in the editor
 	UPROPERTY(EditAnywhere)
