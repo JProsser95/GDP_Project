@@ -104,6 +104,10 @@ protected:
 	FVector2D MovementInput;
 	FVector2D CameraInput;
 
+	//Collision functions
+	UFUNCTION()
+	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
 	//Input functions
 	void MoveUp(float AxisValue);
 	void MoveRight(float AxisValue);
