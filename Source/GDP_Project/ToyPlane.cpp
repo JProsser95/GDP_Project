@@ -12,7 +12,6 @@ AToyPlane::AToyPlane()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Create our components
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
@@ -114,7 +113,6 @@ void AToyPlane::Tick(float DeltaTime)
 	SetActorLocation(NewLocation);
 
 	fPropRotation += DeltaTime * 500.0f;
-
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(fPropRotation, 0, 0));
 }
 
