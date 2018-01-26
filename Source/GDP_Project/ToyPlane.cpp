@@ -116,6 +116,10 @@ void AToyPlane::Tick(float DeltaTime)
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	OUTPUT_STRING("HIT");
+
+	//fSpeed = 0;
+	//bIsBoosting = false;
+	//SetActorLocation(FVector(0, 0, 0));
 }
 
 // Called to bind functionality to input
