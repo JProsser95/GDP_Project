@@ -12,10 +12,14 @@ AToyPlane::AToyPlane()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Create our components
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	//MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
+	RootComponent = MeshComponent;
+
+	MeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
+	MeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
@@ -41,7 +45,6 @@ AToyPlane::AToyPlane()
 void AToyPlane::Restart()
 {
 	Super::Restart();
-
 
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->ChangeHUD("ToyPlane");
@@ -107,6 +110,12 @@ void AToyPlane::Tick(float DeltaTime)
 
 	SetActorRotation(NewRotation);
 	SetActorLocation(NewLocation);
+
+}
+
+void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	OUTPUT_STRING("HIT");
 }
 
 // Called to bind functionality to input

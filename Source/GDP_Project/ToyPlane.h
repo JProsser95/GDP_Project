@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 
 
 #include "ToyPlane.generated.h"
@@ -74,8 +75,6 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float currentBoost);
 
-	
-
 protected:
 
 	// The buleprint for the camera shake 
@@ -94,15 +93,23 @@ protected:
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
 
-	// Allows the addition of a static mesh componenet in the editor
+	// Allows the addition of a static mesh component in the editor
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* MeshComponent;
+
+	// Allows the additions of a collider component in the editor
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* BoxComponent;
 
 	CameraType eCameraType;
 	
 	//Input variables
 	FVector2D MovementInput;
 	FVector2D CameraInput;
+
+	//Collision functions
+	UFUNCTION()
+	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	//Input functions
 	void MoveUp(float AxisValue);
