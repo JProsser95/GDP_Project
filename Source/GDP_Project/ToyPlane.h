@@ -8,8 +8,6 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/BoxComponent.h"
-
 
 #include "ToyPlane.generated.h"
 
@@ -100,10 +98,6 @@ protected:
 	UStaticMeshComponent* PlaneBodyMeshComponent;
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PlanePropMeshComponent;
-
-	// Allows the additions of a collider component in the editor
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* BoxComponent;
 
 	CameraType eCameraType;
 	
