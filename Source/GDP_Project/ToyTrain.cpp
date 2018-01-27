@@ -3,7 +3,7 @@
 #include "ToyTrain.h"
 #include "GDP_ProjectGameModeBase.h"
 
-const int HEIGHT = 300;//height of player above spline
+const int HEIGHT = 0;//height of player above spline
 const int MAXPOINTS = 5000;//stop sampling the spline after MAXPOINTS points
 FVector pathPointLocation[MAXPOINTS];//save sampled point locations into an array
 FQuat pathPointRotation[MAXPOINTS];//save sampled point rotations into an array
@@ -23,7 +23,7 @@ AToyTrain::AToyTrain()
 	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	OurCameraSpringArm->SetupAttachment(MeshComponent);
+	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-30.0f, 0.0f, 0.0f));
 	OurCameraSpringArm->TargetArmLength = 700.f;
 	OurCameraSpringArm->bEnableCameraLag = true;
@@ -47,7 +47,7 @@ void AToyTrain::BeginPlay()
 		float totalLength = SplineComponent->GetSplineLength();
 
 		float currentLength = 0;
-		int sampleLength = 10; //we will sample the spline every "sampleLength" units
+		int sampleLength = 5; //we will sample the spline every "sampleLength" units
 
 		FRotator splinePointRotation = FRotator(0, 0, 0);
 
