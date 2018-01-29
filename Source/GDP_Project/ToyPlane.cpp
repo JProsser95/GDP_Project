@@ -3,6 +3,7 @@
 #include "ToyPlane.h"
 #include "Blueprint/UserWidget.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Macros.h"
 
 // Sets default values
@@ -14,13 +15,25 @@ AToyPlane::AToyPlane()
 	//Create our components
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
+
+	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
 	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/PlaneHull_Cylinder003.PlaneHull_Cylinder003'"));
+	if (MeshAssetBody.Object)
+		PlaneBodyMeshComponent->SetStaticMesh(MeshAssetBody.Object);
 
+	//Mesh
 	PlanePropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanePropMeshComponent"));
 	PlanePropMeshComponent->AttachToComponent(PlaneBodyMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/prop_prop.prop_prop'"));
+	if (MeshAssetBProp.Object)
+		PlanePropMeshComponent->SetStaticMesh(MeshAssetBProp.Object);
+	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, -90.0f, 5.0f));
+
+	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(0,90.0f,0));
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
@@ -38,10 +51,11 @@ AToyPlane::AToyPlane()
 	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
+	bIsActive = false;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 void AToyPlane::Restart()
@@ -61,6 +75,9 @@ void AToyPlane::BeginPlay()
 // Called every frame
 void AToyPlane::Tick(float DeltaTime)
 {
+	if (!bIsActive)
+		return;
+
 	Super::Tick(DeltaTime);
 
 	if (fCurrentBoost <= 0) {
@@ -121,9 +138,6 @@ void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AAct
 {
 	OUTPUT_STRING("HIT");
 
-	//fSpeed = 0;
-	//bIsBoosting = false;
-	//SetActorLocation(FVector(0, 0, 0));
 }
 
 // Called to bind functionality to input

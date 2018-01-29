@@ -11,6 +11,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
+#include "Components/SphereComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Macros.h"
 
@@ -26,6 +27,10 @@ AToyCar::AToyCar()
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
+
+	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
+	SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
 
 	// Setup friction materials
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));

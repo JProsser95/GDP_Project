@@ -9,6 +9,7 @@
 class UPhysicalMaterial;
 class UCameraComponent;
 class USpringArmComponent;
+class USphereComponent;
 
 /**
  * 
@@ -26,6 +27,7 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
 	
+
 	
 public:
 
@@ -64,6 +66,9 @@ public:
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
 	static const FName EngineAudioRPM;
+
+	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereCollider;
 
 private:
 

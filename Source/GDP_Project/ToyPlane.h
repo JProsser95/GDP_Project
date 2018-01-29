@@ -43,8 +43,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsBoosting;
 
-	float fPropRotation;
+	bool bIsActive;
 
+	float fPropRotation;
 	float fSpeed;
 
 public:	
