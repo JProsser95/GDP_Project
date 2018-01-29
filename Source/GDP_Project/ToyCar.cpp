@@ -13,6 +13,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "Components/SphereComponent.h"
+#include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Macros.h"
 
@@ -154,6 +155,14 @@ void AToyCar::Tick(float DeltaTime)
 	UpdatePhysicsMaterial();
 }
 
+void AToyCar::Restart()
+{
+	Super::Restart();
+
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->ChangeHUD("ToyCar");
+}
+
 // Called to bind functionality to input
 void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -208,22 +217,35 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveHUD();
 	if (possesActor != nullptr)
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
 }
 
 void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+	if (bCanPosses)
+		return;
+
 	OUTPUT_STRING("CAR HIT");
 
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->AddHUD();
 }
 
 void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (!bCanPosses)
+		return;
+
 	OUTPUT_STRING("CAR FINISH HIT");
+
 
 	bCanPosses = false;
 	possesActor = nullptr;
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveHUD();
 }

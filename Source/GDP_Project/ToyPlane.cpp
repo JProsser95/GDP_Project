@@ -44,6 +44,11 @@ AToyPlane::AToyPlane()
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
+	PlaneWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	PlaneWidget->SetupAttachment(RootComponent);
+	//static ConstructorHelpers::FObjectFinder<UWidgetComponent> Widget(TEXT("WidgetBlueprint'/Game/HUD/VehicleWidget.VehicleWidget'"));
+	//PlaneWidget->SetWidget(Widget.Object);
+
 	eCameraType = THIRD_PERSON;
 
 	fInitialBoost = 100.0f;

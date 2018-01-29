@@ -4,6 +4,7 @@
 #include "ToyPlane.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "Macros.h"
 
 
 void AGDP_ProjectGameModeBase::BeginPlay()
@@ -14,17 +15,18 @@ void AGDP_ProjectGameModeBase::BeginPlay()
 
 void AGDP_ProjectGameModeBase::ChangeHUD(FString name)
 {
-
 	if (name == "ToyPlane") 
 	{
 		ChangeMenuWidget(PlaneHUDClass);
-	}
-	
+	} else 	
 	if (name == "ToyTrain")
 	{
 		ChangeMenuWidget(TrainHUDClass);
+	} else
+	if (name == "ToyCar")
+	{
+		ChangeMenuWidget(CarHUDClass);
 	}
-
 }
 
 void AGDP_ProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)
@@ -42,4 +44,19 @@ void AGDP_ProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidg
 			CurrentWidget->AddToViewport();
 		}
 	}
+}
+
+void AGDP_ProjectGameModeBase::AddHUD()
+{
+	VehicleWidget = CreateWidget<UUserWidget>(GetWorld(), ChangeVehicleHUDClass);
+	if (VehicleWidget != nullptr)
+	{
+		VehicleWidget->AddToViewport();
+	}
+}
+
+void AGDP_ProjectGameModeBase::RemoveHUD()
+{
+	VehicleWidget->RemoveFromViewport();
+	VehicleWidget = nullptr;
 }

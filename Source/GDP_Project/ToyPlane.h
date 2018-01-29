@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 
 #include "ToyPlane.generated.h"
 
@@ -92,6 +93,9 @@ protected:
 	// Instance of the HUD
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* PlaneWidget;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;

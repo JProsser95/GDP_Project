@@ -42,6 +42,9 @@ public:
 	// Begin Actor interface
 	virtual void Tick(float Delta) override;
 
+	// Called when the Pawn is possesed
+	virtual void Restart() override;
+
 protected:
 	virtual void BeginPlay() override;
 
