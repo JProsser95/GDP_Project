@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyCar.h"
+#include "ToyPlane.h"
 #include "ToyCarWheelFront.h"
 #include "ToyCarWheelRear.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -31,6 +32,8 @@ AToyCar::AToyCar()
 	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
 	SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
+	SphereCollider->OnComponentBeginOverlap.AddDynamic(this, &AToyCar::OnBeginOverlap);
+	SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
 
 	// Setup friction materials
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
@@ -127,6 +130,8 @@ AToyCar::AToyCar()
 	bIsLowFriction = false;
 	bInReverseGear = false;
 
+	bCanPosses = false;
+
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -159,6 +164,8 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
+	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
+
 
 }
 
@@ -197,4 +204,26 @@ void AToyCar::UpdatePhysicsMaterial()
 			bIsLowFriction = true;
 		}
 	}
+}
+
+void AToyCar::ChangePossesion()
+{
+	if (possesActor != nullptr)
+		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
+}
+
+void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	OUTPUT_STRING("CAR HIT");
+
+	bCanPosses = true;
+	possesActor = Cast<APawn>(OtherActor);
+}
+
+void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	OUTPUT_STRING("CAR FINISH HIT");
+
+	bCanPosses = false;
+	possesActor = nullptr;
 }

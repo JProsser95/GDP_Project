@@ -27,8 +27,6 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
 	
-
-	
 public:
 
 	AToyCar();
@@ -62,6 +60,8 @@ public:
 	void OnHandbrakePressed();
 	/** Handle handbrake released */
 	void OnHandbrakeReleased();
+	// Posses other Actor;
+	void ChangePossesion();
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
@@ -69,6 +69,12 @@ public:
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollider;
+
+	UFUNCTION()
+	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
 
@@ -78,6 +84,11 @@ private:
 	UPhysicalMaterial* SlipperyMaterial;
 	/** Non Slippery Material instance */
 	UPhysicalMaterial* NonSlipperyMaterial;
+
+	//Is the car able to currently posses another Pawn
+	bool bCanPosses;
+
+	APawn* possesActor;
 
 public:
 	/** Returns SpringArm subobject **/

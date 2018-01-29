@@ -15,7 +15,6 @@ AToyPlane::AToyPlane()
 	//Create our components
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
-
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
@@ -70,6 +69,8 @@ void AToyPlane::Restart()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 // Called every frame
@@ -136,8 +137,11 @@ void AToyPlane::Tick(float DeltaTime)
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	OUTPUT_STRING("HIT");
+}
 
+void AToyPlane::Posses()
+{
+	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
 // Called to bind functionality to input

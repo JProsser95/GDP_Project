@@ -76,6 +76,9 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float currentBoost);
 
+	//Posses this Pawn
+	void Posses();
+
 protected:
 
 	// The buleprint for the camera shake 
