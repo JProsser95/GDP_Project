@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyCar.h"
+#include "ToyPlane.h"
 #include "ToyCarWheelFront.h"
 #include "ToyCarWheelRear.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -11,6 +12,8 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
+#include "Components/SphereComponent.h"
+#include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Macros.h"
 
@@ -26,6 +29,12 @@ AToyCar::AToyCar()
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
+
+	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
+	SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
+	SphereCollider->OnComponentBeginOverlap.AddDynamic(this, &AToyCar::OnBeginOverlap);
+	SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
 
 	// Setup friction materials
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
@@ -122,6 +131,8 @@ AToyCar::AToyCar()
 	bIsLowFriction = false;
 	bInReverseGear = false;
 
+	bCanPosses = false;
+
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -144,6 +155,14 @@ void AToyCar::Tick(float DeltaTime)
 	UpdatePhysicsMaterial();
 }
 
+void AToyCar::Restart()
+{
+	Super::Restart();
+
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->ChangeHUD("ToyCar");
+}
+
 // Called to bind functionality to input
 void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -154,6 +173,8 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
+	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
+
 
 }
 
@@ -192,4 +213,39 @@ void AToyCar::UpdatePhysicsMaterial()
 			bIsLowFriction = true;
 		}
 	}
+}
+
+void AToyCar::ChangePossesion()
+{
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveHUD();
+	if (possesActor != nullptr)
+		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
+}
+
+void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (bCanPosses)
+		return;
+
+	OUTPUT_STRING("CAR HIT");
+
+	bCanPosses = true;
+	possesActor = Cast<APawn>(OtherActor);
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->AddHUD();
+}
+
+void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (!bCanPosses)
+		return;
+
+	OUTPUT_STRING("CAR FINISH HIT");
+
+
+	bCanPosses = false;
+	possesActor = nullptr;
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveHUD();
 }

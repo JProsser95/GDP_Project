@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 
 #include "ToyPlane.generated.h"
 
@@ -43,8 +44,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsBoosting;
 
-	float fPropRotation;
+	bool bIsActive;
 
+	float fPropRotation;
 	float fSpeed;
 
 public:	
@@ -75,6 +77,9 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float currentBoost);
 
+	//Posses this Pawn
+	void Posses();
+
 protected:
 
 	// The buleprint for the camera shake 
@@ -88,6 +93,9 @@ protected:
 	// Instance of the HUD
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* PlaneWidget;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;

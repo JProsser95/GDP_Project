@@ -23,6 +23,8 @@ public:
 	*/
 	void ChangeHUD(FString name);
 
+	void AddHUD();
+	void RemoveHUD();
 
 protected:
 
@@ -36,8 +38,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
 	TSubclassOf<class UUserWidget> TrainHUDClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> CarHUDClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> ChangeVehicleHUDClass;
+
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
-	
-	
+
+	UPROPERTY()
+	class UUserWidget* VehicleWidget;
+
 };
