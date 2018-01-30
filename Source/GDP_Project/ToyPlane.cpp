@@ -63,11 +63,11 @@ AToyPlane::AToyPlane()
 	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
-	bIsActive = true;
+	bIsActive = false;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
@@ -120,14 +120,10 @@ void AToyPlane::Tick(float DeltaTime)
 
 	//Scale our movement input axis values by 100 units per second
 	MovementInput = MovementInput.GetSafeNormal() * 100.0f;
-	FVector NewLocation = GetActorLocation();
 	FRotator NewRotation = GetActorRotation();
-
-	NewLocation += GetActorForwardVector() * DeltaTime * fSpeed;
 
 	if (MovementInput.Y != 0) {
 		//A or D pressed
-		NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
 		NewRotation.Roll += MovementInput.Y * DeltaTime;
 		NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f, 90.0f);
 		NewRotation.Yaw += MovementInput.Y * DeltaTime;
@@ -148,7 +144,7 @@ void AToyPlane::Tick(float DeltaTime)
 	SetActorRotation(NewRotation);
 	//SetActorLocation(NewLocation);
 
-	CustomMovementComponent->AddInputVector(GetActorForwardVector() * 10);
+	CustomMovementComponent->AddInputVector(GetActorForwardVector() * fSpeed);
 
 	fPropRotation += DeltaTime * 500.0f;
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(fPropRotation, 0, 0));

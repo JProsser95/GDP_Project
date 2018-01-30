@@ -13,7 +13,7 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	}
 
 	// Get (and then clear) the movement vector that we set in APawnTesting::Tick
-	FVector DesiredMovementThisFrame = ConsumeInputVector().GetClampedToMaxSize(1.0f) * DeltaTime * 750.0f;
+	FVector DesiredMovementThisFrame = ConsumeInputVector() * DeltaTime;
 	if (!DesiredMovementThisFrame.IsNearlyZero())
 	{
 		FHitResult Hit;
