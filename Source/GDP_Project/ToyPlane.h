@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 
 #include "ToyPlane.generated.h"
@@ -79,6 +80,10 @@ public:
 
 	//Posses this Pawn
 	void Posses();
+
+	class UCustomMovementComponent* CustomMovementComponent;
+
+	virtual UPawnMovementComponent* GetMovementComponent() const override;
 
 protected:
 

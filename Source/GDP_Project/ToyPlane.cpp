@@ -5,6 +5,7 @@
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Macros.h"
+#include "CustomMovementComponent.h"
 
 // Sets default values
 AToyPlane::AToyPlane()
@@ -13,7 +14,14 @@ AToyPlane::AToyPlane()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Create our components
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
+	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
+
+	//UStaticMeshComponent* SphereComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Planemain"));
+	RootComponent = SphereComponent;
+	SphereComponent->InitSphereRadius(100.0f);
+	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
@@ -55,11 +63,15 @@ AToyPlane::AToyPlane()
 	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
-	bIsActive = false;
+	bIsActive = true;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	// Create an instance of our movement component, and tell it to update our root component.
+	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
+	CustomMovementComponent->UpdatedComponent = RootComponent;
 }
 
 void AToyPlane::Restart()
@@ -134,10 +146,17 @@ void AToyPlane::Tick(float DeltaTime)
 	}
 
 	SetActorRotation(NewRotation);
-	SetActorLocation(NewLocation);
+	//SetActorLocation(NewLocation);
+
+	CustomMovementComponent->AddInputVector(GetActorForwardVector() * 10);
 
 	fPropRotation += DeltaTime * 500.0f;
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(fPropRotation, 0, 0));
+}
+
+UPawnMovementComponent* AToyPlane::GetMovementComponent() const
+{
+	return CustomMovementComponent;
 }
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
