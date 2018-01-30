@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Macros.h"
 #include "CustomMovementComponent.h"
 
@@ -54,8 +55,9 @@ AToyPlane::AToyPlane()
 
 	PlaneWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	PlaneWidget->SetupAttachment(RootComponent);
-	//static ConstructorHelpers::FObjectFinder<UWidgetComponent> Widget(TEXT("WidgetBlueprint'/Game/HUD/VehicleWidget.VehicleWidget'"));
-	//PlaneWidget->SetWidget(Widget.Object);
+	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
+	PlaneWidget->SetWidgetClass(Widget.Class);
+	PlaneWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 
 	eCameraType = THIRD_PERSON;
 
@@ -63,11 +65,11 @@ AToyPlane::AToyPlane()
 	fCurrentBoost = fInitialBoost;
 	fSpeed = 400.0f;
 	bIsBoosting = false;
-	bIsActive = true;
+	bIsActive = false;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
@@ -94,9 +96,16 @@ void AToyPlane::BeginPlay()
 void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
+	{
+		FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
+		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
+		PlaneWidget->SetRelativeRotation(PlayerRot);
 		return;
+	}
 
 	Super::Tick(DeltaTime);
+
+	
 
 	if (fCurrentBoost <= 0) {
 		bIsBoosting = false;
