@@ -174,6 +174,8 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
+	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
+
 
 
 }
@@ -248,4 +250,15 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	possesActor = nullptr;
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->RemoveHUD();
+}
+
+void AToyCar::ResetPositionAndRotation()
+{
+	OUTPUT_STRING("Reset");
+
+	FVector currentLoaction = this->GetActorLocation();
+
+	this->SetActorRelativeLocation(FVector(currentLoaction.X, currentLoaction.Y, currentLoaction.Z + 100), false, NULL, ETeleportType::TeleportPhysics);
+	this->SetActorRotation(FRotator(0, 0, 0), ETeleportType::TeleportPhysics);
+
 }

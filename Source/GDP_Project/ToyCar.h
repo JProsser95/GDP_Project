@@ -66,6 +66,8 @@ public:
 	// Posses other Actor;
 	void ChangePossesion();
 
+	void ResetPositionAndRotation();
+
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
 	static const FName EngineAudioRPM;
