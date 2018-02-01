@@ -11,21 +11,29 @@ void AGDP_ProjectGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	for (int i = 0; i < NUMBEROFPLANEPARTS; ++i) // Set all plane parts to not collected at the start of the game.
+	{ 
+		CollectedPlaneParts[i] = false;
+	}
 }
 
-void AGDP_ProjectGameModeBase::ChangeHUD(FString name)
+void AGDP_ProjectGameModeBase::ChangeHUD(const FString& name)
 {
 	if (name == "ToyPlane") 
 	{
 		ChangeMenuWidget(PlaneHUDClass);
-	} else 	
-	if (name == "ToyTrain")
+	} 
+	else if (name == "ToyTrain")
 	{
 		ChangeMenuWidget(TrainHUDClass);
-	} else
-	if (name == "ToyCar")
+	} 
+	else if (name == "ToyCar")
 	{
 		ChangeMenuWidget(CarHUDClass);
+	}
+	else if (name == "HUD")
+	{
+		ChangeMenuWidget(PlanePartsHUDClass);
 	}
 }
 
@@ -59,4 +67,12 @@ void AGDP_ProjectGameModeBase::RemoveHUD()
 {
 	VehicleWidget->RemoveFromViewport();
 	VehicleWidget = nullptr;
+}
+
+void AGDP_ProjectGameModeBase::SetPlanePartCollected(PlaneParts PartCollected)
+{
+	CollectedPlaneParts[PartCollected] = true;
+	//UE_LOG(LogTemp, Warning, TEXT("Plane Parts Collected: %d, %d, %d, %d, %d"), CollectedPlaneParts[0], CollectedPlaneParts[1], CollectedPlaneParts[2], CollectedPlaneParts[3], CollectedPlaneParts[4]);
+
+	ChangeHUD("HUD");
 }

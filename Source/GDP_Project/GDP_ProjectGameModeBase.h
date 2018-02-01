@@ -6,6 +6,17 @@
 #include "GameFramework/GameModeBase.h"
 #include "GDP_ProjectGameModeBase.generated.h"
 
+#define NUMBEROFPLANEPARTS 5
+
+enum PlaneParts
+{
+	PlanePart1,
+	PlanePart2,
+	PlanePart3,
+	PlanePart4,
+	PlanePart5
+};
+
 /**
  * 
  */
@@ -21,10 +32,12 @@ public:
 	/* Updates the current HUD Widget
 	* @param Name the name of the current pawn.
 	*/
-	void ChangeHUD(FString name);
+	void ChangeHUD(const FString& name);
 
 	void AddHUD();
 	void RemoveHUD();
+
+	void SetPlanePartCollected(PlaneParts PartCollected);
 
 protected:
 
@@ -44,10 +57,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
 	TSubclassOf<class UUserWidget> ChangeVehicleHUDClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> PlanePartsHUDClass; // The main HUD. Used to display plane parts collected.
+
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
 
 	UPROPERTY()
 	class UUserWidget* VehicleWidget;
+
+	bool CollectedPlaneParts[NUMBEROFPLANEPARTS];
 
 };
