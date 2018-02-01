@@ -113,11 +113,14 @@ AToyCar::AToyCar()
 	// Set the inertia scale. This controls how the mass of the vehicle is distributed.
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
 
+	CameraParent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraParent"));
+	CameraParent->SetupAttachment(RootComponent);
+
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
 	SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
-	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->SetupAttachment(CameraParent);
 	SpringArm->TargetArmLength = 125.0f;
 	SpringArm->bEnableCameraLag = false;
 	SpringArm->bEnableCameraRotationLag = false;
@@ -156,8 +159,18 @@ void AToyCar::Tick(float DeltaTime)
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
+	FRotator cameraRot = SpringArm->GetComponentRotation();
+	cameraRot.Yaw += CameraInput.X;
+	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch + CameraInput.Y, -80.0f, -15.0f);
+	cameraRot.Roll = 0;
+	SpringArm->SetWorldRotation(cameraRot);
+
+	FRotator cam = Camera->GetComponentRotation();
+	cam.Roll = 0;
+	Camera->SetWorldRotation(cam);
+
 	// Update phsyics material
-	UpdatePhysicsMaterial();
+	//UpdatePhysicsMaterial();
 }
 
 void AToyCar::Restart()
@@ -175,13 +188,14 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyCar::MoveForward);
 	PlayerInputComponent->BindAxis("CarMoveRight", this, &AToyCar::MoveRight);
+	PlayerInputComponent->BindAxis("CarCameraPitch", this, &AToyCar::PitchCamera);
+	PlayerInputComponent->BindAxis("CarCameraYaw", this, &AToyCar::YawCamera);
 
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
 	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
 	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
-
 }
 
 void AToyCar::MoveForward(float AxisValue)
@@ -192,6 +206,16 @@ void AToyCar::MoveForward(float AxisValue)
 void AToyCar::MoveRight(float AxisValue)
 {
 	GetVehicleMovementComponent()->SetSteeringInput(AxisValue);
+}
+
+void AToyCar::PitchCamera(float AxisValue)
+{
+	CameraInput.Y = AxisValue;
+}
+
+void AToyCar::YawCamera(float AxisValue)
+{
+	CameraInput.X = AxisValue;
 }
 
 void AToyCar::OnHandbrakePressed()
@@ -223,8 +247,6 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
-	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	//GameMode->RemoveHUD();
 	if (possesActor != nullptr)
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
 }
@@ -238,8 +260,6 @@ void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
-	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	//GameMode->AddHUD();
 }
 
 void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -252,8 +272,6 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 
 	bCanPosses = false;
 	possesActor = nullptr;
-	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	//GameMode->RemoveHUD();
 }
 
 void AToyCar::ResetPositionAndRotation()

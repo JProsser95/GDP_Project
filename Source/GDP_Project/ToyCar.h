@@ -66,6 +66,9 @@ public:
 	// Posses other Actor;
 	void ChangePossesion();
 
+	void PitchCamera(float AxisValue);
+	void YawCamera(float AxisValue);
+
 	// Flips the car back to being flat (Used when the car is flipped over)
 	void ResetPositionAndRotation();
 
@@ -78,6 +81,9 @@ public:
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollider;
+
+	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* CameraParent;
 
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
@@ -98,6 +104,8 @@ private:
 	bool bCanPosses;
 
 	APawn* possesActor;
+
+	FVector2D CameraInput;
 
 public:
 	/** Returns SpringArm subobject **/
