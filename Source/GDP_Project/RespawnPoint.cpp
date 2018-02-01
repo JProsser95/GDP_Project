@@ -67,8 +67,6 @@ void ARespawnPoint::Tick(float DeltaTime)
 
 void ARespawnPoint::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	OUTPUT_STRING("Respawn Trigger HIT");
-
 	for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		ActorItr->SetisCurrentSpawnPoint(false);
