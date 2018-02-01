@@ -66,7 +66,11 @@ public:
 	// Posses other Actor;
 	void ChangePossesion();
 
+	// Flips the car back to being flat (Used when the car is flipped over)
 	void ResetPositionAndRotation();
+
+	// Respawns the car at the current active safe spot
+	void Respawn();
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
