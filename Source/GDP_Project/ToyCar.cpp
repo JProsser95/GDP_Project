@@ -15,6 +15,9 @@
 #include "Components/SphereComponent.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PossessableActorComponent.h"
+#include "EngineUtils.h"
+#include "RespawnPoint.h"
 #include "Macros.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
@@ -174,7 +177,8 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
-
+	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
+	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
 
 }
 
@@ -217,23 +221,23 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveHUD();
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->RemoveHUD();
 	if (possesActor != nullptr)
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
 }
 
 void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (bCanPosses)
+	if (bCanPosses || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
 	OUTPUT_STRING("CAR HIT");
 
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->AddHUD();
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->AddHUD();
 }
 
 void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -246,6 +250,30 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 
 	bCanPosses = false;
 	possesActor = nullptr;
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveHUD();
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->RemoveHUD();
+}
+
+void AToyCar::ResetPositionAndRotation()
+{
+	OUTPUT_STRING("Reset");
+
+	FVector currentLoaction = this->GetActorLocation();
+	FRotator currentRotation = this->GetActorRotation();
+
+	this->SetActorRelativeLocation(FVector(currentLoaction.X, currentLoaction.Y, currentLoaction.Z + 100), false, NULL, ETeleportType::TeleportPhysics);
+	this->SetActorRotation(FRotator(0,0,0), ETeleportType::TeleportPhysics);
+}
+
+void AToyCar::Respawn()
+{
+	for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->GetIsCurrentSpawnPoint())
+		{
+			FVector spawnLocation = ActorItr->GetActorLocation();
+			spawnLocation.Z += 100;
+			this->SetActorLocationAndRotation(spawnLocation, FRotator(0, 0, 0), false, NULL, ETeleportType::TeleportPhysics);
+		}
+	}
 }
