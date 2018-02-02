@@ -11,7 +11,7 @@ void AGDP_ProjectGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (int i = 0; i < NUMBEROFPLANEPARTS; ++i) // Set all plane parts to not collected at the start of the game.
+	for (int i = 0; i < PlaneParts_MAX; ++i) // Set all plane parts to not collected at the start of the game.
 	{ 
 		CollectedPlaneParts[i] = false;
 	}
@@ -75,4 +75,9 @@ void AGDP_ProjectGameModeBase::SetPlanePartCollected(PlaneParts PartCollected)
 	//UE_LOG(LogTemp, Warning, TEXT("Plane Parts Collected: %d, %d, %d, %d, %d"), CollectedPlaneParts[0], CollectedPlaneParts[1], CollectedPlaneParts[2], CollectedPlaneParts[3], CollectedPlaneParts[4]);
 
 	ChangeHUD("HUD");
+}
+
+bool AGDP_ProjectGameModeBase::GetPlanePartCollected(PlaneParts PartCollected)
+{
+	return CollectedPlaneParts[PartCollected];
 }

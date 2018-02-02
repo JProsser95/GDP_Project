@@ -11,8 +11,6 @@ UCollectableObject::UCollectableObject()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	if (PlanePartName == "PlanePart1")
-		PlanePart = PlanePart1;
 }
 
 
@@ -22,6 +20,16 @@ void UCollectableObject::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+	if (PlanePartName == "PlanePart1")
+		PlanePart = PlanePart1;
+	else if (PlanePartName == "PlanePart2")
+		PlanePart = PlanePart2;
+	else if (PlanePartName == "PlanePart3")
+		PlanePart = PlanePart3;
+	else if (PlanePartName == "PlanePart4")
+		PlanePart = PlanePart4;
+	else if (PlanePartName == "PlanePart5")
+		PlanePart = PlanePart5;
 }
 
 

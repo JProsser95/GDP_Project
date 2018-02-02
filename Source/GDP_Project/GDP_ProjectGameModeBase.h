@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "HUDWidget.h"
 #include "GDP_ProjectGameModeBase.generated.h"
-
-#define NUMBEROFPLANEPARTS 5
 
 enum PlaneParts
 {
@@ -14,7 +13,8 @@ enum PlaneParts
 	PlanePart2,
 	PlanePart3,
 	PlanePart4,
-	PlanePart5
+	PlanePart5,
+	PlaneParts_MAX // Used to calculate the number of plane parts in the game
 };
 
 /**
@@ -38,6 +38,7 @@ public:
 	void RemoveHUD();
 
 	void SetPlanePartCollected(PlaneParts PartCollected);
+	bool GetPlanePartCollected(PlaneParts PartCollected);
 
 protected:
 
@@ -66,6 +67,6 @@ protected:
 	UPROPERTY()
 	class UUserWidget* VehicleWidget;
 
-	bool CollectedPlaneParts[NUMBEROFPLANEPARTS];
+	bool CollectedPlaneParts[PlaneParts_MAX];
 
 };
