@@ -10,6 +10,7 @@ class UPhysicalMaterial;
 class UCameraComponent;
 class USpringArmComponent;
 class USphereComponent;
+class UWidgetComponent;
 
 /**
  * 
@@ -48,6 +49,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* ChangeVehicleWidget;
+
 public:
 	// End Actor interface
 
@@ -74,6 +78,9 @@ public:
 
 	// Respawns the car at the current active safe spot
 	void Respawn();
+
+	bool GetIsActive() { return isActive; }
+	void SetIsActive(bool Value);
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
@@ -102,6 +109,8 @@ private:
 
 	//Is the car able to currently posses another Pawn
 	bool bCanPosses;
+
+	bool isActive;
 
 	APawn* possesActor;
 
