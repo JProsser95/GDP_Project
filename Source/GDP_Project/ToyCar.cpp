@@ -16,8 +16,11 @@
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "PossessableActorComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "EngineUtils.h"
 #include "RespawnPoint.h"
+#include "ToyTrain.h"
 #include "Macros.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
@@ -136,10 +139,17 @@ AToyCar::AToyCar()
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
 
+	ChangeVehicleWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	ChangeVehicleWidget->SetupAttachment(CameraParent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
+	ChangeVehicleWidget->SetWidgetClass(Widget.Class);
+	ChangeVehicleWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
+
 	bIsLowFriction = false;
 	bInReverseGear = false;
 
 	bCanPosses = false;
+	isActive = true;
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -155,6 +165,10 @@ void AToyCar::BeginPlay()
 void AToyCar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FVector PlayerLoc = Camera->GetComponentLocation();
+	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
+	ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
 
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
@@ -248,15 +262,28 @@ void AToyCar::UpdatePhysicsMaterial()
 void AToyCar::ChangePossesion()
 {
 	if (possesActor != nullptr)
+	{
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
+		AToyPlane* tp = Cast<AToyPlane>(possesActor);
+		AToyTrain* tt = Cast<AToyTrain>(possesActor);
+		if (tp != nullptr) 
+		{
+			tp->SetIsActive(true);
+		} 
+		else if (tt != nullptr)
+		{
+			tt->SetIsActive(true);
+			tt->SetToyCar(this);
+		}
+	}
 }
 
 void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (bCanPosses || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
+	if (bCanPosses || !isActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
-	OUTPUT_STRING("CAR HIT");
+	OUTPUT_STRING("HIT");
 
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
@@ -267,17 +294,12 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	if (!bCanPosses)
 		return;
 
-	OUTPUT_STRING("CAR FINISH HIT");
-
-
 	bCanPosses = false;
 	possesActor = nullptr;
 }
 
 void AToyCar::ResetPositionAndRotation()
 {
-	OUTPUT_STRING("Reset");
-
 	FVector currentLoaction = this->GetActorLocation();
 	FRotator currentRotation = this->GetActorRotation();
 
@@ -296,4 +318,9 @@ void AToyCar::Respawn()
 			this->SetActorLocationAndRotation(spawnLocation, FRotator(0, 0, 0), false, NULL, ETeleportType::TeleportPhysics);
 		}
 	}
+}
+
+void AToyCar::SetIsActive(bool Value)
+{
+	isActive = Value;
 }

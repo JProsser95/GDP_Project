@@ -78,12 +78,12 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float currentBoost);
 
-	//Posses this Pawn
-	void Posses();
-
 	class UCustomMovementComponent* CustomMovementComponent;
 
 	virtual UPawnMovementComponent* GetMovementComponent() const override;
+
+	void SetIsActive(bool Value);
+	bool GetIsActive() { return bIsActive; }
 
 protected:
 
@@ -98,9 +98,6 @@ protected:
 	// Instance of the HUD
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* PlaneWidget;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;

@@ -50,11 +50,7 @@ AToyPlane::AToyPlane()
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	PlaneWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
-	PlaneWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
-	PlaneWidget->SetWidgetClass(Widget.Class);
-	PlaneWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
+	
 
 	eCameraType = THIRD_PERSON;
 
@@ -85,24 +81,15 @@ void AToyPlane::Restart()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 // Called every frame
 void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
-	{
-		FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-		PlaneWidget->SetRelativeRotation(PlayerRot);
 		return;
-	}
 
 	Super::Tick(DeltaTime);
-
-	
 
 	if (fCurrentBoost <= 0)
 		bIsBoosting = false;
@@ -165,11 +152,7 @@ UPawnMovementComponent* AToyPlane::GetMovementComponent() const
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-}
 
-void AToyPlane::Posses()
-{
-	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
 // Called to bind functionality to input
@@ -242,4 +225,8 @@ void AToyPlane::UpdateCurrentBoost(float currentBoost)
 	fCurrentBoost += currentBoost;
 }
 
+void AToyPlane::SetIsActive(bool Value)
+{
+	bIsActive = Value;
+}
 	
