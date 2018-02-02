@@ -26,7 +26,7 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
-	
+
 public:
 
 	AToyCar();
