@@ -174,8 +174,7 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
-
-
+	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
 }
 
 void AToyCar::MoveForward(float AxisValue)
@@ -221,6 +220,12 @@ void AToyCar::ChangePossesion()
 	GameMode->RemoveHUD();
 	if (possesActor != nullptr)
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
+}
+
+void AToyCar::ChangeHUD()
+{
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->DisplayPlanePartsCollected(true);
 }
 
 void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)

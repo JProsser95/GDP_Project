@@ -31,10 +31,6 @@ void AGDP_ProjectGameModeBase::ChangeHUD(const FString& name)
 	{
 		ChangeMenuWidget(CarHUDClass);
 	}
-	else if (name == "HUD")
-	{
-		ChangeMenuWidget(PlanePartsHUDClass);
-	}
 }
 
 void AGDP_ProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)
@@ -72,12 +68,47 @@ void AGDP_ProjectGameModeBase::RemoveHUD()
 void AGDP_ProjectGameModeBase::SetPlanePartCollected(PlaneParts PartCollected)
 {
 	CollectedPlaneParts[PartCollected] = true;
-	//UE_LOG(LogTemp, Warning, TEXT("Plane Parts Collected: %d, %d, %d, %d, %d"), CollectedPlaneParts[0], CollectedPlaneParts[1], CollectedPlaneParts[2], CollectedPlaneParts[3], CollectedPlaneParts[4]);
-
-	ChangeHUD("HUD");
+	DisplayPlanePartsCollected(false);
 }
 
 bool AGDP_ProjectGameModeBase::GetPlanePartCollected(PlaneParts PartCollected)
 {
 	return CollectedPlaneParts[PartCollected];
+}
+
+void AGDP_ProjectGameModeBase::DisplayPlanePartsCollected(bool bToggle)
+{
+	if (bToggle)
+	{
+		if (PlanePartsWidget != nullptr) // UI already exists, remove it.
+		{
+			PlanePartsWidget->RemoveFromViewport();
+			PlanePartsWidget = nullptr;
+		}
+		else
+		{
+			DisplayPlanePartsWidget();
+		}
+	}
+	else
+	{
+		DisplayPlanePartsWidget();
+	}
+}
+
+void AGDP_ProjectGameModeBase::DisplayPlanePartsWidget()
+{
+	if (PlanePartsWidget != nullptr)
+	{
+		PlanePartsWidget->RemoveFromViewport();
+		PlanePartsWidget = nullptr;
+	}
+	if (PlanePartsHUDClass != nullptr)
+	{
+		PlanePartsWidget = CreateWidget<UUserWidget>(GetWorld(), PlanePartsHUDClass);
+		if (PlanePartsWidget != nullptr)
+		{
+			PlanePartsWidget->AddToViewport();
+		}
+	}
 }

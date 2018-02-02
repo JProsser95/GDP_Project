@@ -65,6 +65,8 @@ public:
 	void OnHandbrakeReleased();
 	// Posses other Actor;
 	void ChangePossesion();
+	// Either bring up or remove the HUD
+	void ChangeHUD();
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;

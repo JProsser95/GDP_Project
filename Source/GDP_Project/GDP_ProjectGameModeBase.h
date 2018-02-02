@@ -40,6 +40,8 @@ public:
 	void SetPlanePartCollected(PlaneParts PartCollected);
 	bool GetPlanePartCollected(PlaneParts PartCollected);
 
+	void DisplayPlanePartsCollected(bool bToggle);
+
 protected:
 
 	/** Remove the current menu widget and create a new one from the specified class, if provided. */
@@ -62,11 +64,15 @@ protected:
 	TSubclassOf<class UUserWidget> PlanePartsHUDClass; // The main HUD. Used to display plane parts collected.
 
 	UPROPERTY()
-	class UUserWidget* CurrentWidget;
+	UUserWidget* CurrentWidget;
 
 	UPROPERTY()
-	class UUserWidget* VehicleWidget;
+	UUserWidget* VehicleWidget;
+
+	UPROPERTY()
+	UUserWidget* PlanePartsWidget;
 
 	bool CollectedPlaneParts[PlaneParts_MAX];
 
+	void DisplayPlanePartsWidget();
 };
