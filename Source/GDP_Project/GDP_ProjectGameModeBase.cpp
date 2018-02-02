@@ -50,7 +50,7 @@ void AGDP_ProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidg
 	}
 }
 
-void AGDP_ProjectGameModeBase::AddHUD()
+void AGDP_ProjectGameModeBase::SetVehicleHUD()
 {
 	VehicleWidget = CreateWidget<UUserWidget>(GetWorld(), ChangeVehicleHUDClass);
 	if (VehicleWidget != nullptr)
@@ -59,7 +59,7 @@ void AGDP_ProjectGameModeBase::AddHUD()
 	}
 }
 
-void AGDP_ProjectGameModeBase::RemoveHUD()
+void AGDP_ProjectGameModeBase::RemoveVehicleHUD()
 {
 	VehicleWidget->RemoveFromViewport();
 	VehicleWidget = nullptr;

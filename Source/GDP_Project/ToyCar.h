@@ -49,8 +49,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* ChangeVehicleWidget;
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* ChangeVehicleWidget;
 
 public:
 	// End Actor interface
