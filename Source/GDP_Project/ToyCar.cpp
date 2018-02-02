@@ -15,6 +15,12 @@
 #include "Components/SphereComponent.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PossessableActorComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "EngineUtils.h"
+#include "RespawnPoint.h"
+#include "ToyTrain.h"
 #include "Macros.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
@@ -23,10 +29,10 @@ const FName AToyCar::LookRightBinding("LookRight");
 AToyCar::AToyCar() 
 {
 	// Car mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
 	GetMesh()->SetSkeletalMesh(CarMesh.Object);
 
-	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
+	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/Car/TOYCAR_Skeleton_AnimBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
 
@@ -50,20 +56,20 @@ AToyCar::AToyCar()
 	// Wheels/Tyres
 	// Setup the wheels
 	Vehicle4W->WheelSetups[0].WheelClass = UToyCarWheelFront::StaticClass();
-	Vehicle4W->WheelSetups[0].BoneName = FName("PhysWheel_FL");
-	Vehicle4W->WheelSetups[0].AdditionalOffset = FVector(0.f, -8.f, 0.f);
+	Vehicle4W->WheelSetups[0].BoneName = FName("WheelFL");
+	//Vehicle4W->WheelSetups[0].AdditionalOffset = FVector(0.f, -8.f, 0.f);
 
 	Vehicle4W->WheelSetups[1].WheelClass = UToyCarWheelFront::StaticClass();
-	Vehicle4W->WheelSetups[1].BoneName = FName("PhysWheel_FR");
-	Vehicle4W->WheelSetups[1].AdditionalOffset = FVector(0.f, 8.f, 0.f);
+	Vehicle4W->WheelSetups[1].BoneName = FName("WheelFR");
+	//Vehicle4W->WheelSetups[1].AdditionalOffset = FVector(0.f, 8.f, 0.f);
 
 	Vehicle4W->WheelSetups[2].WheelClass = UToyCarWheelRear::StaticClass();
-	Vehicle4W->WheelSetups[2].BoneName = FName("PhysWheel_BL");
-	Vehicle4W->WheelSetups[2].AdditionalOffset = FVector(0.f, -8.f, 0.f);
-
+	Vehicle4W->WheelSetups[2].BoneName = FName("WheelRL");
+	//Vehicle4W->WheelSetups[2].AdditionalOffset = FVector(0.f, -8.f, 0.f);
+	
 	Vehicle4W->WheelSetups[3].WheelClass = UToyCarWheelRear::StaticClass();
-	Vehicle4W->WheelSetups[3].BoneName = FName("PhysWheel_BR");
-	Vehicle4W->WheelSetups[3].AdditionalOffset = FVector(0.f, 8.f, 0.f);
+	Vehicle4W->WheelSetups[3].BoneName = FName("WheelRR");
+	//Vehicle4W->WheelSetups[3].AdditionalOffset = FVector(0.f, 8.f, 0.f);
 
 	// Adjust the tire loading
 	Vehicle4W->MinNormalizedTireLoad = 0.0f;
@@ -82,8 +88,10 @@ AToyCar::AToyCar()
 	// Adjust the steering 
 	Vehicle4W->SteeringCurve.GetRichCurve()->Reset();
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 1.0f);
-	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(40.0f, 0.7f);
-	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(120.0f, 0.6f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(26.0f, 0.5f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(78.0f, 0.2f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(122.0f, 0.13f);
+
 
 	// Transmission	
 	// We want 4wd
@@ -108,30 +116,40 @@ AToyCar::AToyCar()
 	// Set the inertia scale. This controls how the mass of the vehicle is distributed.
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
 
+	CameraParent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraParent"));
+	CameraParent->SetupAttachment(RootComponent);
+
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
 	SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
-	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 125.0f;
+	SpringArm->SetupAttachment(CameraParent);
+	SpringArm->TargetArmLength = 300.0f;
 	SpringArm->bEnableCameraLag = false;
-	SpringArm->bEnableCameraRotationLag = false;
-	SpringArm->bInheritPitch = true;
-	SpringArm->bInheritYaw = true;
-	SpringArm->bInheritRoll = true;
-
+	//SpringArm->bEnableCameraRotationLag = false;
+	//SpringArm->bInheritPitch = true;
+	//SpringArm->bInheritYaw = true;
+	//SpringArm->bInheritRoll = true;
+	
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
+	//Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
 	Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
+
+	ChangeVehicleWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	ChangeVehicleWidget->SetupAttachment(CameraParent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
+	ChangeVehicleWidget->SetWidgetClass(Widget.Class);
+	ChangeVehicleWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 
 	bIsLowFriction = false;
 	bInReverseGear = false;
 
 	bCanPosses = false;
+	isActive = true;
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -148,11 +166,25 @@ void AToyCar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector PlayerLoc = Camera->GetComponentLocation();
+	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
+	ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
+
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
+	FRotator cameraRot = SpringArm->GetComponentRotation();
+	cameraRot.Yaw += CameraInput.X;
+	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch + CameraInput.Y, -80.0f, -15.0f);
+	cameraRot.Roll = 0;
+	SpringArm->SetWorldRotation(cameraRot);
+
+	FRotator cam = Camera->GetComponentRotation();
+	cam.Roll = 0;
+	Camera->SetWorldRotation(cam);
+
 	// Update phsyics material
-	UpdatePhysicsMaterial();
+	//UpdatePhysicsMaterial();
 }
 
 void AToyCar::Restart()
@@ -170,11 +202,15 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyCar::MoveForward);
 	PlayerInputComponent->BindAxis("CarMoveRight", this, &AToyCar::MoveRight);
+	PlayerInputComponent->BindAxis("CarCameraPitch", this, &AToyCar::PitchCamera);
+	PlayerInputComponent->BindAxis("CarCameraYaw", this, &AToyCar::YawCamera);
 
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
 	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
+	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
+	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
 }
 
 void AToyCar::MoveForward(float AxisValue)
@@ -185,6 +221,16 @@ void AToyCar::MoveForward(float AxisValue)
 void AToyCar::MoveRight(float AxisValue)
 {
 	GetVehicleMovementComponent()->SetSteeringInput(AxisValue);
+}
+
+void AToyCar::PitchCamera(float AxisValue)
+{
+	CameraInput.Y = AxisValue;
+}
+
+void AToyCar::YawCamera(float AxisValue)
+{
+	CameraInput.X = AxisValue;
 }
 
 void AToyCar::OnHandbrakePressed()
@@ -216,10 +262,21 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveHUD();
 	if (possesActor != nullptr)
+	{
 		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
+		AToyPlane* tp = Cast<AToyPlane>(possesActor);
+		AToyTrain* tt = Cast<AToyTrain>(possesActor);
+		if (tp != nullptr) 
+		{
+			tp->SetIsActive(true);
+		} 
+		else if (tt != nullptr)
+		{
+			tt->SetIsActive(true);
+			tt->SetToyCar(this);
+		}
+	}
 }
 
 void AToyCar::ChangeHUD()
@@ -230,15 +287,13 @@ void AToyCar::ChangeHUD()
 
 void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (bCanPosses)
+	if (bCanPosses || !isActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
-	OUTPUT_STRING("CAR HIT");
+	OUTPUT_STRING("HIT");
 
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->AddHUD();
 }
 
 void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -246,11 +301,33 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	if (!bCanPosses)
 		return;
 
-	OUTPUT_STRING("CAR FINISH HIT");
-
-
 	bCanPosses = false;
 	possesActor = nullptr;
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveHUD();
+}
+
+void AToyCar::ResetPositionAndRotation()
+{
+	FVector currentLoaction = this->GetActorLocation();
+	FRotator currentRotation = this->GetActorRotation();
+
+	this->SetActorRelativeLocation(FVector(currentLoaction.X, currentLoaction.Y, currentLoaction.Z + 100), false, NULL, ETeleportType::TeleportPhysics);
+	this->SetActorRotation(FRotator(0,0,0), ETeleportType::TeleportPhysics);
+}
+
+void AToyCar::Respawn()
+{
+	for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->GetIsCurrentSpawnPoint())
+		{
+			FVector spawnLocation = ActorItr->GetActorLocation();
+			spawnLocation.Z += 100;
+			this->SetActorLocationAndRotation(spawnLocation, FRotator(0, 0, 0), false, NULL, ETeleportType::TeleportPhysics);
+		}
+	}
+}
+
+void AToyCar::SetIsActive(bool Value)
+{
+	isActive = Value;
 }

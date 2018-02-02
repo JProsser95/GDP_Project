@@ -11,35 +11,32 @@
 // Sets default values
 AToyPlane::AToyPlane()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
+	//	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+
 	//Create our components
-	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-
-	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
-
-	//UStaticMeshComponent* SphereComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Planemain"));
-	RootComponent = SphereComponent;
-	SphereComponent->InitSphereRadius(100.0f);
-	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
 	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/PlaneHull_Cylinder003.PlaneHull_Cylinder003'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/PlaneHull.PlaneHull'"));
 	if (MeshAssetBody.Object)
 		PlaneBodyMeshComponent->SetStaticMesh(MeshAssetBody.Object);
+
+	RootComponent = PlaneBodyMeshComponent;
 
 	//Mesh
 	PlanePropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanePropMeshComponent"));
 	PlanePropMeshComponent->AttachToComponent(PlaneBodyMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/prop_prop.prop_prop'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/PlaneProp.PlaneProp'"));
 	if (MeshAssetBProp.Object)
 		PlanePropMeshComponent->SetStaticMesh(MeshAssetBProp.Object);
-	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, -90.0f, 5.0f));
+	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, 0.0f, 5.0f));
 
 	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(0,90.0f,0));
 
@@ -53,11 +50,7 @@ AToyPlane::AToyPlane()
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	PlaneWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
-	PlaneWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
-	PlaneWidget->SetWidgetClass(Widget.Class);
-	PlaneWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
+	
 
 	eCameraType = THIRD_PERSON;
 
@@ -88,28 +81,21 @@ void AToyPlane::Restart()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 // Called every frame
 void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
-	{
-		FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-		PlaneWidget->SetRelativeRotation(PlayerRot);
 		return;
-	}
 
 	Super::Tick(DeltaTime);
 
-	
-
-	if (fCurrentBoost <= 0) {
+	if (fCurrentBoost <= 0)
 		bIsBoosting = false;
-	}
+	else if (fCurrentBoost > fInitialBoost)
+		fCurrentBoost = fInitialBoost;
+
 
 	if (bIsBoosting) {
 		fSpeed += DeltaTime * 500.0f;
@@ -156,7 +142,7 @@ void AToyPlane::Tick(float DeltaTime)
 	CustomMovementComponent->AddInputVector(GetActorForwardVector() * fSpeed);
 
 	fPropRotation += DeltaTime * 500.0f;
-	PlanePropMeshComponent->SetRelativeRotation(FRotator(fPropRotation, 0, 0));
+	PlanePropMeshComponent->SetRelativeRotation(FRotator(0, 0, fPropRotation));
 }
 
 UPawnMovementComponent* AToyPlane::GetMovementComponent() const
@@ -166,11 +152,7 @@ UPawnMovementComponent* AToyPlane::GetMovementComponent() const
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-}
 
-void AToyPlane::Posses()
-{
-	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
 // Called to bind functionality to input
@@ -243,4 +225,8 @@ void AToyPlane::UpdateCurrentBoost(float currentBoost)
 	fCurrentBoost += currentBoost;
 }
 
+void AToyPlane::SetIsActive(bool Value)
+{
+	bIsActive = Value;
+}
 	

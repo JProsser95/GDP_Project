@@ -10,6 +10,7 @@ class UPhysicalMaterial;
 class UCameraComponent;
 class USpringArmComponent;
 class USphereComponent;
+class UWidgetComponent;
 
 /**
  * 
@@ -26,7 +27,7 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
-	
+
 public:
 
 	AToyCar();
@@ -48,6 +49,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* ChangeVehicleWidget;
+
 public:
 	// End Actor interface
 
@@ -68,12 +72,27 @@ public:
 	// Either bring up or remove the HUD
 	void ChangeHUD();
 
+	void PitchCamera(float AxisValue);
+	void YawCamera(float AxisValue);
+
+	// Flips the car back to being flat (Used when the car is flipped over)
+	void ResetPositionAndRotation();
+
+	// Respawns the car at the current active safe spot
+	void Respawn();
+
+	bool GetIsActive() { return isActive; }
+	void SetIsActive(bool Value);
+
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
 	static const FName EngineAudioRPM;
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollider;
+
+	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* CameraParent;
 
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
@@ -93,7 +112,11 @@ private:
 	//Is the car able to currently posses another Pawn
 	bool bCanPosses;
 
+	bool isActive;
+
 	APawn* possesActor;
+
+	FVector2D CameraInput;
 
 public:
 	/** Returns SpringArm subobject **/

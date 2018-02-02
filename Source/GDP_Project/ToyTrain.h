@@ -12,6 +12,8 @@
 
 #include "ToyTrain.generated.h"
 
+class AToyCar;
+
 UCLASS()
 class GDP_PROJECT_API AToyTrain : public APawn
 {
@@ -25,6 +27,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+private:
+
+	bool isActive;
+	APawn* ToyCar;
 
 public:	
 	// Called every frame
@@ -39,6 +45,11 @@ public:
 	// Allows the addition of a static mesh componenet in the editor
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* MeshComponent;
+
+	bool GetIsActive() { return isActive; }
+	void SetIsActive(bool Value);
+
+	void SetToyCar(APawn* TC);
 
 protected:
 
