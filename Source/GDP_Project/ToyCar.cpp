@@ -139,11 +139,11 @@ AToyCar::AToyCar()
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
 
-	ChangeVehicleWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
-	ChangeVehicleWidget->SetupAttachment(CameraParent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
-	ChangeVehicleWidget->SetWidgetClass(Widget.Class);
-	ChangeVehicleWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
+	//ChangeVehicleWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	//ChangeVehicleWidget->SetupAttachment(CameraParent);
+	//static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
+	//ChangeVehicleWidget->SetWidgetClass(Widget.Class);
+	//ChangeVehicleWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 
 	bIsLowFriction = false;
 	bInReverseGear = false;
@@ -166,9 +166,9 @@ void AToyCar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector PlayerLoc = Camera->GetComponentLocation();
-	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
+	//FVector PlayerLoc = Camera->GetComponentLocation();
+	//FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
+	//ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
 
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
@@ -292,6 +292,9 @@ void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 	OUTPUT_STRING("HIT");
 
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->SetVehicleHUD();
+
 	bCanPosses = true;
 	possesActor = Cast<APawn>(OtherActor);
 }
@@ -300,6 +303,9 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 {
 	if (!bCanPosses)
 		return;
+
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveVehicleHUD();
 
 	bCanPosses = false;
 	possesActor = nullptr;
