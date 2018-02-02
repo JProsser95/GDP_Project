@@ -121,17 +121,17 @@ AToyCar::AToyCar()
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
 	SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
 	SpringArm->SetupAttachment(CameraParent);
-	SpringArm->TargetArmLength = 125.0f;
+	SpringArm->TargetArmLength = 300.0f;
 	SpringArm->bEnableCameraLag = false;
-	SpringArm->bEnableCameraRotationLag = false;
-	SpringArm->bInheritPitch = true;
-	SpringArm->bInheritYaw = true;
-	SpringArm->bInheritRoll = true;
-
+	//SpringArm->bEnableCameraRotationLag = false;
+	//SpringArm->bInheritPitch = true;
+	//SpringArm->bInheritYaw = true;
+	//SpringArm->bInheritRoll = true;
+	
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
+	//Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
 	Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
