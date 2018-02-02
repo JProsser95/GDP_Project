@@ -69,6 +69,8 @@ public:
 	void OnHandbrakeReleased();
 	// Posses other Actor;
 	void ChangePossesion();
+	// Either bring up or remove the HUD
+	void ChangeHUD();
 
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);
