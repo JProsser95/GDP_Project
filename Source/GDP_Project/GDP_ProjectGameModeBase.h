@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "HUDWidget.h"
 #include "GDP_ProjectGameModeBase.generated.h"
-
-#define NUMBEROFPLANEPARTS 5
 
 enum PlaneParts
 {
@@ -14,7 +13,8 @@ enum PlaneParts
 	PlanePart2,
 	PlanePart3,
 	PlanePart4,
-	PlanePart5
+	PlanePart5,
+	PlaneParts_MAX // Used to calculate the number of plane parts in the game
 };
 
 /**
@@ -34,10 +34,13 @@ public:
 	*/
 	void ChangeHUD(const FString& name);
 
-	void AddHUD();
-	void RemoveHUD();
+	void SetVehicleHUD();
+	void RemoveVehicleHUD();
 
 	void SetPlanePartCollected(PlaneParts PartCollected);
+	bool GetPlanePartCollected(PlaneParts PartCollected);
+
+	void DisplayPlanePartsCollected(bool bToggle);
 
 protected:
 
@@ -61,11 +64,15 @@ protected:
 	TSubclassOf<class UUserWidget> PlanePartsHUDClass; // The main HUD. Used to display plane parts collected.
 
 	UPROPERTY()
-	class UUserWidget* CurrentWidget;
+	UUserWidget* CurrentWidget;
 
 	UPROPERTY()
-	class UUserWidget* VehicleWidget;
+	UUserWidget* VehicleWidget;
 
-	bool CollectedPlaneParts[NUMBEROFPLANEPARTS];
+	UPROPERTY()
+	UUserWidget* PlanePartsWidget;
 
+	bool CollectedPlaneParts[PlaneParts_MAX];
+
+	void DisplayPlanePartsWidget();
 };

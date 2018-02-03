@@ -10,6 +10,8 @@ class UPhysicalMaterial;
 class UCameraComponent;
 class USpringArmComponent;
 class USphereComponent;
+class UWidgetComponent;
+class UPossessableActorComponent;
 
 /**
  * 
@@ -26,6 +28,10 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
+
+	/** Camera component that will be our viewpoint */
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPossessableActorComponent* PossessableComponent;
 
 public:
 
@@ -48,6 +54,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* ChangeVehicleWidget;
+
 public:
 	// End Actor interface
 
@@ -65,6 +74,8 @@ public:
 	void OnHandbrakeReleased();
 	// Posses other Actor;
 	void ChangePossesion();
+	// Either bring up or remove the HUD
+	void ChangeHUD();
 
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);
@@ -74,6 +85,9 @@ public:
 
 	// Respawns the car at the current active safe spot
 	void Respawn();
+
+	bool GetIsActive() { return isActive; }
+	void SetIsActive(bool Value);
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
@@ -102,6 +116,8 @@ private:
 
 	//Is the car able to currently posses another Pawn
 	bool bCanPosses;
+
+	bool isActive;
 
 	APawn* possesActor;
 

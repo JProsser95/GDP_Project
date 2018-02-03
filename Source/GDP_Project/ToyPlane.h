@@ -102,12 +102,12 @@ public:
 	UFUNCTION(BluePrintCallable, Category = "Plane")
 	void UpdateCurrentBoost(float boostIncrement);
 
-	//Posses this Pawn
-	void Posses();
-
 	class UCustomMovementComponent* CustomMovementComponent;
 
 	virtual UPawnMovementComponent* GetMovementComponent() const override;
+
+	void SetIsActive(bool Value);
+	bool GetIsActive() { return bIsActive; }
 
 protected:
 

@@ -1,7 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyTrain.h"
+#include "ToyCar.h"
+#include "EngineUtils.h"
+#include "UObject/ConstructorHelpers.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Macros.h"
 
 const int HEIGHT = 0;//height of player above spline
 const int MAXPOINTS = 5000;//stop sampling the spline after MAXPOINTS points
@@ -21,6 +25,9 @@ AToyTrain::AToyTrain()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Train/TrainSingle_low.TrainSingle_low'"));
+	if (MeshAssetBody.Object)
+		MeshComponent->SetStaticMesh(MeshAssetBody.Object);
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
@@ -33,7 +40,11 @@ AToyTrain::AToyTrain()
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	ToyCar = nullptr;
+
+	isActive = false;
 }
 
 // Called when the game starts or when spawned
@@ -88,6 +99,9 @@ void AToyTrain::Restart()
 // Called every frame
 void AToyTrain::Tick(float DeltaTime)
 {
+	if (!isActive)
+		return;
+
 	Super::Tick(DeltaTime);
 
 	RootComponent->SetWorldLocation(pathPointLocation[splinePointer]);//just move the player to the next sampled point on the spline
@@ -95,9 +109,26 @@ void AToyTrain::Tick(float DeltaTime)
 
 	splinePointer += 1;
 
+	//Loop the train movement
+	//if (splinePointer >= totalSplinePoints)
+	//{
+	//	splinePointer = 1;
+	//}
+
+	//End movement at end of Spline
 	if (splinePointer >= totalSplinePoints)
 	{
-		splinePointer = 1;
+		OUTPUT_STRING("END");
+		isActive = false;
+		if (ToyCar != nullptr) 
+		{
+			GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
+			AToyCar* TC = Cast<AToyCar>(ToyCar);
+			if (TC != nullptr)
+			{
+				TC->SetIsActive(true);
+			}
+		}
 	}
 }
 
@@ -105,6 +136,14 @@ void AToyTrain::Tick(float DeltaTime)
 void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
+void AToyTrain::SetIsActive(bool Value)
+{
+	isActive = Value;
+}
+
+void AToyTrain::SetToyCar(APawn* TC)
+{
+	ToyCar = TC;
+}

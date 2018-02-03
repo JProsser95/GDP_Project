@@ -85,20 +85,16 @@ void AToyPlane::Restart()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 // Called every frame
 void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
-	{
 		return;
-	}
 
 	Super::Tick(DeltaTime);
-	
+
 	if (CurrentBoost <= 0)
 		IsBoosting = false;
 	else if (CurrentBoost > InitialBoost)
@@ -108,6 +104,7 @@ void AToyPlane::Tick(float DeltaTime)
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
 		UpdateCurrentBoost(-DeltaTime * 0.3f * InitialBoost);
+
 	}
 	else if (fSpeed> MinSpeed)
 	{
@@ -201,11 +198,7 @@ UPawnMovementComponent* AToyPlane::GetMovementComponent() const
 
 void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-}
 
-void AToyPlane::Posses()
-{
-	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
 // Called to bind functionality to input
@@ -278,4 +271,8 @@ void AToyPlane::UpdateCurrentBoost(float boostIncrement)
 	CurrentBoost += boostIncrement;
 }
 
+void AToyPlane::SetIsActive(bool Value)
+{
+	bIsActive = Value;
+}
 	
