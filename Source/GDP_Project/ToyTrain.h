@@ -51,6 +51,9 @@ public:
 
 	void SetToyCar(APawn* TC);
 
+	/** Handle pressing forwards */
+	void MoveForward(float fValue);
+
 protected:
 
 	UPROPERTY(EditAnywhere)

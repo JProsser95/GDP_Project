@@ -40,11 +40,11 @@ AToyTrain::AToyTrain()
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
 	//Take control of the default Player
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	ToyCar = nullptr;
 
-	isActive = false;
+	isActive = true;
 }
 
 // Called when the game starts or when spawned
@@ -104,10 +104,12 @@ void AToyTrain::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
+	UE_LOG(LogTemp, Warning, TEXT("SplinePointer: %d"), splinePointer);
+
 	RootComponent->SetWorldLocation(pathPointLocation[splinePointer]);//just move the player to the next sampled point on the spline
 	RootComponent->SetWorldRotation(pathPointRotation[splinePointer]);//and give the player the same rotation as the sampled point
 
-	splinePointer += 1;
+	//splinePointer += 1;
 
 	//Loop the train movement
 	//if (splinePointer >= totalSplinePoints)
@@ -136,6 +138,8 @@ void AToyTrain::Tick(float DeltaTime)
 void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyTrain::MoveForward);
 }
 
 void AToyTrain::SetIsActive(bool Value)
@@ -146,4 +150,21 @@ void AToyTrain::SetIsActive(bool Value)
 void AToyTrain::SetToyCar(APawn* TC)
 {
 	ToyCar = TC;
+}
+
+void AToyTrain::MoveForward(float fValue)
+{
+	if (fValue == 0.0f)
+		return;
+
+	if (fValue > 0.0f)
+	{
+		if (++splinePointer >= totalSplinePoints)
+			splinePointer = 0;
+	}
+	else
+	{
+		if (--splinePointer < 0)
+			splinePointer = totalSplinePoints - 1;
+	}
 }
