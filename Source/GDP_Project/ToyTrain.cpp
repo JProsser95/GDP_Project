@@ -12,10 +12,12 @@ const int MAXPOINTS = 5000;//stop sampling the spline after MAXPOINTS points
 FVector pathPointLocation[MAXPOINTS];//save sampled point locations into an array
 FQuat pathPointRotation[MAXPOINTS];//save sampled point rotations into an array
 int totalSplinePoints = 0; //After we sampled the spline at intervals, this is the total number of sampled points on the curve
-int splinePointer = 1;//this counter is incremented in the Tick() function to move us to the next point on the spline
+
+#define CARRIAGESPACING 30
 
 // Sets default values
 AToyTrain::AToyTrain()
+	: splinePointer(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -104,18 +106,10 @@ void AToyTrain::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	UE_LOG(LogTemp, Warning, TEXT("SplinePointer: %d"), splinePointer);
-
 	RootComponent->SetWorldLocation(pathPointLocation[splinePointer]);//just move the player to the next sampled point on the spline
 	RootComponent->SetWorldRotation(pathPointRotation[splinePointer]);//and give the player the same rotation as the sampled point
 
-	//splinePointer += 1;
-
-	//Loop the train movement
-	//if (splinePointer >= totalSplinePoints)
-	//{
-	//	splinePointer = 1;
-	//}
+	UpdateCarriages();
 
 	//End movement at end of Spline
 	if (splinePointer >= totalSplinePoints)
@@ -131,6 +125,20 @@ void AToyTrain::Tick(float DeltaTime)
 				TC->SetIsActive(true);
 			}
 		}
+	}
+}
+
+void AToyTrain::UpdateCarriages()
+{
+	int carriageSplinePointer = 0;
+	for (int i = 0; i < Carriages.Num(); ++i)
+	{
+		carriageSplinePointer = splinePointer - (CARRIAGESPACING * (i + 1));
+		if (carriageSplinePointer < 0)
+			carriageSplinePointer = totalSplinePoints + carriageSplinePointer; // It's an add because cSP will be negative
+
+		Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
+		Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
 	}
 }
 
@@ -159,8 +167,13 @@ void AToyTrain::MoveForward(float fValue)
 
 	if (fValue > 0.0f)
 	{
-		if (++splinePointer >= totalSplinePoints)
-			splinePointer = 0;
+		if (!MeshComponent->IsOverlappingActor(Obstacle))
+		{
+			if (++splinePointer >= totalSplinePoints)
+				splinePointer = 0;
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("Object hit!"));
 	}
 	else
 	{

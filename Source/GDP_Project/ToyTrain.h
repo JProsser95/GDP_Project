@@ -28,9 +28,11 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void UpdateCarriages();
 
 	bool isActive;
 	APawn* ToyCar;
+	int splinePointer; //this counter is incremented in the Tick() function to move us to the next point on the spline
 
 public:	
 	// Called every frame
@@ -60,4 +62,9 @@ protected:
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
 
+	UPROPERTY(EditAnywhere)
+	AActor* Obstacle;
+
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> Carriages;
 };
