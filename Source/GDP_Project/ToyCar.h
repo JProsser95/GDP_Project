@@ -86,6 +86,9 @@ public:
 	// Respawns the car at the current active safe spot
 	void Respawn();
 
+	// Resets the camera to the be directly behind the car
+	void ResetCamera();
+
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);
 

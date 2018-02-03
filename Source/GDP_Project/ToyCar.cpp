@@ -216,6 +216,8 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
 	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
 	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
+	PlayerInputComponent->BindAction("ResetCamera", IE_Released, this, &AToyCar::ResetCamera);
+
 }
 
 void AToyCar::MoveForward(float AxisValue)
@@ -246,6 +248,11 @@ void AToyCar::OnHandbrakePressed()
 void AToyCar::OnHandbrakeReleased()
 {
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
+}
+
+void AToyCar::ResetCamera()
+{
+	SpringArm->SetWorldRotation(CameraParent->GetComponentRotation());
 }
 
 void AToyCar::UpdatePhysicsMaterial()
