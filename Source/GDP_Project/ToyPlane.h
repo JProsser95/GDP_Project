@@ -10,8 +10,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-
 #include "ToyPlane.generated.h"
+
+class UPossessableActorComponent;
 
 UCLASS()
 class GDP_PROJECT_API AToyPlane : public APawn
@@ -28,6 +29,8 @@ protected:
 
 private:
 
+	UPossessableActorComponent* possComponent;
+
 	enum CameraType {
 		FIRST_PERSON,
 		THIRD_PERSON
@@ -35,15 +38,36 @@ private:
 
 	// Players initial boost
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	float fInitialBoost;
+	float InitialBoost;
 
 	// Players current boost
-	UPROPERTY(EditAnywhere, Category = "Plane")
-	float fCurrentBoost;
+	UPROPERTY(VisibleAnywhere, Category = "Plane")
+	float CurrentBoost;
 
 	// Is the plane currently boosting
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool bIsBoosting;
+	bool IsBoosting;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float MinSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float MaxSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float CamShakeSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float SpeedIncrement;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float BoostSpeedIncrement;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float RotateSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float TurnSpeed;
 
 	bool bIsActive;
 
@@ -62,21 +86,21 @@ public:
 
 	// Accessor for InitialBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	float GetInitialBoost() { return fInitialBoost; }
+	float GetInitialBoost() { return InitialBoost; }
 
 	// Accessor for CurrentBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	float GetCurrentBoost() { return fCurrentBoost; }
+	float GetCurrentBoost() { return CurrentBoost; }
 
 	// Accessor for isBoosting
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	bool GetIsBoosting() { return bIsBoosting; }
+	bool GetIsBoosting() { return IsBoosting; }
 
 	/* Updates current boost
 	* @param Boost The amount the boost of the plane will change 
 	*/
 	UFUNCTION(BluePrintCallable, Category = "Plane")
-	void UpdateCurrentBoost(float currentBoost);
+	void UpdateCurrentBoost(float boostIncrement);
 
 	//Posses this Pawn
 	void Posses();
@@ -98,9 +122,6 @@ protected:
 	// Instance of the HUD
 	UPROPERTY()
 	class UUserWidget* CurrentWidget;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* PlaneWidget;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
@@ -130,5 +151,4 @@ protected:
 	void StartBoost();
 	void EndBoost();
 	void CameraZoom();
-
 };

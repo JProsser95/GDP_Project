@@ -6,10 +6,14 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Macros.h"
+#include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "CustomMovementComponent.h"
+#include "PossessableActorComponent.h"
 
 // Sets default values
 AToyPlane::AToyPlane()
+	:MinSpeed(600.0f), MaxSpeed(1000.0f), CamShakeSpeed(800.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.0f), TurnSpeed(1.0f),
+	InitialBoost(100.0f), CurrentBoost(InitialBoost)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,9 +25,11 @@ AToyPlane::AToyPlane()
 
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
+	possComponent = CreateDefaultSubobject<UPossessableActorComponent>(TEXT("PossessableComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
-	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+	//PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
+	//PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/PlaneHull.PlaneHull'"));
 	if (MeshAssetBody.Object)
 		PlaneBodyMeshComponent->SetStaticMesh(MeshAssetBody.Object);
@@ -36,7 +42,7 @@ AToyPlane::AToyPlane()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/PlaneProp.PlaneProp'"));
 	if (MeshAssetBProp.Object)
 		PlanePropMeshComponent->SetStaticMesh(MeshAssetBProp.Object);
-	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, 0.0f, 5.0f));
+	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, 0.0f, 0.0f));
 
 	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(0,90.0f,0));
 
@@ -50,23 +56,17 @@ AToyPlane::AToyPlane()
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	PlaneWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
-	PlaneWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> Widget(TEXT("/Game/HUD/VehicleWidget"));
-	PlaneWidget->SetWidgetClass(Widget.Class);
-	PlaneWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-
 	eCameraType = THIRD_PERSON;
 
-	fInitialBoost = 100.0f;
-	fCurrentBoost = fInitialBoost;
-	fSpeed = 400.0f;
-	bIsBoosting = false;
-	bIsActive = false;
+	InitialBoost = 100.0f;
+	CurrentBoost = InitialBoost;
+	fSpeed = 0.0f;
+	IsBoosting = false;
+	bIsActive = true;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
@@ -94,67 +94,103 @@ void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
 	{
-		FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-		PlaneWidget->SetRelativeRotation(PlayerRot);
 		return;
 	}
 
 	Super::Tick(DeltaTime);
-
 	
+	if (CurrentBoost <= 0)
+		IsBoosting = false;
+	else if (CurrentBoost > InitialBoost)
+		CurrentBoost = InitialBoost;
 
-	if (fCurrentBoost <= 0)
-		bIsBoosting = false;
-	else if (fCurrentBoost > fInitialBoost)
-		fCurrentBoost = fInitialBoost;
-
-
-	if (bIsBoosting) {
-		fSpeed += DeltaTime * 500.0f;
-		UpdateCurrentBoost(-DeltaTime * 0.3f * fInitialBoost);
+	if (IsBoosting) 
+	{
+		fSpeed += DeltaTime * BoostSpeedIncrement;
+		UpdateCurrentBoost(-DeltaTime * 0.3f * InitialBoost);
 	}
-	else {
-		fSpeed -= DeltaTime * 500.0f;
-		UpdateCurrentBoost(DeltaTime * 0.2f * fInitialBoost);
+	else if (fSpeed> MinSpeed)
+	{
+		fSpeed -= DeltaTime * SpeedIncrement;
+		UpdateCurrentBoost(DeltaTime * 0.2f * InitialBoost);
 	}
+	else
+		fSpeed += DeltaTime * SpeedIncrement;
 
-	if (fSpeed > 800.0f) {
+	if (fSpeed >= CamShakeSpeed) 
+	{
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 		PC->ClientPlayCameraShake(CameraShake, 1);
 	}
 
-	fSpeed = FMath::Clamp(fSpeed, 400.0f, 1000.0f);
+	fSpeed = FMath::Clamp(fSpeed, 0.0f, MaxSpeed);
 
 	//Scale our movement input axis values by 100 units per second
 	MovementInput = MovementInput.GetSafeNormal() * 100.0f;
 	FRotator NewRotation = GetActorRotation();
 
-	if (MovementInput.Y != 0) {
-		//A or D pressed
-		NewRotation.Roll += MovementInput.Y * DeltaTime;
-		NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f, 90.0f);
-		NewRotation.Yaw += MovementInput.Y * DeltaTime;
+	float fRotateMod(fSpeed / MaxSpeed);
+	if (fRotateMod > 1.0f)
+		fRotateMod = 1.0f;
+
+	if (MovementInput.X == 0 && MovementInput.Y == 0)
+	{
+		NewRotation = FMath::Lerp(NewRotation, FRotator(NewRotation.Pitch, NewRotation.Yaw, 0), DeltaTime * 2);
+
+		//if (NewRotation.Pitch > 0)
+		//	NewRotation.Pitch -= DeltaTime*10;
+		//else
+		//	NewRotation.Pitch += DeltaTime*10;
 	}
-	else {
-		NewRotation = FMath::Lerp(NewRotation, FRotator(0, NewRotation.Yaw, 0), 2.0f * DeltaTime);
+	else if (MovementInput.X == 0)
+	{
+		//if (NewRotation.Pitch > 0)
+		//	NewRotation.Pitch -= DeltaTime*10;
+		//else
+		//	NewRotation.Pitch += DeltaTime*10;
+	}
+	else if (MovementInput.Y == 0)
+		NewRotation = FMath::Lerp(NewRotation, FRotator(NewRotation.Pitch, NewRotation.Yaw, 0), DeltaTime * 2);
+
+	FRotator PitchRoll(0.0f, 0.0f, 0.0f);
+	if (fSpeed > MinSpeed)
+	{
+		if (MovementInput.Y != 0) {
+			//A or D pressed
+			//FRotator Roll(0.0f, 0.0f, MovementInput.Y * DeltaTime);
+
+			//NewRotation = UKismetMathLibrary::ComposeRotators(NewRotation, Roll);
+
+			PitchRoll.Roll = MovementInput.Y * DeltaTime;
+
+
+			//NewRotation.Roll += MovementInput.Y * DeltaTime * RotateSpeed;
+			//NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f * fRotateMod, 90.0f * fRotateMod);
+			NewRotation.Yaw += MovementInput.Y * DeltaTime * fRotateMod * TurnSpeed;
+		}
 	}
 
 	if (MovementInput.X != 0) {
 		//W or S press
-		NewRotation.Pitch += MovementInput.X * DeltaTime;
-		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f, 60.0f);
+		//FRotator Pitch(FRotator(MovementInput.X * DeltaTime, 0.0f, 0.0f));
+		PitchRoll.Pitch = MovementInput.X * DeltaTime;
+		//FMath::Clamp(Pitch.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
+		//NewRotation = UKismetMathLibrary::ComposeRotators(Pitch, NewRotation);
+		////NewRotation.Pitch += MovementInput.X * DeltaTime;
+		//NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
 	}
-	else {
-		NewRotation = FMath::Lerp(NewRotation, FRotator(0, NewRotation.Yaw, 0), 2.0f * DeltaTime);
-	}
+	NewRotation = UKismetMathLibrary::ComposeRotators(PitchRoll, NewRotation);
+
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
+	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f * fRotateMod, 90.0f * fRotateMod);
+
 
 	SetActorRotation(NewRotation);
 	//SetActorLocation(NewLocation);
 
 	CustomMovementComponent->AddInputVector(GetActorForwardVector() * fSpeed);
 
-	fPropRotation += DeltaTime * 500.0f;
+	fPropRotation += DeltaTime * fSpeed * 2.0f;
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(0, 0, fPropRotation));
 }
 
@@ -211,14 +247,14 @@ void AToyPlane::YawCamera(float AxisValue)
 
 void AToyPlane::StartBoost() 
 {
-	if (fCurrentBoost >= 10.0f) {
-		bIsBoosting = true;
+	if (CurrentBoost >= 10.0f) {
+		IsBoosting = true;
 	}
 }
 
 void AToyPlane::EndBoost()
 {
-	bIsBoosting = false;
+	IsBoosting = false;
 }
 
 void AToyPlane::CameraZoom()
@@ -237,9 +273,9 @@ void AToyPlane::CameraZoom()
 	}
 }
 
-void AToyPlane::UpdateCurrentBoost(float currentBoost)
+void AToyPlane::UpdateCurrentBoost(float boostIncrement)
 {
-	fCurrentBoost += currentBoost;
+	CurrentBoost += boostIncrement;
 }
 
 	
