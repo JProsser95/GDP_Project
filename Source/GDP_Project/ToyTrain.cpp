@@ -12,10 +12,12 @@ const int MAXPOINTS = 5000;//stop sampling the spline after MAXPOINTS points
 FVector pathPointLocation[MAXPOINTS];//save sampled point locations into an array
 FQuat pathPointRotation[MAXPOINTS];//save sampled point rotations into an array
 int totalSplinePoints = 0; //After we sampled the spline at intervals, this is the total number of sampled points on the curve
-int splinePointer = 1;//this counter is incremented in the Tick() function to move us to the next point on the spline
+
+#define CARRIAGESPACING 30
 
 // Sets default values
 AToyTrain::AToyTrain()
+	: splinePointer(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,11 +42,11 @@ AToyTrain::AToyTrain()
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
 	//Take control of the default Player
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	ToyCar = nullptr;
 
-	isActive = false;
+	isActive = true;
 }
 
 // Called when the game starts or when spawned
@@ -107,27 +109,40 @@ void AToyTrain::Tick(float DeltaTime)
 	RootComponent->SetWorldLocation(pathPointLocation[splinePointer]);//just move the player to the next sampled point on the spline
 	RootComponent->SetWorldRotation(pathPointRotation[splinePointer]);//and give the player the same rotation as the sampled point
 
-	splinePointer += 1;
-
-	//Loop the train movement
-	//if (splinePointer >= totalSplinePoints)
-	//{
-	//	splinePointer = 1;
-	//}
+	UpdateCarriages();
 
 	//End movement at end of Spline
-	if (splinePointer >= totalSplinePoints)
+	if (MeshComponent->IsOverlappingActor(TrainHouse))
 	{
-		OUTPUT_STRING("END");
-		isActive = false;
-		if (ToyCar != nullptr) 
+		CompleteTrainPuzzle();
+	}
+}
+
+void AToyTrain::UpdateCarriages()
+{
+	int carriageSplinePointer = 0;
+	for (int i = 0; i < Carriages.Num(); ++i)
+	{
+		carriageSplinePointer = splinePointer - (CARRIAGESPACING * (i + 1));
+		if (carriageSplinePointer < 0)
+			carriageSplinePointer = totalSplinePoints + carriageSplinePointer; // It's an add because cSP will be negative
+
+		Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
+		Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
+	}
+}
+
+void AToyTrain::CompleteTrainPuzzle()
+{
+	OUTPUT_STRING("END");
+	isActive = false;
+	if (ToyCar != nullptr)
+	{
+		GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
+		AToyCar* TC = Cast<AToyCar>(ToyCar);
+		if (TC != nullptr)
 		{
-			GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
-			AToyCar* TC = Cast<AToyCar>(ToyCar);
-			if (TC != nullptr)
-			{
-				TC->SetIsActive(true);
-			}
+			TC->SetIsActive(true);
 		}
 	}
 }
@@ -136,6 +151,8 @@ void AToyTrain::Tick(float DeltaTime)
 void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyTrain::MoveForward);
 }
 
 void AToyTrain::SetIsActive(bool Value)
@@ -146,4 +163,24 @@ void AToyTrain::SetIsActive(bool Value)
 void AToyTrain::SetToyCar(APawn* TC)
 {
 	ToyCar = TC;
+}
+
+void AToyTrain::MoveForward(float fValue)
+{
+	if (fValue == 0.0f)
+		return;
+
+	if (fValue > 0.0f)
+	{
+		if (!MeshComponent->IsOverlappingActor(Obstacle))
+		{
+			if (++splinePointer >= totalSplinePoints)
+				splinePointer = 0;
+		}
+	}
+	else
+	{
+		if (--splinePointer < 0)
+			splinePointer = totalSplinePoints - 1;
+	}
 }

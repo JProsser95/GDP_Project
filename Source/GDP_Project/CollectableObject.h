@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Components/PrimitiveComponent.h"
 #include "CollectableObject.generated.h"
 
 
