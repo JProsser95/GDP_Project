@@ -112,19 +112,9 @@ void AToyTrain::Tick(float DeltaTime)
 	UpdateCarriages();
 
 	//End movement at end of Spline
-	if (splinePointer >= totalSplinePoints)
+	if (MeshComponent->IsOverlappingActor(TrainHouse))
 	{
-		OUTPUT_STRING("END");
-		isActive = false;
-		if (ToyCar != nullptr) 
-		{
-			GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
-			AToyCar* TC = Cast<AToyCar>(ToyCar);
-			if (TC != nullptr)
-			{
-				TC->SetIsActive(true);
-			}
-		}
+		CompleteTrainPuzzle();
 	}
 }
 
@@ -139,6 +129,21 @@ void AToyTrain::UpdateCarriages()
 
 		Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
 		Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
+	}
+}
+
+void AToyTrain::CompleteTrainPuzzle()
+{
+	OUTPUT_STRING("END");
+	isActive = false;
+	if (ToyCar != nullptr)
+	{
+		GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
+		AToyCar* TC = Cast<AToyCar>(ToyCar);
+		if (TC != nullptr)
+		{
+			TC->SetIsActive(true);
+		}
 	}
 }
 
@@ -172,8 +177,6 @@ void AToyTrain::MoveForward(float fValue)
 			if (++splinePointer >= totalSplinePoints)
 				splinePointer = 0;
 		}
-		else
-			UE_LOG(LogTemp, Warning, TEXT("Object hit!"));
 	}
 	else
 	{

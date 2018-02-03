@@ -29,6 +29,7 @@ protected:
 
 private:
 	void UpdateCarriages();
+	void CompleteTrainPuzzle();
 
 	bool isActive;
 	APawn* ToyCar;
@@ -64,6 +65,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	AActor* Obstacle;
+
+	UPROPERTY(EditAnywhere)
+	AActor* TrainHouse;
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Carriages;
