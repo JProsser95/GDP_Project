@@ -38,18 +38,18 @@ void UCollectableObject::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
-	AActor* pPlayer = GetWorld()->GetFirstPlayerController()->GetPawn();
+	TArray<UPrimitiveComponent*> components;
 
-	TArray<AActor*> Actors;
+	GetOwner()->GetOverlappingComponents(components);
 
-	GetOwner()->GetOverlappingActors(Actors);
-
-	if (GetOwner()->IsOverlappingActor(pPlayer) || Actors.Num())
+	for (UPrimitiveComponent* pComponent : components)
 	{
-		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-		GameMode->SetPlanePartCollected(PlanePart);
-		GetWorld()->DestroyActor(GetOwner());
+		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+		{
+			AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+			GameMode->SetPlanePartCollected(PlanePart);
+			GetWorld()->DestroyActor(GetOwner());
+		}
 	}
 }
 
