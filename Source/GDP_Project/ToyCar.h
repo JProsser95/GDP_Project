@@ -11,6 +11,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USphereComponent;
 class UWidgetComponent;
+class UPossessableActorComponent;
 
 /**
  * 
@@ -27,6 +28,10 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
+
+	/** Camera component that will be our viewpoint */
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPossessableActorComponent* PossessableComponent;
 
 public:
 
@@ -49,8 +54,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* ChangeVehicleWidget;
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* ChangeVehicleWidget;
 
 public:
 	// End Actor interface

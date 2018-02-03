@@ -34,8 +34,8 @@ public:
 	*/
 	void ChangeHUD(const FString& name);
 
-	void AddHUD();
-	void RemoveHUD();
+	void SetVehicleHUD();
+	void RemoveVehicleHUD();
 
 	void SetPlanePartCollected(PlaneParts PartCollected);
 	bool GetPlanePartCollected(PlaneParts PartCollected);
