@@ -12,6 +12,7 @@ class USpringArmComponent;
 class USphereComponent;
 class UWidgetComponent;
 class UPossessableActorComponent;
+class USoundCue;
 
 /**
  * 
@@ -107,6 +108,13 @@ public:
 
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USoundCue* AudioCue;
+
+	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* AudioComponent;
+
 
 private:
 
