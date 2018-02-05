@@ -23,6 +23,8 @@
 #include "RespawnPoint.h"
 #include "ToyTrain.h"
 #include "Macros.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
@@ -155,6 +157,26 @@ AToyCar::AToyCar()
 	bCanPosses = false;
 	isActive = true;
 
+	
+
+	// Load our Sound Cue for the propeller sound we created in the editor... 
+	// note your path may be different depending
+	// on where you store the asset on disk.
+	static ConstructorHelpers::FObjectFinder<USoundCue> ac(TEXT("/Game/Sounds/Background_Audio_Cue"));
+
+	// Store a reference to the Cue asset - we'll need it later.
+	AudioCue = ac.Object;
+
+	// Create an audio component, the audio component wraps the Cue, 
+	// and allows us to ineract with
+	// it, and its parameters from code.
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+	// I don't want the sound playing the moment it's created.
+	AudioComponent->bAutoActivate = false;
+	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
+	AudioComponent->SetupAttachment(RootComponent);
+
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -164,6 +186,13 @@ void AToyCar::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Attach our sound cue to the SoundComponent (outside the constructor)
+	//if (AudioCue->IsValidLowLevelFast()) {
+	//	AudioComponent->SetSound(AudioCue);
+	//}
+
+	// Finally play the sound  (outside the constructor)
+	//AudioComponent->Play();
 }
 
 // Called every frame
