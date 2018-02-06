@@ -22,6 +22,11 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 {
 	GENERATED_BODY()
 	
+	enum Sounds {
+		ENGINE = 0,
+		BREAK  = 1
+	};
+
 	/** Spring arm that will offset the camera */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -110,13 +115,14 @@ public:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USoundCue* AudioCue;
-
-	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* AudioComponent;
 
 
 private:
+
+	Sounds currentSoundCue;
+
+	TArray<USoundCue*> AudioCues;
 
 	/* Are we on a 'slippery' surface */
 	bool bIsLowFriction;
@@ -129,6 +135,8 @@ private:
 	bool bCanPosses;
 
 	bool isActive;
+
+	bool isBreaking;
 
 	APawn* possesActor;
 

@@ -130,15 +130,10 @@ AToyCar::AToyCar()
 	SpringArm->SetupAttachment(CameraParent);
 	SpringArm->TargetArmLength = 300.0f;
 	SpringArm->bEnableCameraLag = false;
-	//SpringArm->bEnableCameraRotationLag = false;
-	//SpringArm->bInheritPitch = true;
-	//SpringArm->bInheritYaw = true;
-	//SpringArm->bInheritRoll = true;
 	
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	//Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
 	Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
@@ -156,20 +151,16 @@ AToyCar::AToyCar()
 
 	bCanPosses = false;
 	isActive = true;
-
-	
+	isBreaking = false;
 
 	// Load our Sound Cue for the propeller sound we created in the editor... 
-	// note your path may be different depending
-	// on where you store the asset on disk.
-	static ConstructorHelpers::FObjectFinder<USoundCue> ac(TEXT("/Game/Sounds/Background_Audio_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> engineSound(TEXT("/Game/Sounds/Car_Engine_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> breakSound(TEXT("/Game/Sounds/Car_Break_Cue"));
 
-	// Store a reference to the Cue asset - we'll need it later.
-	AudioCue = ac.Object;
+	AudioCues.Add(engineSound.Object);
+	AudioCues.Add(breakSound.Object);
 
-	// Create an audio component, the audio component wraps the Cue, 
-	// and allows us to ineract with
-	// it, and its parameters from code.
+	// Create an audio component, the audio component wraps the Cue
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 
 	// I don't want the sound playing the moment it's created.
@@ -186,13 +177,8 @@ void AToyCar::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Attach our sound cue to the SoundComponent (outside the constructor)
-	//if (AudioCue->IsValidLowLevelFast()) {
-	//	AudioComponent->SetSound(AudioCue);
-	//}
-
-	// Finally play the sound  (outside the constructor)
-	//AudioComponent->Play();
+	AudioComponent->SetSound(AudioCues[ENGINE]);
+	currentSoundCue = ENGINE;
 }
 
 // Called every frame
@@ -251,6 +237,20 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AToyCar::MoveForward(float AxisValue)
 {
+	if (!isBreaking)
+	{
+		if (AxisValue > 0) {
+			if (currentSoundCue != ENGINE) {
+				AudioComponent->SetSound(AudioCues[ENGINE]);
+				currentSoundCue = ENGINE;
+			}
+			if (!AudioComponent->IsPlaying())
+				AudioComponent->FadeIn(1.0f, 0.6f);
+		}
+		else {
+			AudioComponent->FadeOut(1.0f, 0.f);
+		}
+	}
 	GetVehicleMovementComponent()->SetThrottleInput(AxisValue);
 }
 
@@ -271,12 +271,24 @@ void AToyCar::YawCamera(float AxisValue)
 
 void AToyCar::OnHandbrakePressed()
 {
+	if (currentSoundCue != BREAK) 
+	{
+		AudioComponent->SetSound(AudioCues[BREAK]);
+		currentSoundCue = BREAK;
+	}
+	if (!AudioComponent->IsPlaying()) 
+	{
+		AudioComponent->Play();
+	}
+
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
+	isBreaking = true;
 }
 
 void AToyCar::OnHandbrakeReleased()
 {
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
+	isBreaking = false;
 }
 
 void AToyCar::ResetCamera()
