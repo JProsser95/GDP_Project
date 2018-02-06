@@ -12,7 +12,7 @@
 
 // Sets default values
 AToyPlane::AToyPlane()
-	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(2.5f), TurnSpeed(2.5f),
+	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(2.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
 	InitialBoost(100.0f), CurrentBoost(InitialBoost)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -26,6 +26,7 @@ AToyPlane::AToyPlane()
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
 	PlaneBodyMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(13.5f, 0.0f, 0.0f));
 	possComponent = CreateDefaultSubobject<UPossessableActorComponent>(TEXT("PossessableComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	//PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
@@ -164,7 +165,6 @@ void AToyPlane::Tick(float DeltaTime)
 
 			//NewRotation.Roll += MovementInput.Y * DeltaTime * RotateSpeed;
 			//NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f * fRotateMod, 90.0f * fRotateMod);
-			NewRotation.Yaw += PitchRoll.Roll * 100 * DeltaTime * fRotateMod * TurnSpeed;
 		}
 	}
 
@@ -182,13 +182,14 @@ void AToyPlane::Tick(float DeltaTime)
 	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
 	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f * fRotateMod, 90.0f * fRotateMod);
 
+	NewRotation.Yaw += PitchRoll.Roll * 100.0f * DeltaTime * fRotateMod * TurnSpeed;
 
 	SetActorRotation(NewRotation);
 	//SetActorLocation(NewLocation);
 
 	CustomMovementComponent->AddInputVector(GetActorForwardVector() * fSpeed);
 
-	fPropRotation += DeltaTime * fSpeed * 2.0f;
+	fPropRotation += DeltaTime * fSpeed * PropRotateSpeed;
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(0, 0, fPropRotation));
 }
 
