@@ -4,6 +4,7 @@
 #include "ToyPlane.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "TimerWidgetParent.h"
 #include "Macros.h"
 
 
@@ -15,6 +16,8 @@ void AGDP_ProjectGameModeBase::BeginPlay()
 	{ 
 		CollectedPlaneParts[i] = false;
 	}
+
+	iTimeLeft = 0.0f;
 }
 
 void AGDP_ProjectGameModeBase::ChangeHUD(const FString& name)
@@ -112,3 +115,51 @@ void AGDP_ProjectGameModeBase::DisplayPlanePartsWidget()
 		}
 	}
 }
+
+void AGDP_ProjectGameModeBase::DisplayTimer()
+{
+	if (TimerWidget != nullptr)
+	{
+		TimerWidget->RemoveFromViewport();
+		TimerWidget = nullptr;
+	}
+	if (TimePuzzleHUDClass != nullptr)
+	{
+		TimerWidget = CreateWidget<UUserWidget>(GetWorld(), TimePuzzleHUDClass);
+		if (TimerWidget != nullptr)
+		{
+			TimerWidget->AddToViewport();
+		}
+	}
+}
+
+void AGDP_ProjectGameModeBase::RemoveTimerWidget()
+{
+	if (TimerWidget != nullptr)
+	{
+		TimerWidget->RemoveFromViewport();
+		TimerWidget = nullptr;
+	}
+}
+
+
+void AGDP_ProjectGameModeBase::BeginTimer()
+{
+	OUTPUT_STRING("Begin Timer");
+	iTimeLeft = 30.0f;
+	GetWorldTimerManager().SetTimer(Timer, this, &AGDP_ProjectGameModeBase::UpdateTimer, 1.0f, true, 0.0f);
+}
+
+void AGDP_ProjectGameModeBase::UpdateTimer()
+{
+	OUTPUT_INT(iTimeLeft);
+	if (--iTimeLeft <= 0) 
+	{
+		GetWorldTimerManager().ClearTimer(Timer);
+	}
+	DisplayTimer();
+}
+
+
+
+

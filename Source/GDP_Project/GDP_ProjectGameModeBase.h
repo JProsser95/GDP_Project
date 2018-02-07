@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "HUDWidget.h"
+#include "Engine/EngineTypes.h"
 #include "GDP_ProjectGameModeBase.generated.h"
 
 enum PlaneParts
@@ -42,6 +43,13 @@ public:
 
 	void DisplayPlanePartsCollected(bool bToggle);
 
+	void BeginTimer();
+	void DisplayTimer();
+	void UpdateTimer();
+	int GetTimeLeft() { return iTimeLeft; }
+
+	void RemoveTimerWidget();
+
 protected:
 
 	/** Remove the current menu widget and create a new one from the specified class, if provided. */
@@ -63,6 +71,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
 	TSubclassOf<class UUserWidget> PlanePartsHUDClass; // The main HUD. Used to display plane parts collected.
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> TimePuzzleHUDClass; // The main HUD. Used to display plane parts collected.
+
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 
@@ -72,7 +83,17 @@ protected:
 	UPROPERTY()
 	UUserWidget* PlanePartsWidget;
 
+	UPROPERTY()
+	UUserWidget* TimerWidget;
+
+	FTimerHandle Timer;
+
 	bool CollectedPlaneParts[PlaneParts_MAX];
 
 	void DisplayPlanePartsWidget();
+
+private:
+
+	int iTimeLeft;
+
 };
