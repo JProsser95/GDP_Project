@@ -6,6 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "EngineUtils.h"
@@ -33,6 +34,9 @@ ATimePuzzle::ATimePuzzle()
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ATimePuzzle::OnBeginOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 
+	Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorComponent"));
+	Door->SetupAttachment(RootComponent);
+
 	bIsPuzzleTriggered = false;
 }
 
@@ -57,6 +61,8 @@ void ATimePuzzle::Tick(float DeltaTime)
 			{
 				bIsPuzzleTriggered = false;
 				GameMode->RemoveTimerWidget();
+				FVector DoorLocation = Door->GetComponentLocation();
+				Door->SetWorldLocation(DoorLocation - FVector(0, 0, 400.0f));
 			}
 		}
 	}
@@ -77,4 +83,8 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	bIsPuzzleTriggered = true;
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->BeginTimer();
+
+	FVector DoorLocation = Door->GetComponentLocation();
+	Door->SetWorldLocation(DoorLocation + FVector(0, 0, 400.0f));
+	//Door->SetRelativeLocation(FVector(0, 0, 0.0f));
 }

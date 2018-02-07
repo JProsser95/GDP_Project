@@ -146,7 +146,7 @@ void AGDP_ProjectGameModeBase::RemoveTimerWidget()
 void AGDP_ProjectGameModeBase::BeginTimer()
 {
 	OUTPUT_STRING("Begin Timer");
-	iTimeLeft = 10.0f;
+	iTimeLeft = 30.0f;
 	GetWorldTimerManager().SetTimer(Timer, this, &AGDP_ProjectGameModeBase::UpdateTimer, 1.0f, true, 0.0f);
 }
 

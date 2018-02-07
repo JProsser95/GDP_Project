@@ -8,6 +8,7 @@
 
 class UWidgetComponent;
 class UBoxComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -27,6 +28,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* TriggerBox;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* Door;
 
 public:	
 	// Called every frame
