@@ -25,32 +25,32 @@ AToyPlane::AToyPlane()
 
 	//Mesh
 	PlaneBodyMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneBodyMeshComponent"));
-	PlaneBodyMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(13.5f, 0.0f, 0.0f));
 	possComponent = CreateDefaultSubobject<UPossessableActorComponent>(TEXT("PossessableComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	//PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
 	//PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialPlane(TEXT("MaterialInstanceDynamic'/Game/Plane/Texture/Plane_Material.Plane_Material'"));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/PlaneHull.PlaneHull'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/Plane_Plane.Plane_Plane'"));
 	if (MeshAssetBody.Object)
 		PlaneBodyMeshComponent->SetStaticMesh(MeshAssetBody.Object);
-
+	PlaneBodyMeshComponent->SetMaterial(0, MaterialPlane.Object);
 	RootComponent = PlaneBodyMeshComponent;
 
 	//Mesh
 	PlanePropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanePropMeshComponent"));
 	PlanePropMeshComponent->AttachToComponent(PlaneBodyMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/PlaneProp.PlaneProp'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBProp(TEXT("StaticMesh'/Game/Plane/Plane_Prop.Plane_Prop'"));
 	if (MeshAssetBProp.Object)
 		PlanePropMeshComponent->SetStaticMesh(MeshAssetBProp.Object);
-	PlanePropMeshComponent->SetRelativeLocation(FVector(-1.0f, 0.0f, 0.0f));
+	PlanePropMeshComponent->SetRelativeLocation(FVector(45.0f, 0.0f, 2.0f));
 
 	//PlaneBodyMeshComponent->SetRelativeRotation(FRotator(0,90.0f,0));
 
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
-	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-20.0f, 0.0f, 0.0f));
+	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f, 0.0f, 0.0f));
 	OurCameraSpringArm->TargetArmLength = 100.f;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 4.0f;
@@ -64,11 +64,11 @@ AToyPlane::AToyPlane()
 	CurrentBoost = InitialBoost;
 	fSpeed = 0.0f;
 	IsBoosting = false;
-	bIsActive = false;
+	bIsActive = true;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
