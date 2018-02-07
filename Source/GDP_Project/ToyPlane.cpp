@@ -48,8 +48,6 @@ AToyPlane::AToyPlane()
 		PlanePropMeshComponent->SetStaticMesh(MeshAssetBProp.Object);
 	PlanePropMeshComponent->SetRelativeLocation(FVector(45.0f, 0.0f, 2.0f));
 
-	//PlaneBodyMeshComponent->SetRelativeRotation(FRotator(0,90.0f,0));
-
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f, 0.0f, 0.0f));
@@ -66,11 +64,11 @@ AToyPlane::AToyPlane()
 	CurrentBoost = InitialBoost;
 	fSpeed = 0.0f;
 	IsBoosting = false;
-	bIsActive = true;
+	bIsActive = false;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
