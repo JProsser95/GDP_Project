@@ -69,6 +69,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float TurnSpeed;
 
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float PropRotateSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsActive;
 
 	float fPropRotation;
