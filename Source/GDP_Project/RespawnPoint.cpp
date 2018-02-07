@@ -9,8 +9,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "EngineUtils.h"
 
-
-
 // Sets default values
 ARespawnPoint::ARespawnPoint()
 {
