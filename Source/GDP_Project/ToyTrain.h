@@ -55,7 +55,9 @@ public:
 	void SetToyCar(APawn* TC);
 
 	/** Handle pressing forwards */
-	void MoveForward(float fValue);
+	void MoveForward(float fValue);	
+	// Posses other Actor;
+	void ChangePossesion();
 
 protected:
 
