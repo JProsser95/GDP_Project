@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "PossessableActorComponent.h"
 #include "ToyCar.h"
+#include "CleanerObject.h"
 #include "Macros.h"
 
 // Sets default values
@@ -46,6 +47,14 @@ void AFrictionPuzzle::Tick(float DeltaTime)
 
 void AFrictionPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+	if (!OtherActor->FindComponentByClass<UCleanerObject>())
+	{
+		OUTPUT_STRING("CLEAN");
+		OtherActor->Destroy();
+		this->Destroy();
+		return;
+	}
+
 	if (bIsCarStuck || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 	{
 		return;
