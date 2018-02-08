@@ -60,9 +60,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	//UPROPERTY(EditAnywhere)
-	//UWidgetComponent* ChangeVehicleWidget;
-
 public:
 	// End Actor interface
 
@@ -98,6 +95,10 @@ public:
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);
 
+	// For the Friction Puzzle
+	void OnSticky();
+	void OffSticky();
+
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
 	static const FName EngineAudioRPM;
@@ -117,7 +118,6 @@ public:
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* AudioComponent;
 
-
 private:
 
 	Sounds currentSoundCue;
@@ -133,10 +133,11 @@ private:
 
 	//Is the car able to currently posses another Pawn
 	bool bCanPosses;
-
 	bool isActive;
-
 	bool isBreaking;
+
+	// For the friction puzzle
+	float fSitckyFriction;
 
 	APawn* possesActor;
 

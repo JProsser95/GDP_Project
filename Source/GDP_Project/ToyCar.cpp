@@ -46,11 +46,11 @@ AToyCar::AToyCar()
 	SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
 
 	// Setup friction materials
-	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
-	SlipperyMaterial = SlipperyMat.Object;
-	
-	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
-	NonSlipperyMaterial = NonSlipperyMat.Object;
+	//static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
+	//SlipperyMaterial = SlipperyMat.Object;
+	//
+	//static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
+	//NonSlipperyMaterial = NonSlipperyMat.Object;
 
 	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
@@ -152,6 +152,7 @@ AToyCar::AToyCar()
 	bCanPosses = false;
 	isActive = true;
 	isBreaking = false;
+	fSitckyFriction = 1.0f;
 
 	// Load our Sound Cue for the propeller sound we created in the editor... 
 	static ConstructorHelpers::FObjectFinder<USoundCue> engineSound(TEXT("/Game/Sounds/Car_Engine_Cue"));
@@ -251,7 +252,7 @@ void AToyCar::MoveForward(float AxisValue)
 			AudioComponent->FadeOut(1.0f, 0.f);
 		}
 	}
-	GetVehicleMovementComponent()->SetThrottleInput(AxisValue);
+	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * fSitckyFriction);
 }
 
 void AToyCar::MoveRight(float AxisValue)
@@ -389,4 +390,14 @@ void AToyCar::Respawn()
 void AToyCar::SetIsActive(bool Value)
 {
 	isActive = Value;
+}
+
+void AToyCar::OnSticky()
+{
+	fSitckyFriction = 0.3f;
+}
+
+void AToyCar::OffSticky()
+{
+	fSitckyFriction = 1.0f;
 }
