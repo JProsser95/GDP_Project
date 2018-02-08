@@ -27,7 +27,7 @@ AToyTrain::AToyTrain()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Train/TrainSingle_low.TrainSingle_low'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Train/TrainTextured_TrainHub.TrainTextured_TrainHub'"));
 	if (MeshAssetBody.Object)
 		MeshComponent->SetStaticMesh(MeshAssetBody.Object);
 
@@ -42,7 +42,7 @@ AToyTrain::AToyTrain()
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	ToyCar = nullptr;
 
@@ -135,16 +135,7 @@ void AToyTrain::UpdateCarriages()
 void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");
-	isActive = false;
-	if (ToyCar != nullptr)
-	{
-		GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
-		AToyCar* TC = Cast<AToyCar>(ToyCar);
-		if (TC != nullptr)
-		{
-			TC->SetIsActive(true);
-		}
-	}
+	ChangePossesion();
 }
 
 // Called to bind functionality to input
@@ -153,6 +144,8 @@ void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyTrain::MoveForward);
+
+	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyTrain::ChangePossesion);
 }
 
 void AToyTrain::SetIsActive(bool Value)
@@ -182,5 +175,19 @@ void AToyTrain::MoveForward(float fValue)
 	{
 		if (--splinePointer < 0)
 			splinePointer = totalSplinePoints - 1;
+	}
+}
+
+void AToyTrain::ChangePossesion()
+{
+	isActive = false;
+	if (ToyCar != nullptr)
+	{
+		GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
+		AToyCar* TC = Cast<AToyCar>(ToyCar);
+		if (TC != nullptr)
+		{
+			TC->SetIsActive(true);
+		}
 	}
 }
