@@ -12,6 +12,8 @@
 #include "EngineUtils.h"
 #include "Macros.h"
 
+const int MAX_DOOR_TIMER(5);
+
 // Sets default values
 ATimePuzzle::ATimePuzzle()
 {
@@ -38,6 +40,8 @@ ATimePuzzle::ATimePuzzle()
 	Door->SetupAttachment(RootComponent);
 
 	bIsPuzzleTriggered = false;
+	bIsClosingDoor = false;
+	iDoorTime = MAX_DOOR_TIMER;
 }
 
 // Called when the game starts or when spawned
@@ -52,7 +56,7 @@ void ATimePuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsPuzzleTriggered) 
+	if (bIsPuzzleTriggered && !bIsClosingDoor) 
 	{
 		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 		if (GameMode != nullptr)
@@ -61,10 +65,17 @@ void ATimePuzzle::Tick(float DeltaTime)
 			{
 				bIsPuzzleTriggered = false;
 				GameMode->RemoveTimerWidget();
-				FVector DoorLocation = Door->GetComponentLocation();
-				Door->SetWorldLocation(DoorLocation - FVector(0, 0, 400.0f));
+				bIsClosingDoor = true;
+				iDoorTime = MAX_DOOR_TIMER;
+				GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::CloseDoor, 1.0f, true, 0.0f);
 			}
 		}
+	}
+
+	if (bIsClosingDoor)
+	{
+		FVector DoorLocation = Door->GetComponentLocation();
+		Door->SetWorldLocation(DoorLocation - FVector(0, 0, DeltaTime * 100));
 	}
 
 	//For the widget testing
@@ -78,13 +89,20 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	if (bIsPuzzleTriggered)
 		return;
 
-	OUTPUT_STRING("Puzzle Triggered");
-
 	bIsPuzzleTriggered = true;
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->BeginTimer();
 
 	FVector DoorLocation = Door->GetComponentLocation();
 	Door->SetWorldLocation(DoorLocation + FVector(0, 0, 400.0f));
-	//Door->SetRelativeLocation(FVector(0, 0, 0.0f));
+}
+
+void ATimePuzzle::CloseDoor()
+{
+	if (--iDoorTime <= 0)
+	{
+		bIsClosingDoor = false;
+		GetWorldTimerManager().ClearTimer(DoorTimer);
+	}
+
 }

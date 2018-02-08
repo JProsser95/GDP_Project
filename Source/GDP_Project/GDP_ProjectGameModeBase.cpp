@@ -7,6 +7,7 @@
 #include "TimerWidgetParent.h"
 #include "Macros.h"
 
+const int MAX_TIME(25);
 
 void AGDP_ProjectGameModeBase::BeginPlay()
 {
@@ -146,7 +147,7 @@ void AGDP_ProjectGameModeBase::RemoveTimerWidget()
 void AGDP_ProjectGameModeBase::BeginTimer()
 {
 	OUTPUT_STRING("Begin Timer");
-	iTimeLeft = 30.0f;
+	iTimeLeft = MAX_TIME;
 	GetWorldTimerManager().SetTimer(Timer, this, &AGDP_ProjectGameModeBase::UpdateTimer, 1.0f, true, 0.0f);
 }
 

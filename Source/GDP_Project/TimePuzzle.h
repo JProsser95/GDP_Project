@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TimerManager.h"
+#include "Engine/EngineTypes.h"
 #include "TimePuzzle.generated.h"
 
 class UWidgetComponent;
@@ -32,6 +34,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Door;
 
+	FTimerHandle DoorTimer;
+
+	void CloseDoor();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,5 +48,7 @@ public:
 private:
 
 	bool bIsPuzzleTriggered;
+	bool bIsClosingDoor;
 
+	int iDoorTime;
 };
