@@ -47,7 +47,7 @@ void AFrictionPuzzle::Tick(float DeltaTime)
 
 void AFrictionPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (!OtherActor->FindComponentByClass<UCleanerObject>())
+	if (OtherActor->FindComponentByClass<UCleanerObject>())
 	{
 		OUTPUT_STRING("CLEAN");
 		OtherActor->Destroy();
