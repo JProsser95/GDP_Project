@@ -95,6 +95,9 @@ public:
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);
 
+	bool GetCanMove() { return bCanMove; }
+	void SetCanMove(bool Value) { bCanMove = Value; }
+
 	// For the Friction Puzzle
 	void OnSticky();
 	void OffSticky();
@@ -135,6 +138,8 @@ private:
 	bool bCanPosses;
 	bool isActive;
 	bool isBreaking;
+	//Set this to false if we don't want the car to be able to move
+	bool bCanMove;
 
 	// For the friction puzzle
 	float fSitckyFriction;

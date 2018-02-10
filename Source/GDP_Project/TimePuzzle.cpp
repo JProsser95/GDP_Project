@@ -8,6 +8,9 @@
 #include "Components/WidgetComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
+#include "Camera/CameraComponent.h"
+#include "CameraDirector.h"
+#include "ToyCar.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "EngineUtils.h"
 #include "Macros.h"
@@ -30,6 +33,14 @@ ATimePuzzle::ATimePuzzle()
 	TriggerWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 	TriggerWidget->SetTwoSided(true);
 
+	//For testing
+	CompleteWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("CompleteWidgetComponent"));
+	CompleteWidget->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> CWidget(TEXT("/Game/TestingPurpose/PuzzleComplete"));
+	CompleteWidget->SetWidgetClass(CWidget.Class);
+	CompleteWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
+	CompleteWidget->SetTwoSided(true);
+
 	//Trigger Box for activating this spawn point
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->SetupAttachment(RootComponent);
@@ -39,8 +50,12 @@ ATimePuzzle::ATimePuzzle()
 	Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorComponent"));
 	Door->SetupAttachment(RootComponent);
 
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(RootComponent);
+
 	bIsPuzzleTriggered = false;
 	bIsClosingDoor = false;
+	bIsOpeningDoor = false;
 	iDoorTime = MAX_DOOR_TIMER;
 }
 
@@ -49,6 +64,11 @@ void ATimePuzzle::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Get the Camera Director that is in the scene
+	for (TActorIterator<ACameraDirector> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		CameraDirector = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -56,7 +76,7 @@ void ATimePuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsPuzzleTriggered && !bIsClosingDoor) 
+	if (bIsPuzzleTriggered && !bIsClosingDoor && !bIsOpeningDoor) 
 	{
 		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 		if (GameMode != nullptr)
@@ -78,6 +98,12 @@ void ATimePuzzle::Tick(float DeltaTime)
 		Door->SetWorldLocation(DoorLocation - FVector(0, 0, DeltaTime * 100));
 	}
 
+	if (bIsOpeningDoor)
+	{
+		FVector DoorLocation = Door->GetComponentLocation();
+		Door->SetWorldLocation(DoorLocation + FVector(0, 0, DeltaTime * 100));
+	}
+
 	//For the widget testing
 	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
@@ -90,11 +116,18 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		return;
 
 	bIsPuzzleTriggered = true;
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->BeginTimer();
+	bIsOpeningDoor = true;
 
-	FVector DoorLocation = Door->GetComponentLocation();
-	Door->SetWorldLocation(DoorLocation + FVector(0, 0, 400.0f));
+	if (CameraDirector != nullptr)
+		CameraDirector->BeginCameraChange();
+
+	Car = Cast<AToyCar>(OtherActor);
+
+	if (Car != nullptr)
+		Car->SetCanMove(false);
+
+	iDoorTime = MAX_DOOR_TIMER;
+	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
 }
 
 void ATimePuzzle::CloseDoor()
@@ -102,7 +135,21 @@ void ATimePuzzle::CloseDoor()
 	if (--iDoorTime <= 0)
 	{
 		bIsClosingDoor = false;
+		iDoorTime = MAX_DOOR_TIMER;
 		GetWorldTimerManager().ClearTimer(DoorTimer);
 	}
+}
 
+void ATimePuzzle::OpenDoor()
+{
+	if (--iDoorTime <= 0)
+	{
+		bIsOpeningDoor = false;
+		iDoorTime = MAX_DOOR_TIMER;
+		if (CameraDirector != nullptr)
+			CameraDirector->BeginCameraChange();
+		if (Car != nullptr)
+			Car->SetCanMove(true);
+		GetWorldTimerManager().ClearTimer(DoorTimer);
+	}
 }
