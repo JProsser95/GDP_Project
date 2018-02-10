@@ -11,6 +11,9 @@
 class UWidgetComponent;
 class UBoxComponent;
 class UStaticMeshComponent;
+class UCameraComponent;
+class ACameraDirector;
+class AToyCar;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -29,13 +32,24 @@ protected:
 	UWidgetComponent* TriggerWidget;
 
 	UPROPERTY(EditAnywhere)
+	UWidgetComponent* CompleteWidget;
+
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* TriggerBox;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Door;
 
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* Camera;
+
 	FTimerHandle DoorTimer;
 
+	ACameraDirector* CameraDirector;
+
+	AToyCar* Car;
+
+	void OpenDoor();
 	void CloseDoor();
 
 public:	
@@ -49,6 +63,7 @@ private:
 
 	bool bIsPuzzleTriggered;
 	bool bIsClosingDoor;
+	bool bIsOpeningDoor;
 
 	int iDoorTime;
 };

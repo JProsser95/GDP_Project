@@ -152,6 +152,7 @@ AToyCar::AToyCar()
 	bCanPosses = false;
 	isActive = true;
 	isBreaking = false;
+	bCanMove = true;
 	fSitckyFriction = 1.0f;
 
 	// Load our Sound Cue for the propeller sound we created in the editor... 
@@ -238,7 +239,7 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AToyCar::MoveForward(float AxisValue)
 {
-	if (!isBreaking)
+	if (!isBreaking && bCanMove)
 	{
 		if (AxisValue > 0) {
 			if (currentSoundCue != ENGINE) {
@@ -252,7 +253,8 @@ void AToyCar::MoveForward(float AxisValue)
 			AudioComponent->FadeOut(1.0f, 0.f);
 		}
 	}
-	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * fSitckyFriction);
+
+	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * fSitckyFriction * (int)bCanMove);
 }
 
 void AToyCar::MoveRight(float AxisValue)
