@@ -13,7 +13,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), LineSwapped(false)
+	: splinePointer(0), Rotating(false), LineSwapped(false), MovementDirection(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -91,8 +91,6 @@ void AToyTrain::BeginPlay()
 	
 	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation());
 	RootComponent->SetWorldRotation(FRotator(0.0f, angle, 0.0f));
-
-	//LineSwapped = true;
 }
 
 void AToyTrain::Restart()
@@ -110,6 +108,20 @@ void AToyTrain::Tick(float DeltaTime)
 		return;
 
 	Super::Tick(DeltaTime);
+
+	static float SplineTimer = 0.0f;
+
+	if (MovementDirection)
+	{
+		SplineTimer += DeltaTime;
+		if (SplineTimer >= 0.01f)
+		{
+			SplineTimer = 0.0f;
+			UpdateSplinePointer();
+		}
+	}
+	else
+		SplineTimer = 0.0f;
 
 	if (!Rotating)
 	{
@@ -129,7 +141,7 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 	else
 	{
-		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw -1.0f, 0.0f));
+		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw -(30.0f * DeltaTime), 0.0f));
 		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[0].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
@@ -145,6 +157,39 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *pathPointLocation[splinePointer].ToString());
+}
+
+void AToyTrain::UpdateSplinePointer()
+{
+	if (MovementDirection == 1)
+	{
+		if (LineSwapped)
+		{
+			if (!MeshComponent->IsOverlappingActor(Obstacle))
+			{
+				if (++splinePointer >= totalSplinePoints)
+					splinePointer = totalSplinePoints;
+			}
+		}
+		else
+		{
+			if (--splinePointer < 0)
+				splinePointer = 0;
+		}
+	}
+	else
+	{
+		if (LineSwapped)
+		{
+			if (--splinePointer < 0)
+				splinePointer = 0;
+		}
+		else
+		{
+			if (++splinePointer > 100)
+				splinePointer = 100;
+		}
+	}
 }
 
 void AToyTrain::UpdateTrainOnVector()
@@ -202,38 +247,7 @@ void AToyTrain::SetToyCar(APawn* TC)
 
 void AToyTrain::MoveForward(float fValue)
 {
-	if (fValue == 0.0f)
-		return;
-
-	if (fValue > 0.0f)
-	{
-		if (LineSwapped)
-		{
-			if (!MeshComponent->IsOverlappingActor(Obstacle))
-			{
-				if (++splinePointer >= totalSplinePoints)
-					splinePointer = 0; // THIS NEEDS CHANGING!! Don't let the train loop back around.
-			}
-		}
-		else
-		{
-			if (--splinePointer < 0)
-				splinePointer = 0;
-		}
-	}
-	else
-	{
-		if (LineSwapped)
-		{
-			if (--splinePointer < 0)
-				splinePointer = 0;
-		}
-		else
-		{
-			if (++splinePointer > 100)
-				splinePointer = 100;
-		}
-	}
+	MovementDirection = (int)fValue;
 }
 
 void AToyTrain::ChangePossesion()

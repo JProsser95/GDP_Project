@@ -14,7 +14,7 @@
 
 class AToyCar;
 
-const int MAXPOINTS = 5000;//stop sampling the spline after MAXPOINTS points
+const int MAXPOINTS = 2500;//stop sampling the spline after MAXPOINTS points
 
 UCLASS()
 class GDP_PROJECT_API AToyTrain : public APawn
@@ -30,6 +30,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void UpdateSplinePointer();
 	void UpdateTrainOnVector();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
@@ -46,6 +47,8 @@ private:
 	bool Rotating;
 	bool LineSwapped;
 	FVector FirstLine; // The vector representing the first piece of track
+
+	int MovementDirection;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
