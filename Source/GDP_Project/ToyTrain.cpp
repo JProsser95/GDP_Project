@@ -219,7 +219,7 @@ void AToyTrain::UpdateCarriages()
 		}
 		else
 		{
-			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(30.0f, 0.0f, 0.0f));
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(150.0f, 0.0f, 0.0f));
 			Carriages[i]->SetActorRotation(pathPointRotation[0]);
 		}
 	}
