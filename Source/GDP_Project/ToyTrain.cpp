@@ -10,6 +10,7 @@
 const int HEIGHT = 0;//height of player above spline
 
 #define CARRIAGESPACING 30
+#define FIRSTLINELENGTH 300
 
 // Sets default values
 AToyTrain::AToyTrain()
@@ -90,7 +91,7 @@ void AToyTrain::BeginPlay()
 	float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(FirstLine.GetSafeNormal(), FVector::ForwardVector)));
 	
 	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation());
-	RootComponent->SetWorldRotation(FRotator(0.0f, angle, 0.0f));
+	RootComponent->SetWorldRotation(FRotator(0.0f, -angle, 0.0f));
 }
 
 void AToyTrain::Restart()
@@ -133,7 +134,7 @@ void AToyTrain::Tick(float DeltaTime)
 		{
 			UpdateTrainOnVector();
 
-			if (splinePointer == 100)
+			if (splinePointer == FIRSTLINELENGTH)
 			{
 				Rotating = true;
 			}
@@ -141,7 +142,7 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 	else
 	{
-		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw -(30.0f * DeltaTime), 0.0f));
+		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw + (30.0f * DeltaTime), 0.0f));
 		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[0].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
@@ -186,15 +187,15 @@ void AToyTrain::UpdateSplinePointer()
 		}
 		else
 		{
-			if (++splinePointer > 100)
-				splinePointer = 100;
+			if (++splinePointer > FIRSTLINELENGTH)
+				splinePointer = FIRSTLINELENGTH;
 		}
 	}
 }
 
 void AToyTrain::UpdateTrainOnVector()
 {
-	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation() - ((FirstLine / 100.0f) * splinePointer)); // The movement is a minus because the vector is backwards to make the train move in reverse.
+	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation() - ((FirstLine / FIRSTLINELENGTH) * splinePointer)); // The movement is a minus because the vector is backwards to make the train move in reverse.
 }
 
 void AToyTrain::UpdateTrainOnSpline()
@@ -211,11 +212,16 @@ void AToyTrain::UpdateCarriages()
 	for (int i = 0; i < Carriages.Num(); ++i)
 	{
 		carriageSplinePointer = splinePointer - (CARRIAGESPACING * (i + 1));
-		if (carriageSplinePointer < 0)
-			carriageSplinePointer = totalSplinePoints + carriageSplinePointer; // It's an add because cSP will be negative
-
-		Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
-		Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
+		if (carriageSplinePointer >= 0)
+		{
+			Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
+			Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
+		}
+		else
+		{
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(30.0f, 0.0f, 0.0f));
+			Carriages[i]->SetActorRotation(pathPointRotation[0]);
+		}
 	}
 }
 
