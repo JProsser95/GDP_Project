@@ -8,6 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "EngineUtils.h"
+#include "Macros.h"
 
 // Sets default values
 ARespawnPoint::ARespawnPoint()
@@ -41,7 +42,6 @@ ARespawnPoint::ARespawnPoint()
 
 
 	isCurrentSpawnPoint = false;
-
 }
 
 // Called when the game starts or when spawned
