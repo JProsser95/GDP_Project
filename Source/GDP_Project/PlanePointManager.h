@@ -6,11 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
+#include "ToyPlane.h"
 #include "PossessableActorComponent.h"
 #include "PlanePointManager.generated.h"
 
 
-class AToyPlane;
+//class AToyPlane;
 
 UCLASS()
 class GDP_PROJECT_API APlanePointManager : public AActor

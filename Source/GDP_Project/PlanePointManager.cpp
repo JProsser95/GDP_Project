@@ -8,6 +8,7 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
+	:ToyPlane(nullptr)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,6 +19,10 @@ APlanePointManager::APlanePointManager()
 void APlanePointManager::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!ToyPlane)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ToyPlane has not been setup in PlanePointManager!"));
+	}
 
 	for (int i = 3; i < Actors.Num(); ++i)
 	{
@@ -36,12 +41,7 @@ void APlanePointManager::Tick(float DeltaTime)
 	
 	if (Actors[0]->IsOverlappingActor(ToyPlane))
 	{
-
-		AToyPlane* tp = Cast<AToyPlane>(ToyPlane);
-		if (tp != nullptr)
-		{
-			tp->UpdateCurrentBoost(10.0f);
-		}
+		ToyPlane->UpdateCurrentBoost(10.0f);
 
 		GetWorld()->DestroyActor(Actors[0]);
 		Actors.RemoveAt(0);
