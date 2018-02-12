@@ -38,7 +38,7 @@ private:
 
 	// Players initial boost
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	float InitialBoost;
+	float MaximumBoost;
 
 	// Players current boost
 	UPROPERTY(VisibleAnywhere, Category = "Plane")
@@ -88,9 +88,9 @@ public:
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
 
-	// Accessor for InitialBoost
+	// Accessor for MaximumBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	float GetInitialBoost() { return InitialBoost; }
+	float GetMaximumBoost() { return MaximumBoost; }
 
 	// Accessor for CurrentBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")

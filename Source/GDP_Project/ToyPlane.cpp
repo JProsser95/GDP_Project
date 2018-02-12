@@ -13,7 +13,7 @@
 // Sets default values
 AToyPlane::AToyPlane()
 	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(2.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
-	InitialBoost(100.0f), CurrentBoost(InitialBoost)
+	MaximumBoost(100.0f), CurrentBoost(0.0f)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,8 +60,6 @@ AToyPlane::AToyPlane()
 
 	eCameraType = THIRD_PERSON;
 
-	InitialBoost = 100.0f;
-	CurrentBoost = InitialBoost;
 	fSpeed = 0.0f;
 	IsBoosting = false;
 	bIsActive = false;
@@ -99,19 +97,19 @@ void AToyPlane::Tick(float DeltaTime)
 
 	if (CurrentBoost <= 0)
 		IsBoosting = false;
-	else if (CurrentBoost > InitialBoost)
-		CurrentBoost = InitialBoost;
+	else if (CurrentBoost > MaximumBoost)
+		CurrentBoost = MaximumBoost;
 
 	if (IsBoosting) 
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
-		UpdateCurrentBoost(-DeltaTime * 0.3f * InitialBoost);
+		UpdateCurrentBoost(-DeltaTime * 0.3f * MaximumBoost);
 
 	}
 	else if (fSpeed > MinSpeed)
 	{
 		fSpeed -= DeltaTime * SpeedIncrement;
-		UpdateCurrentBoost(DeltaTime * 0.2f * InitialBoost);
+		//UpdateCurrentBoost(DeltaTime * 0.2f * MaximumBoost);
 	}
 	else
 		fSpeed += DeltaTime * SpeedIncrement;
