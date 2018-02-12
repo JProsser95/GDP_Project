@@ -37,19 +37,11 @@ void APlanePointManager::Tick(float DeltaTime)
 	if (Actors[0]->IsOverlappingActor(ToyPlane))
 	{
 
-		for (TObjectIterator<AToyPlane> Itr; Itr; ++Itr)
+		AToyPlane* tp = Cast<AToyPlane>(ToyPlane);
+		if (tp != nullptr)
 		{
-			if (Itr->IsA(AToyPlane::StaticClass()))
-			{
-				AToyPlane* actorClass = *Itr;
-				actorClass->UpdateCurrentBoost(10.0f);
-			}
+			tp->UpdateCurrentBoost(10.0f);
 		}
-
-		//(*Cast<AToyPlane*>(ToyPlane))->UpdateCurrentBoost(10.0f);
-		//AToyPlane* actorClass = Cast<AToyPlane>(GetWorld()->SpawnActor(AToyPlane::StaticClass()));
-		//if (actorClass)
-		//	actorClass->UpdateCurrentBoost(10.0f);
 
 		GetWorld()->DestroyActor(Actors[0]);
 		Actors.RemoveAt(0);
