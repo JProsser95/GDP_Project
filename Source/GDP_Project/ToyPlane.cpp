@@ -30,9 +30,9 @@ AToyPlane::AToyPlane()
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	//PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
 	//PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialPlane(TEXT("MaterialInstanceDynamic'/Game/Plane/Texture/Plane_Material.Plane_Material'"));
-	if (MaterialPlane.Object)
-		PlaneBodyMeshComponent->SetMaterial(0, MaterialPlane.Object);
+	//static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialPlane(TEXT("MaterialInstanceDynamic'/Game/Plane/Texture/Plane_Material.Plane_Material'"));
+	//if (MaterialPlane.Object)
+	//	PlaneBodyMeshComponent->SetMaterial(0, MaterialPlane.Object);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/Plane_Plane.Plane_Plane'"));
 	if (MeshAssetBody.Object)
