@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), LineSwapped(false), MovementDirection(0), TrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), /*LineSwapped(false),*/ MovementDirection(0), TrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -51,52 +51,54 @@ void AToyTrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	USplineComponent* SplineComponent = SplineBPs->FindComponentByClass<USplineComponent>();
 
-	if (!SplineComponent)
-		UE_LOG(LogTemp, Warning, TEXT("No spline component find."));
+	for(int i = 0; i < SplineBPs.Num(); ++i)
+	{
+		USplineComponent* SplineComponent = SplineBPs[i]->FindComponentByClass<USplineComponent>();
 
-	//for (TObjectIterator<USplineComponent> SplineComponent; SplineComponent; ++SplineComponent)
-	//{
+		if (!SplineComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("No spline component find in actor %d"), i);
+			continue;
+		}
+
 		int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 		float totalLength = SplineComponent->GetSplineLength();
 
 		float currentLength = 0;
 		int sampleLength = 5; //we will sample the spline every "sampleLength" units
 
-		FRotator splinePointRotation = FRotator(0, 0, 0);
-
-		if (numberOfSplinePoints > 5) {//you can also use GetName() to select the spline component you want to process
+		if (numberOfSplinePoints > 1) {//you can also use GetName() to select the spline component you want to process
 
 			int splinePointCount = 0;
 
-			while (currentLength < totalLength) {
+			pathPointLocation.Push({});
+			pathPointRotation.Push({});
 
+			while (currentLength < totalLength) 
+			{
 				//The next line samples the spline at "currentLength" units from the starting point
 				FTransform splinePointTransform = SplineComponent->GetTransformAtDistanceAlongSpline(currentLength, ESplineCoordinateSpace::World);
 
 				currentLength += sampleLength;//increase "currentLength" for the next sample
 
-				pathPointRotation[splinePointCount] = splinePointTransform.GetRotation();
+				pathPointRotation[i].Add(splinePointTransform.GetRotation());
 
-				FVector up = HEIGHT * pathPointRotation[splinePointCount].GetAxisZ();//this vector is above the spline by 300 units
+				FVector up = HEIGHT * pathPointRotation[i][splinePointCount].GetAxisZ(); //this vector is above the spline by 300 units
 
-				pathPointLocation[splinePointCount] = splinePointTransform.GetLocation() + up;//this will be used to place the player (i.e. the space ship if you don't change the model)
-
-				splinePointRotation = FRotator(pathPointRotation[splinePointCount]);
+				pathPointLocation[i].Add(splinePointTransform.GetLocation() + up); //this will be used to place the player (i.e. the space ship if you don't change the model)
 
 				splinePointCount += 1;
 			}
-			totalSplinePoints = splinePointCount;
 		}
-	//}
+	}
 
-	FirstLine = StartingPosition->GetActorLocation() - pathPointLocation[0];
-	
-	float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(FirstLine.GetSafeNormal(), FVector::ForwardVector)));
-	
-	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation());
-	RootComponent->SetWorldRotation(FRotator(0.0f, -angle, 0.0f));
+	//FirstLine = StartingPosition->GetActorLocation() - pathPointLocation[0];
+	//
+	//float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(FirstLine.GetSafeNormal(), FVector::ForwardVector)));
+	//
+	//RootComponent->SetWorldLocation(StartingPosition->GetActorLocation());
+	//RootComponent->SetWorldRotation(FRotator(0.0f, -angle, 0.0f));
 }
 
 void AToyTrain::Restart()
@@ -131,27 +133,27 @@ void AToyTrain::Tick(float DeltaTime)
 
 	if (!Rotating)
 	{
-		if (LineSwapped)
-		{
+		//if (LineSwapped)
+		//{
 			UpdateTrainOnSpline();
-		}
-		else
-		{
-			UpdateTrainOnVector();
-
-			if (splinePointer == FIRSTLINELENGTH)
-			{
-				Rotating = true;
-			}
-		}
+		//}
+		//else
+		//{
+		//	UpdateTrainOnVector();
+		//
+		//	if (splinePointer == FIRSTLINELENGTH)
+		//	{
+		//		Rotating = true;
+		//	}
+		//}
 	}
 	else
 	{
 		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw + (30.0f * DeltaTime), 0.0f));
-		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[0].Rotator().Yaw) < 1.0f)
+		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][0].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
-			LineSwapped = true;
+			//LineSwapped = true;
 			splinePointer = 0;
 		}
 	}
@@ -165,48 +167,70 @@ void AToyTrain::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *pathPointLocation[splinePointer].ToString());
 }
 
+void AToyTrain::UpdateState()
+{
+	switch (TrainState)
+	{
+	case TRAIN_STATES::RunawayTrain:
+		//if(splinePointer >= )
+		//MoveForward(1.0f);
+		break;
+
+	case TRAIN_STATES::RunawayTrain_Failed:
+
+		break;
+
+
+
+	case TRAIN_STATES::TRAIN_STATES_MAX:
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("AToyTrain::UpdateState has attempted to use an invalid TRAIN_STATE"));
+		break;
+	}
+}
+
 void AToyTrain::UpdateSplinePointer()
 {
 	if (MovementDirection == 1)
 	{
-		if (LineSwapped)
-		{
+		//if (LineSwapped)
+		//{
 			if (!MeshComponent->IsOverlappingActor(Obstacle))
 			{
-				if (++splinePointer >= totalSplinePoints)
-					splinePointer = totalSplinePoints;
+				if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
+					splinePointer = pathPointLocation[TrainState].Num() - 1;
 			}
-		}
-		else
-		{
-			if (--splinePointer < 0)
-				splinePointer = 0;
-		}
+		//}
+		//else
+		//{
+		//	if (--splinePointer < 0)
+		//		splinePointer = 0;
+		//}
 	}
 	else
 	{
-		if (LineSwapped)
-		{
+		//if (LineSwapped)
+		//{
 			if (--splinePointer < 0)
 				splinePointer = 0;
-		}
-		else
-		{
-			if (++splinePointer > FIRSTLINELENGTH)
-				splinePointer = FIRSTLINELENGTH;
-		}
+		//}
+		//else
+		//{
+		//	if (++splinePointer > FIRSTLINELENGTH)
+		//		splinePointer = FIRSTLINELENGTH;
+		//}
 	}
 }
 
-void AToyTrain::UpdateTrainOnVector()
-{
-	RootComponent->SetWorldLocation(StartingPosition->GetActorLocation() - ((FirstLine / FIRSTLINELENGTH) * splinePointer)); // The movement is a minus because the vector is backwards to make the train move in reverse.
-}
+//void AToyTrain::UpdateTrainOnVector()
+//{
+//	//RootComponent->SetWorldLocation(StartingPosition->GetActorLocation() - ((FirstLine / FIRSTLINELENGTH) * splinePointer)); // The movement is a minus because the vector is backwards to make the train move in reverse.
+//}
 
 void AToyTrain::UpdateTrainOnSpline()
 {
-	RootComponent->SetWorldLocation(pathPointLocation[splinePointer]);//just move the player to the next sampled point on the spline
-	RootComponent->SetWorldRotation(pathPointRotation[splinePointer]);//and give the player the same rotation as the sampled point
+	RootComponent->SetWorldLocation(pathPointLocation[TrainState][splinePointer]);//just move the player to the next sampled point on the spline
+	RootComponent->SetWorldRotation(pathPointRotation[TrainState][splinePointer]);//and give the player the same rotation as the sampled point
 
 	UpdateCarriages();
 }
@@ -219,13 +243,13 @@ void AToyTrain::UpdateCarriages()
 		carriageSplinePointer = splinePointer - (CARRIAGESPACING * (i + 1));
 		if (carriageSplinePointer >= 0)
 		{
-			Carriages[i]->SetActorLocation(pathPointLocation[carriageSplinePointer]);
-			Carriages[i]->SetActorRotation(pathPointRotation[carriageSplinePointer]);
+			Carriages[i]->SetActorLocation(pathPointLocation[TrainState][carriageSplinePointer]);
+			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][carriageSplinePointer]);
 		}
 		else
 		{
 			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(150.0f, 0.0f, 0.0f));
-			Carriages[i]->SetActorRotation(pathPointRotation[0]);
+			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
 }

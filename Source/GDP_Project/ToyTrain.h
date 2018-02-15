@@ -13,10 +13,12 @@
 #include "ToyTrain.generated.h"
 
 const int MAXPOINTS = 2500;//stop sampling the spline after MAXPOINTS points
+const int MAXSPLINES = 8; // Maximum number of splines that can be parsed and saved
 
 enum TRAIN_STATES
 {
 	RunawayTrain,
+	RunawayTrain_Failed,
 
 	TRAIN_STATES_MAX
 };
@@ -35,8 +37,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void UpdateState();
+
 	void UpdateSplinePointer();
-	void UpdateTrainOnVector();
+	//void UpdateTrainOnVector();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
 	void CompleteTrainPuzzle();
@@ -45,13 +49,12 @@ private:
 	APawn* ToyCar;
 	
 	int splinePointer; //this counter is incremented in the Tick() function to move us to the next point on the spline
-	FVector pathPointLocation[MAXPOINTS];//save sampled point locations into an array
-	FQuat pathPointRotation[MAXPOINTS];//save sampled point rotations into an array
-	int totalSplinePoints = 0; //After we sampled the spline at intervals, this is the total number of sampled points on the curve
-
+	TArray<TArray<FVector>> pathPointLocation;//save sampled point locations into an array
+	TArray<TArray<FQuat>> pathPointRotation;//save sampled point rotations into an array
+	
 	bool Rotating;
-	bool LineSwapped;
-	FVector FirstLine; // The vector representing the first piece of track
+	//bool LineSwapped;
+	//FVector FirstLine; // The vector representing the first piece of track
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;
@@ -86,10 +89,10 @@ protected:
 	UCameraComponent* OurCamera;
 
 	UPROPERTY(EditAnywhere)
-	AActor* SplineBPs;
+	TArray<AActor*> SplineBPs;
 
-	UPROPERTY(EditAnywhere)
-	AActor* StartingPosition;
+	//UPROPERTY(EditAnywhere)
+	//AActor* StartingPosition; // Used for non-spline movement, probably not required
 
 	UPROPERTY(EditAnywhere)
 	AActor* Obstacle;
