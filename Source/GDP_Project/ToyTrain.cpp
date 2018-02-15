@@ -9,8 +9,8 @@
 
 const int HEIGHT = 0;//height of player above spline
 
-#define CARRIAGESPACING 30
-#define FIRSTLINELENGTH 300
+#define CARRIAGESPACING 38
+#define TIMETOUPDATETRAIN 0.01f
 
 // Sets default values
 AToyTrain::AToyTrain()
@@ -117,7 +117,7 @@ void AToyTrain::Tick(float DeltaTime)
 	if (MovementDirection)
 	{
 		SplineTimer += DeltaTime;
-		if (SplineTimer >= 0.01f)
+		if (SplineTimer >= TIMETOUPDATETRAIN)
 		{
 			SplineTimer = 0.0f;
 			UpdateSplinePointer();
@@ -146,8 +146,6 @@ void AToyTrain::Tick(float DeltaTime)
 	{
 		CompleteTrainPuzzle();
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *pathPointLocation[splinePointer].ToString());
 }
 
 void AToyTrain::UpdateState()
@@ -222,7 +220,7 @@ void AToyTrain::UpdateCarriages()
 		}
 		else
 		{
-			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(150.0f, 0.0f, 0.0f));
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(175.0f, 0.0f, 0.0f));
 			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
