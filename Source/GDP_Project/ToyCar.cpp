@@ -93,7 +93,8 @@ AToyCar::AToyCar()
 
 	// Engine 
 	// Torque setup
-	Vehicle4W->MaxEngineRPM = 2000.0f;
+	Vehicle4W->EngineSetup.MaxRPM = 2000.0f;
+	//Vehicle4W->MaxEngineRPM = 2000.0f;
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->Reset();
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->AddKey(0.0f, 400.0f);
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->AddKey(1890.0f, 420.0f);
