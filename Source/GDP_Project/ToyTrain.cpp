@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), /*LineSwapped(false),*/ MovementDirection(0), TrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -112,10 +112,12 @@ void AToyTrain::Restart()
 // Called every frame
 void AToyTrain::Tick(float DeltaTime)
 {
-	if (!isActive)
-		return;
+	//if (!isActive)
+	//	return;
 
 	Super::Tick(DeltaTime);
+
+	UpdateState();
 
 	static float SplineTimer = 0.0f;
 
@@ -172,12 +174,15 @@ void AToyTrain::UpdateState()
 	switch (TrainState)
 	{
 	case TRAIN_STATES::RunawayTrain:
-		//if(splinePointer >= )
-		//MoveForward(1.0f);
+		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+			MoveForward(1.0f);
+		else
+			ChangeToState(TrackSwitched ? RunawayTrain_Succeeded : RunawayTrain_Failed);
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
-
+		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+			MoveForward(1.0f);
 		break;
 
 
@@ -189,43 +194,28 @@ void AToyTrain::UpdateState()
 	}
 }
 
+void AToyTrain::ChangeToState(TRAIN_STATES newState)
+{
+	splinePointer = 0;
+	TrainState = newState;
+}
+
 void AToyTrain::UpdateSplinePointer()
 {
 	if (MovementDirection == 1)
 	{
-		//if (LineSwapped)
-		//{
-			if (!MeshComponent->IsOverlappingActor(Obstacle))
-			{
-				if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
-					splinePointer = pathPointLocation[TrainState].Num() - 1;
-			}
-		//}
-		//else
-		//{
-		//	if (--splinePointer < 0)
-		//		splinePointer = 0;
-		//}
+		if (!MeshComponent->IsOverlappingActor(Obstacle))
+		{
+			if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
+				splinePointer = pathPointLocation[TrainState].Num() - 1;
+		}
 	}
 	else
 	{
-		//if (LineSwapped)
-		//{
-			if (--splinePointer < 0)
-				splinePointer = 0;
-		//}
-		//else
-		//{
-		//	if (++splinePointer > FIRSTLINELENGTH)
-		//		splinePointer = FIRSTLINELENGTH;
-		//}
+		if (--splinePointer < 0)
+			splinePointer = 0;
 	}
 }
-
-//void AToyTrain::UpdateTrainOnVector()
-//{
-//	//RootComponent->SetWorldLocation(StartingPosition->GetActorLocation() - ((FirstLine / FIRSTLINELENGTH) * splinePointer)); // The movement is a minus because the vector is backwards to make the train move in reverse.
-//}
 
 void AToyTrain::UpdateTrainOnSpline()
 {
@@ -297,4 +287,9 @@ void AToyTrain::ChangePossesion()
 			TC->SetIsActive(true);
 		}
 	}
+}
+
+void AToyTrain::TrackSwitcherHit()
+{
+	TrackSwitched = true;
 }

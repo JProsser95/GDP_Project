@@ -19,6 +19,7 @@ enum TRAIN_STATES
 {
 	RunawayTrain,
 	RunawayTrain_Failed,
+	RunawayTrain_Succeeded,
 
 	TRAIN_STATES_MAX
 };
@@ -38,9 +39,9 @@ protected:
 
 private:
 	void UpdateState();
+	void ChangeToState(TRAIN_STATES newState);
 
 	void UpdateSplinePointer();
-	//void UpdateTrainOnVector();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
 	void CompleteTrainPuzzle();
@@ -53,11 +54,13 @@ private:
 	TArray<TArray<FQuat>> pathPointRotation;//save sampled point rotations into an array
 	
 	bool Rotating;
-	//bool LineSwapped;
-	//FVector FirstLine; // The vector representing the first piece of track
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;
+
+	// Variables used in each train state
+	// Runaway train
+	bool TrackSwitched; // Has the car pressed the track switcher in time?
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -67,10 +70,6 @@ public:
 
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
-
-	// Allows the addition of a static mesh componenet in the editor
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* MeshComponent;
 
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);
@@ -82,7 +81,14 @@ public:
 	// Posses other Actor;
 	void ChangePossesion();
 
+
+	// Trigger functions that can be called from other classes
+	void TrackSwitcherHit();
+
 protected:
+	// Allows the addition of a static mesh componenet in the editor
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
@@ -90,9 +96,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> SplineBPs;
-
-	//UPROPERTY(EditAnywhere)
-	//AActor* StartingPosition; // Used for non-spline movement, probably not required
 
 	UPROPERTY(EditAnywhere)
 	AActor* Obstacle;
