@@ -25,9 +25,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	AActor* ToyCar;
-
-	UPROPERTY(EditAnywhere)
 	AToyTrain* ToyTrain;
 	
 };
