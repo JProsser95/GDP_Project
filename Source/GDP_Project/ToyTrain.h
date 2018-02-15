@@ -12,8 +12,6 @@
 
 #include "ToyTrain.generated.h"
 
-const int MAXPOINTS = 2500;//stop sampling the spline after MAXPOINTS points
-const int MAXSPLINES = 8; // Maximum number of splines that can be parsed and saved
 
 enum TRAIN_STATES
 {

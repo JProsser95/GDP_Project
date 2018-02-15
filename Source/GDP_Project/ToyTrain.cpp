@@ -92,13 +92,6 @@ void AToyTrain::BeginPlay()
 			}
 		}
 	}
-
-	//FirstLine = StartingPosition->GetActorLocation() - pathPointLocation[0];
-	//
-	//float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(FirstLine.GetSafeNormal(), FVector::ForwardVector)));
-	//
-	//RootComponent->SetWorldLocation(StartingPosition->GetActorLocation());
-	//RootComponent->SetWorldRotation(FRotator(0.0f, -angle, 0.0f));
 }
 
 void AToyTrain::Restart()
@@ -135,19 +128,7 @@ void AToyTrain::Tick(float DeltaTime)
 
 	if (!Rotating)
 	{
-		//if (LineSwapped)
-		//{
-			UpdateTrainOnSpline();
-		//}
-		//else
-		//{
-		//	UpdateTrainOnVector();
-		//
-		//	if (splinePointer == FIRSTLINELENGTH)
-		//	{
-		//		Rotating = true;
-		//	}
-		//}
+		UpdateTrainOnSpline();
 	}
 	else
 	{
@@ -177,7 +158,10 @@ void AToyTrain::UpdateState()
 		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
 			MoveForward(1.0f);
 		else
+		{
 			ChangeToState(TrackSwitched ? RunawayTrain_Succeeded : RunawayTrain_Failed);
+			MoveForward(1.0f);
+		}
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
