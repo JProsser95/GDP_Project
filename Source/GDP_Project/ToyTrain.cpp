@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), LineSwapped(false), MovementDirection(0)
+	: splinePointer(0), Rotating(false), LineSwapped(false), MovementDirection(0), TrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -51,8 +51,13 @@ void AToyTrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TObjectIterator<USplineComponent> SplineComponent; SplineComponent; ++SplineComponent)
-	{
+	USplineComponent* SplineComponent = SplineBPs->FindComponentByClass<USplineComponent>();
+
+	if (!SplineComponent)
+		UE_LOG(LogTemp, Warning, TEXT("No spline component find."));
+
+	//for (TObjectIterator<USplineComponent> SplineComponent; SplineComponent; ++SplineComponent)
+	//{
 		int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 		float totalLength = SplineComponent->GetSplineLength();
 
@@ -84,7 +89,7 @@ void AToyTrain::BeginPlay()
 			}
 			totalSplinePoints = splinePointCount;
 		}
-	}
+	//}
 
 	FirstLine = StartingPosition->GetActorLocation() - pathPointLocation[0];
 	

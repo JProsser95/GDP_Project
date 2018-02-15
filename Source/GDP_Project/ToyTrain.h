@@ -12,9 +12,14 @@
 
 #include "ToyTrain.generated.h"
 
-class AToyCar;
-
 const int MAXPOINTS = 2500;//stop sampling the spline after MAXPOINTS points
+
+enum TRAIN_STATES
+{
+	RunawayTrain,
+
+	TRAIN_STATES_MAX
+};
 
 UCLASS()
 class GDP_PROJECT_API AToyTrain : public APawn
@@ -49,6 +54,7 @@ private:
 	FVector FirstLine; // The vector representing the first piece of track
 
 	int MovementDirection;
+	TRAIN_STATES TrainState;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -78,6 +84,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
+
+	UPROPERTY(EditAnywhere)
+	AActor* SplineBPs;
 
 	UPROPERTY(EditAnywhere)
 	AActor* StartingPosition;
