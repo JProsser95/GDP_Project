@@ -12,8 +12,9 @@
 
 // Sets default values
 AToyPlane::AToyPlane()
-	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(2.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
-	MaximumBoost(100.0f), CurrentBoost(0.0f)
+	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
+	MaximumBoost(100.0f), CurrentBoost(0.0f),
+	ControlTypeRealistic(true)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -158,7 +159,7 @@ void AToyPlane::Tick(float DeltaTime)
 
 			//NewRotation = UKismetMathLibrary::ComposeRotators(NewRotation, Roll);
 
-			PitchRoll.Roll = MovementInput.Y * DeltaTime;
+			PitchRoll.Roll = MovementInput.Y * DeltaTime * RotateSpeed;
 
 
 			//NewRotation.Roll += MovementInput.Y * DeltaTime * RotateSpeed;
@@ -169,7 +170,7 @@ void AToyPlane::Tick(float DeltaTime)
 	if (MovementInput.X != 0) {
 		//W or S press
 		//FRotator Pitch(FRotator(MovementInput.X * DeltaTime, 0.0f, 0.0f));
-		PitchRoll.Pitch = MovementInput.X * DeltaTime;
+		PitchRoll.Pitch = MovementInput.X * DeltaTime * 0.5f;
 		//FMath::Clamp(Pitch.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
 		//NewRotation = UKismetMathLibrary::ComposeRotators(Pitch, NewRotation);
 		////NewRotation.Pitch += MovementInput.X * DeltaTime;
@@ -180,7 +181,10 @@ void AToyPlane::Tick(float DeltaTime)
 	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -60.0f * fRotateMod, 60.0f * fRotateMod);
 	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -90.0f * fRotateMod, 90.0f * fRotateMod);
 
-	NewRotation.Yaw += PitchRoll.Roll * 100.0f * DeltaTime * fRotateMod * TurnSpeed;
+	if (ControlTypeRealistic)
+		NewRotation.Yaw += GetActorRotation().Roll * DeltaTime * fRotateMod * TurnSpeed;
+	else
+		NewRotation.Yaw += PitchRoll.Roll * 100.0f * DeltaTime * fRotateMod * TurnSpeed;
 
 	SetActorRotation(NewRotation);
 	//SetActorLocation(NewLocation);
@@ -188,7 +192,7 @@ void AToyPlane::Tick(float DeltaTime)
 	CustomMovementComponent->AddInputVector(GetActorForwardVector() * fSpeed);
 
 	fPropRotation += DeltaTime * fSpeed * PropRotateSpeed;
-	PlanePropMeshComponent->SetRelativeRotation(FRotator(0, 0, fPropRotation));
+	PlanePropMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, fPropRotation));
 }
 
 UPawnMovementComponent* AToyPlane::GetMovementComponent() const
@@ -240,7 +244,7 @@ void AToyPlane::YawCamera(float AxisValue)
 
 void AToyPlane::StartBoost() 
 {
-	if (CurrentBoost >= 10.0f) {
+	if (CurrentBoost > 0.0f) {
 		IsBoosting = true;
 	}
 }

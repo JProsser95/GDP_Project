@@ -75,6 +75,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsActive;
 
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	bool ControlTypeRealistic;
+
 	float fPropRotation;
 	float fSpeed;
 

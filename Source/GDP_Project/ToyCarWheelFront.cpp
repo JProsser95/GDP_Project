@@ -15,7 +15,7 @@ UToyCarWheelFront::UToyCarWheelFront()
 	// Setup suspension forces
 	//SuspensionForceOffset = -4.0f;
 	//SuspensionMaxRaise = 8.0f;
-	//SuspensionMaxDrop = 12.0f;
+	SuspensionMaxDrop = 2.0f; // Previously 12.0f and commented out...
 	//SuspensionNaturalFrequency = 9.0f;
 	//SuspensionDampingRatio = 1.05f;
 

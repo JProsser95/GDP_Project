@@ -38,10 +38,12 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPossessableActorComponent* PossessableComponent;
-
 public:
 
 	AToyCar();
+
+	UPROPERTY(Category = Reset, EditAnywhere)
+	float RespawnDelay;
 
 	/** Are we in reverse gear */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
