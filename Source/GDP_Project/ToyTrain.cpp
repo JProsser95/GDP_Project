@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -98,7 +98,9 @@ void AToyTrain::BeginPlay()
 		}
 	}
 
-	//TrainState = PossessableTrain;
+	// Uncomment the two lines below to test the train puzzle from near the end
+	//TrainState = PossessableTrain4;
+	//splinePointer = 100;
 }
 
 void AToyTrain::Restart()
@@ -112,8 +114,8 @@ void AToyTrain::Restart()
 // Called every frame
 void AToyTrain::Tick(float DeltaTime)
 {
-	//if (!isActive)
-	//	return;
+	if (!PrimaryActorTick.bCanEverTick)
+		return;
 
 	Super::Tick(DeltaTime);
 
@@ -187,8 +189,21 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::PossessableTrain:
+		break;
+	case TRAIN_STATES::PossessableTrain3:
+	case TRAIN_STATES::PossessableTrain4:
+		if (splinePointer <= 0)
+		{
+			TrainState = TRAIN_STATES::PossessableTrain2;
+			splinePointer = pathPointLocation[TrainState].Num() - 2;
+		}
+		break;
 	case TRAIN_STATES::PossessableTrain2:
-
+		if (splinePointer >= pathPointLocation[TrainState].Num() - 1)
+		{
+			TrainState = NextTrainState;
+			splinePointer = 1;
+		}
 		break;
 
 
@@ -263,6 +278,7 @@ void AToyTrain::UpdateCarriages()
 void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");
+	PrimaryActorTick.bCanEverTick = false;
 	ChangePossesion();
 }
 
@@ -317,9 +333,20 @@ void AToyTrain::SwapTrack()
 		{
 		case 0:
 			if (TrainState == TRAIN_STATES::PossessableTrain)
+			{
 				TrainState = TRAIN_STATES::PossessableTrain2;
+				if(NextTrainState == TRAIN_STATES::RunawayTrain)
+					NextTrainState = TRAIN_STATES::PossessableTrain3;
+			}
 			else
 				TrainState = TRAIN_STATES::PossessableTrain;
+			break;
+
+		case 1:
+			if (NextTrainState == TRAIN_STATES::PossessableTrain3)
+				NextTrainState = TRAIN_STATES::PossessableTrain4;
+			else
+				NextTrainState = TRAIN_STATES::PossessableTrain3;
 			break;
 		}
 	}

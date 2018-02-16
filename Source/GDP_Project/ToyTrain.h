@@ -29,6 +29,8 @@ enum TRAIN_STATES
 
 	PossessableTrain,
 	PossessableTrain2,
+	PossessableTrain3,
+	PossessableTrain4,
 
 	TRAIN_STATES_MAX
 };
@@ -68,6 +70,7 @@ private:
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;
+	TRAIN_STATES NextTrainState;
 
 	// Variables used in each train state
 	// Runaway train
