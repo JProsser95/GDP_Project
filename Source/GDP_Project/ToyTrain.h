@@ -10,10 +10,12 @@
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
 
+#include "TrackSwappingManager.h"
+
 #include "ToyTrain.generated.h"
 
 
-#define NUMBEROFTRACKSWITCHERS 2
+#define NUMBEROFTRACKSWITCHERS 2 // Used for the car to weigh down
 
 enum TRAIN_STATES
 {
@@ -26,6 +28,7 @@ enum TRAIN_STATES
 	RunawayTrain3,
 
 	PossessableTrain,
+	PossessableTrain2,
 
 	TRAIN_STATES_MAX
 };
@@ -86,8 +89,10 @@ public:
 
 	/** Handle pressing forwards */
 	void MoveForward(float fValue);	
-	// Posses other Actor;
+	// Possess other Actor;
 	void ChangePossesion();
+	// Swap closest track
+	void SwapTrack();
 
 
 	// Trigger functions that can be called from other classes
@@ -103,6 +108,9 @@ protected:
 	UCameraComponent* OurCamera;
 
 	UPROPERTY(EditAnywhere)
+	ATrackSwappingManager* TrackSwappingManager;
+
+	UPROPERTY(EditAnywhere)
 	TArray<AActor*> SplineBPs;
 
 	UPROPERTY(EditAnywhere)
@@ -113,4 +121,5 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Carriages;
+
 };

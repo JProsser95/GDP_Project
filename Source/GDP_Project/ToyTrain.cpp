@@ -98,7 +98,7 @@ void AToyTrain::BeginPlay()
 		}
 	}
 
-	TrainState = PossessableTrain;
+	//TrainState = PossessableTrain;
 }
 
 void AToyTrain::Restart()
@@ -187,6 +187,7 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::PossessableTrain:
+	case TRAIN_STATES::PossessableTrain2:
 
 		break;
 
@@ -273,6 +274,8 @@ void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyTrain::MoveForward);
 
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyTrain::ChangePossesion);
+
+	PlayerInputComponent->BindAction("TrainSwapTrack", IE_Released, this, &AToyTrain::SwapTrack);
 }
 
 void AToyTrain::SetIsActive(bool Value)
@@ -300,6 +303,24 @@ void AToyTrain::ChangePossesion()
 		if (TC != nullptr)
 		{
 			TC->SetIsActive(true);
+		}
+	}
+}
+
+void AToyTrain::SwapTrack()
+{
+	int SplineToSwap = TrackSwappingManager->GetNearestSwapper(this);
+
+	if (SplineToSwap != -1)
+	{
+		switch (SplineToSwap)
+		{
+		case 0:
+			if (TrainState == TRAIN_STATES::PossessableTrain)
+				TrainState = TRAIN_STATES::PossessableTrain2;
+			else
+				TrainState = TRAIN_STATES::PossessableTrain;
+			break;
 		}
 	}
 }
