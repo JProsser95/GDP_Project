@@ -30,7 +30,7 @@ const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
-	:RespawnDelay(1.5f), MaxAngle(75.0f), RotateSpeed(2.0f), LimitRotation(true)
+	:RespawnDelay(1.5f), MaxAngle(90.0f), RotateSpeed(2.0f), LimitRotation(true)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
