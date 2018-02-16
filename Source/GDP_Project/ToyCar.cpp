@@ -17,20 +17,20 @@
 #include "UObject/ConstructorHelpers.h"
 #include "PossessableActorComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "PossessableActorComponent.h"
 #include "EngineUtils.h"
 #include "RespawnPoint.h"
 #include "ToyTrain.h"
 #include "Macros.h"
 #include "Sound/SoundCue.h"
+#include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
-	:RespawnDelay(1.5f), MaxAngle(50.0f), RotateSpeed(2.0f), LimitRotation(true)
+	:RespawnDelay(1.5f), MaxAngle(75.0f), RotateSpeed(2.0f), LimitRotation(true)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -229,9 +229,8 @@ void AToyCar::Tick(float DeltaTime)
 		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
 
-		//FRotator startRotation(RootComponent->GetComponentRotation());
-		FRotator startRotation(GetActorRotation());
-		FRotator currentRotation(startRotation);
+		FRotator currentRotation(GetActorRotation());
+		FRotator targetRotation(0.0f, currentRotation.Yaw, 0.0f);
 
 		bool rotated(false);
 
@@ -261,9 +260,12 @@ void AToyCar::Tick(float DeltaTime)
 
 		if (rotated)
 		{
+			//FRotator rotateAmount(currentRotation);
+			FRotator rotateAmount = (targetRotation - currentRotation).GetNormalized();
+			//FRotator rotateAmount(FMath::RInterpTo(currentRotation, targetRotation, DeltaTime, 1.0f));
 			//OUTPUT_STRING("Over Rotated... Rotating Back!");
 			//SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
-			pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime*RotateSpeed);
+			pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(rotateAmount.Roll, rotateAmount.Pitch, rotateAmount.Yaw)*RotateSpeed);
 			//pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime);
 		}
 	}
