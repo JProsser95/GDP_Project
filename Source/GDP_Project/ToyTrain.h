@@ -13,11 +13,17 @@
 #include "ToyTrain.generated.h"
 
 
+#define NUMBEROFTRACKSWITCHERS 2
+
 enum TRAIN_STATES
 {
 	RunawayTrain,
 	RunawayTrain_Failed,
-	RunawayTrain_Succeeded,
+
+	RunawayTrain2,
+	RunawayTrain2_Failed,
+
+	RunawayTrain3,
 
 	TRAIN_STATES_MAX
 };
@@ -39,6 +45,8 @@ private:
 	void UpdateState();
 	void ChangeToState(TRAIN_STATES newState);
 
+	bool AutomatedMovement(); // returns false if the train can't move
+
 	void UpdateSplinePointer();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
@@ -58,7 +66,7 @@ private:
 
 	// Variables used in each train state
 	// Runaway train
-	bool TrackSwitched; // Has the car pressed the track switcher in time?
+	bool TrackSwitched[NUMBEROFTRACKSWITCHERS]; // Has the car pressed the track switcher in time?
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -81,7 +89,7 @@ public:
 
 
 	// Trigger functions that can be called from other classes
-	void TrackSwitcherHit();
+	void TrackSwitcherHit(int TrackSwitchNumber);
 
 protected:
 	// Allows the addition of a static mesh componenet in the editor

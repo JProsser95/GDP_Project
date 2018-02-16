@@ -44,6 +44,11 @@ AToyTrain::AToyTrain()
 	ToyCar = nullptr;
 
 	isActive = true;
+
+	for (int i = 0; i < NUMBEROFTRACKSWITCHERS; ++i)
+	{
+		TrackSwitched[i] = false;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -153,20 +158,24 @@ void AToyTrain::UpdateState()
 	switch (TrainState)
 	{
 	case TRAIN_STATES::RunawayTrain:
-		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
-			MoveForward(1.0f);
-		else
+		if (!AutomatedMovement())
 		{
-			ChangeToState(TrackSwitched ? RunawayTrain_Succeeded : RunawayTrain_Failed);
-			MoveForward(1.0f);
+			ChangeToState(TrackSwitched[0] ? RunawayTrain2 : RunawayTrain_Failed);
 		}
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
-		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
-			MoveForward(1.0f);
+	case TRAIN_STATES::RunawayTrain2_Failed:
+	case TRAIN_STATES::RunawayTrain3:
+		AutomatedMovement();
 		break;
 
+	case TRAIN_STATES::RunawayTrain2:
+		if (!AutomatedMovement())
+		{
+			ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+		}
+		break;
 
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
@@ -180,6 +189,17 @@ void AToyTrain::ChangeToState(TRAIN_STATES newState)
 {
 	splinePointer = 0;
 	TrainState = newState;
+	MoveForward(0.0f);
+}
+
+bool AToyTrain::AutomatedMovement()
+{
+	if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+	{
+		MoveForward(1.0f);
+		return true;
+	}
+	return false;
 }
 
 void AToyTrain::UpdateSplinePointer()
@@ -220,7 +240,7 @@ void AToyTrain::UpdateCarriages()
 		}
 		else
 		{
-			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(175.0f, 0.0f, 0.0f));
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - (RootComponent->GetForwardVector() * 175.0f));
 			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
@@ -271,7 +291,7 @@ void AToyTrain::ChangePossesion()
 	}
 }
 
-void AToyTrain::TrackSwitcherHit()
+void AToyTrain::TrackSwitcherHit(int TrackSwitchNumber)
 {
-	TrackSwitched = true;
+	TrackSwitched[TrackSwitchNumber] = true;
 }

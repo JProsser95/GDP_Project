@@ -26,5 +26,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	AToyTrain* ToyTrain;
+
+	UPROPERTY(EditAnywhere)
+	int TrackSwitchNumber;
 	
 };
