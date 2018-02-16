@@ -30,7 +30,7 @@ const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
-	:RespawnDelay(1.5f)
+	:RespawnDelay(1.5f), MaxAngle(50.0f), RotateSpeed(2.0f), LimitRotation(true)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -222,51 +222,53 @@ void AToyCar::Tick(float DeltaTime)
 	// Update physics material
 	//UpdatePhysicsMaterial();
 
-	//RootComponent->SetPhysicsAngularVelocity
-	//SetPhysicsAngularVelocity
 
-	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
-	UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
 
-	FRotator startRotation(GetActorRotation());
-	FRotator currentRotation(startRotation);
-
-	float rotationCap(45.0f);
-
-	bool rotatingPitch(false);
-	bool rotatingRoll(false);
-
-	// Cap pitch
-	if (currentRotation.Pitch > rotationCap)
+	if (LimitRotation)
 	{
-		rotatingPitch = true;
-		currentRotation.Pitch = rotationCap;
-	}
-	else if (currentRotation.Pitch < -rotationCap)
-	{
-		rotatingPitch = true;
-		currentRotation.Pitch = -rotationCap;
-	}
+		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
 
-	// Cap roll
-	if (currentRotation.Roll > rotationCap)
-	{
-		rotatingRoll = true;
-		currentRotation.Roll = rotationCap;
-	}
-	else if (currentRotation.Roll < -rotationCap)
-	{
-		rotatingRoll = true;
-		currentRotation.Roll = -rotationCap;
-	}
+		//FRotator startRotation(RootComponent->GetComponentRotation());
+		FRotator startRotation(GetActorRotation());
+		FRotator currentRotation(startRotation);
 
-	if (rotatingPitch || rotatingRoll)
-	{
-		OUTPUT_STRING("Over Rotated... Rotating Back!");
-		pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime);
-		SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
+		bool rotated(false);
+
+		// Cap pitch
+		if (currentRotation.Pitch > MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Pitch = rotationCap;
+		}
+		else if (currentRotation.Pitch < -MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Pitch = -rotationCap;
+		}
+
+		// Cap roll
+		if (currentRotation.Roll > MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Roll = rotationCap;
+		}
+		else if (currentRotation.Roll < -MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Roll = -rotationCap;
+		}
+
+		if (rotated)
+		{
+			//OUTPUT_STRING("Over Rotated... Rotating Back!");
+			//SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
+			pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime*RotateSpeed);
+			//pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime);
+		}
 	}
 }
+
 void AToyCar::Restart()
 {
 	Super::Restart();
