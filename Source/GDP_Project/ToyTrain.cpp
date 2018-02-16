@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -44,6 +44,11 @@ AToyTrain::AToyTrain()
 	ToyCar = nullptr;
 
 	isActive = true;
+
+	for (int i = 0; i < NUMBEROFTRACKSWITCHERS; ++i)
+	{
+		TrackSwitched[i] = false;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -92,6 +97,10 @@ void AToyTrain::BeginPlay()
 			}
 		}
 	}
+
+	// Uncomment the two lines below to test the train puzzle from near the end
+	//TrainState = PossessableTrain4;
+	//splinePointer = 100;
 }
 
 void AToyTrain::Restart()
@@ -105,8 +114,8 @@ void AToyTrain::Restart()
 // Called every frame
 void AToyTrain::Tick(float DeltaTime)
 {
-	//if (!isActive)
-	//	return;
+	if (!PrimaryActorTick.bCanEverTick)
+		return;
 
 	Super::Tick(DeltaTime);
 
@@ -153,20 +162,49 @@ void AToyTrain::UpdateState()
 	switch (TrainState)
 	{
 	case TRAIN_STATES::RunawayTrain:
-		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
-			MoveForward(1.0f);
-		else
+		if (!AutomatedMovement())
 		{
-			ChangeToState(TrackSwitched ? RunawayTrain_Succeeded : RunawayTrain_Failed);
-			MoveForward(1.0f);
+			ChangeToState(TrackSwitched[0] ? RunawayTrain2 : RunawayTrain_Failed);
 		}
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
-		if (splinePointer < pathPointLocation[TrainState].Num() - 1)
-			MoveForward(1.0f);
+	case TRAIN_STATES::RunawayTrain2_Failed:
+		AutomatedMovement();
 		break;
 
+	case TRAIN_STATES::RunawayTrain2:
+		if (!AutomatedMovement())
+		{
+			ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+		}
+		break;
+
+	case TRAIN_STATES::RunawayTrain3:
+		if (!AutomatedMovement())
+		{
+			ChangeToState(PossessableTrain);
+			splinePointer = pathPointLocation[TrainState].Num() - 1;
+		}
+		break;
+
+	case TRAIN_STATES::PossessableTrain:
+		break;
+	case TRAIN_STATES::PossessableTrain3:
+	case TRAIN_STATES::PossessableTrain4:
+		if (splinePointer <= 0)
+		{
+			TrainState = TRAIN_STATES::PossessableTrain2;
+			splinePointer = pathPointLocation[TrainState].Num() - 2;
+		}
+		break;
+	case TRAIN_STATES::PossessableTrain2:
+		if (splinePointer >= pathPointLocation[TrainState].Num() - 1)
+		{
+			TrainState = NextTrainState;
+			splinePointer = 1;
+		}
+		break;
 
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
@@ -180,6 +218,17 @@ void AToyTrain::ChangeToState(TRAIN_STATES newState)
 {
 	splinePointer = 0;
 	TrainState = newState;
+	MoveForward(0.0f);
+}
+
+bool AToyTrain::AutomatedMovement()
+{
+	if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+	{
+		MoveForward(1.0f);
+		return true;
+	}
+	return false;
 }
 
 void AToyTrain::UpdateSplinePointer()
@@ -220,7 +269,7 @@ void AToyTrain::UpdateCarriages()
 		}
 		else
 		{
-			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - FVector(175.0f, 0.0f, 0.0f));
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - (RootComponent->GetForwardVector() * 175.0f));
 			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
@@ -229,6 +278,7 @@ void AToyTrain::UpdateCarriages()
 void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");
+	PrimaryActorTick.bCanEverTick = false;
 	ChangePossesion();
 }
 
@@ -240,6 +290,8 @@ void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyTrain::MoveForward);
 
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyTrain::ChangePossesion);
+
+	PlayerInputComponent->BindAction("TrainSwapTrack", IE_Released, this, &AToyTrain::SwapTrack);
 }
 
 void AToyTrain::SetIsActive(bool Value)
@@ -271,7 +323,36 @@ void AToyTrain::ChangePossesion()
 	}
 }
 
-void AToyTrain::TrackSwitcherHit()
+void AToyTrain::SwapTrack()
 {
-	TrackSwitched = true;
+	int SplineToSwap = TrackSwappingManager->GetNearestSwapper(this);
+
+	if (SplineToSwap != -1)
+	{
+		switch (SplineToSwap)
+		{
+		case 0:
+			if (TrainState == TRAIN_STATES::PossessableTrain)
+			{
+				TrainState = TRAIN_STATES::PossessableTrain2;
+				if(NextTrainState == TRAIN_STATES::RunawayTrain)
+					NextTrainState = TRAIN_STATES::PossessableTrain3;
+			}
+			else
+				TrainState = TRAIN_STATES::PossessableTrain;
+			break;
+
+		case 1:
+			if (NextTrainState == TRAIN_STATES::PossessableTrain3)
+				NextTrainState = TRAIN_STATES::PossessableTrain4;
+			else
+				NextTrainState = TRAIN_STATES::PossessableTrain3;
+			break;
+		}
+	}
+}
+
+void AToyTrain::TrackSwitcherHit(int TrackSwitchNumber)
+{
+	TrackSwitched[TrackSwitchNumber] = true;
 }

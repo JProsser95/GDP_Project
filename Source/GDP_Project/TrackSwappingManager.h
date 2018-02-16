@@ -4,17 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ToyTrain.h"
-#include "TrackSwitcher.generated.h"
+#include "TrackSwappingManager.generated.h"
 
 UCLASS()
-class GDP_PROJECT_API ATrackSwitcher : public AActor
+class GDP_PROJECT_API ATrackSwappingManager : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATrackSwitcher();
+	ATrackSwappingManager();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,10 +23,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-	AToyTrain* ToyTrain;
+	int GetNearestSwapper(AActor* ToyTrain);
+
 
 	UPROPERTY(EditAnywhere)
-	int TrackSwitchNumber;
+	TArray<AActor*> Swappers;
 	
 };
