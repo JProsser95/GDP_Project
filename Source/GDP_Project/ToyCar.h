@@ -38,12 +38,26 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPossessableActorComponent* PossessableComponent;
+
+
 public:
 
 	AToyCar();
 
+	UPROPERTY(Category = Camera, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FRotator CameraRotation;
+	FRotator CameraRotationOffset;
+
+	UPROPERTY(Category = Camera, EditAnywhere)
+	bool AutoFocus;
+
+	UPROPERTY(Category = Camera, EditAnywhere)
+	float AutoFocusDelay;
+	float fLastUnFocusTime;
+
 	UPROPERTY(Category = Reset, EditAnywhere)
 	float RespawnDelay;
+	float fLastRespawn;
 
 	/** Are we in reverse gear */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
@@ -101,7 +115,9 @@ public:
 	void Respawn();
 
 	// Resets the camera to the be directly behind the car
-	void ResetCamera();
+	void UpdateCamera(float DeltaTime);
+
+	void LimitCarRotation();
 
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);

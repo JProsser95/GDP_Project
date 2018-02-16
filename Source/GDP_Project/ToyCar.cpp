@@ -30,7 +30,12 @@ const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
-	:RespawnDelay(1.5f), MaxAngle(90.0f), RotateSpeed(2.0f), LimitRotation(true)
+	:// Reset
+	RespawnDelay(1.5f), fLastRespawn(-RespawnDelay),
+	// Anti flip rotation
+	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true), 
+	// Camera
+	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(3.0f), fLastUnFocusTime(-AutoFocusDelay)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -208,23 +213,123 @@ void AToyCar::Tick(float DeltaTime)
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
-	FRotator cameraRot = SpringArm->GetComponentRotation();
-	cameraRot.Yaw += CameraInput.X;
-	//cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch + CameraInput.Y, -80.0f, -15.0f);
-	cameraRot.Roll = 0;
-	SpringArm->SetWorldRotation(cameraRot);
-
-	FRotator cam = Camera->GetComponentRotation();
-	cam.Roll = 0;
-	Camera->SetWorldRotation(cam);
-
-
-
 	// Update physics material
 	//UpdatePhysicsMaterial();
 
+	UpdateCamera(DeltaTime);
+
+	LimitCarRotation();
+}
+
+void AToyCar::Restart()
+{
+	Super::Restart();
+
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->ChangeHUD("ToyCar");
+}
+
+// Called to bind functionality to input
+void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyCar::MoveForward);
+	PlayerInputComponent->BindAxis("CarMoveRight", this, &AToyCar::MoveRight);
+	PlayerInputComponent->BindAxis("CarCameraPitch", this, &AToyCar::PitchCamera);
+	PlayerInputComponent->BindAxis("CarCameraYaw", this, &AToyCar::YawCamera);
+
+	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
+	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
+	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
+	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
+	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
+	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
+	//PlayerInputComponent->BindAction("ResetCamera", IE_Released, this, &AToyCar::ResetCamera);
+}
+
+void AToyCar::MoveForward(float AxisValue)
+{
+	if (!isBreaking && bCanMove)
+	{
+		if (AxisValue > 0) {
+			if (currentSoundCue != ENGINE) {
+				AudioComponent->SetSound(AudioCues[ENGINE]);
+				currentSoundCue = ENGINE;
+			}
+			if (!AudioComponent->IsPlaying())
+				AudioComponent->FadeIn(1.0f, 0.6f);
+		}
+		else {
+			AudioComponent->FadeOut(1.0f, 0.f);
+		}
+	}
+
+	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * fSitckyFriction * (int)bCanMove);
+}
+
+void AToyCar::MoveRight(float AxisValue)
+{
+	GetVehicleMovementComponent()->SetSteeringInput(AxisValue);
+}
+
+void AToyCar::PitchCamera(float AxisValue)
+{
+	if (AxisValue != 0.0f)
+		fLastUnFocusTime = GetWorld()->GetTimeSeconds();
+	CameraInput.Y = AxisValue;
+}
+
+void AToyCar::YawCamera(float AxisValue)
+{
+	if (AxisValue != 0.0f)
+		fLastUnFocusTime = GetWorld()->GetTimeSeconds();
+	CameraInput.X = AxisValue;
+}
+
+void AToyCar::OnHandbrakePressed()
+{
+	if (currentSoundCue != BREAK) 
+	{
+		AudioComponent->SetSound(AudioCues[BREAK]);
+		currentSoundCue = BREAK;
+	}
+	if (!AudioComponent->IsPlaying()) 
+	{
+		AudioComponent->Play();
+	}
+
+	GetVehicleMovementComponent()->SetHandbrakeInput(true);
+	isBreaking = true;
+}
+
+void AToyCar::OnHandbrakeReleased()
+{
+	GetVehicleMovementComponent()->SetHandbrakeInput(false);
+	isBreaking = false;
+}
+
+void AToyCar::UpdateCamera(float DeltaTime)
+{
+
+	FRotator CameraRot = GetActorRotation() + CameraRotation;//SpringArm->GetComponentRotation();
+	//CameraRotation = cameraRot - CameraRotationOffset;
+
+	if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
+		CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+
+	CameraRotationOffset.Yaw += CameraInput.X;
+	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
 
 
+	FRotator finalRotation(CameraRot + CameraRotationOffset);
+	finalRotation.Pitch = FMath::Clamp(finalRotation.Pitch, -70.0f, 0.0f);
+	finalRotation.Roll = 0.0f;
+	SpringArm->SetWorldRotation(finalRotation);
+}
+
+void AToyCar::LimitCarRotation()
+{
 	if (LimitRotation)
 	{
 		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
@@ -261,105 +366,10 @@ void AToyCar::Tick(float DeltaTime)
 
 		if (rotated)
 		{
-			//FRotator rotateAmount(currentRotation);
 			FRotator rotateAmount = (targetRotation - currentRotation).GetNormalized();
-			//FRotator rotateAmount(FMath::RInterpTo(currentRotation, targetRotation, DeltaTime, 1.0f));
-			//OUTPUT_STRING("Over Rotated... Rotating Back!");
-			//SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
 			pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(rotateAmount.Roll, rotateAmount.Pitch, rotateAmount.Yaw)*RotateSpeed);
-			//pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime);
 		}
 	}
-}
-
-void AToyCar::Restart()
-{
-	Super::Restart();
-
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("ToyCar");
-}
-
-// Called to bind functionality to input
-void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAxis("CarMoveForward", this, &AToyCar::MoveForward);
-	PlayerInputComponent->BindAxis("CarMoveRight", this, &AToyCar::MoveRight);
-	PlayerInputComponent->BindAxis("CarCameraPitch", this, &AToyCar::PitchCamera);
-	PlayerInputComponent->BindAxis("CarCameraYaw", this, &AToyCar::YawCamera);
-
-	PlayerInputComponent->BindAction("CarHandbrake", IE_Pressed, this, &AToyCar::OnHandbrakePressed);
-	PlayerInputComponent->BindAction("CarHandbrake", IE_Released, this, &AToyCar::OnHandbrakeReleased);
-	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyCar::ChangePossesion);
-	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
-	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
-	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
-	PlayerInputComponent->BindAction("ResetCamera", IE_Released, this, &AToyCar::ResetCamera);
-
-}
-
-void AToyCar::MoveForward(float AxisValue)
-{
-	if (!isBreaking && bCanMove)
-	{
-		if (AxisValue > 0) {
-			if (currentSoundCue != ENGINE) {
-				AudioComponent->SetSound(AudioCues[ENGINE]);
-				currentSoundCue = ENGINE;
-			}
-			if (!AudioComponent->IsPlaying())
-				AudioComponent->FadeIn(1.0f, 0.6f);
-		}
-		else {
-			AudioComponent->FadeOut(1.0f, 0.f);
-		}
-	}
-
-	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * fSitckyFriction * (int)bCanMove);
-}
-
-void AToyCar::MoveRight(float AxisValue)
-{
-	GetVehicleMovementComponent()->SetSteeringInput(AxisValue);
-}
-
-void AToyCar::PitchCamera(float AxisValue)
-{
-	CameraInput.Y = AxisValue;
-}
-
-void AToyCar::YawCamera(float AxisValue)
-{
-	CameraInput.X = AxisValue;
-}
-
-void AToyCar::OnHandbrakePressed()
-{
-	if (currentSoundCue != BREAK) 
-	{
-		AudioComponent->SetSound(AudioCues[BREAK]);
-		currentSoundCue = BREAK;
-	}
-	if (!AudioComponent->IsPlaying()) 
-	{
-		AudioComponent->Play();
-	}
-
-	GetVehicleMovementComponent()->SetHandbrakeInput(true);
-	isBreaking = true;
-}
-
-void AToyCar::OnHandbrakeReleased()
-{
-	GetVehicleMovementComponent()->SetHandbrakeInput(false);
-	isBreaking = false;
-}
-
-void AToyCar::ResetCamera()
-{
-	//SpringArm->SetWorldRotation(CameraParent->GetComponentRotation());
 }
 
 void AToyCar::UpdatePhysicsMaterial()
@@ -432,16 +442,14 @@ void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 
 void AToyCar::ResetPositionAndRotation()
 {
-	static float lastRespawn(0.0f);
-
-	if (GetWorld()->GetTimeSeconds() - lastRespawn >= RespawnDelay)
+	if (GetWorld()->GetTimeSeconds() - fLastRespawn >= RespawnDelay)
 	{
-		lastRespawn = GetWorld()->GetTimeSeconds();
+		fLastRespawn = GetWorld()->GetTimeSeconds();
 
-		FVector currentLoaction = this->GetActorLocation();
+		FVector currentLocation = this->GetActorLocation();
 		FRotator currentRotation = this->GetActorRotation();
 
-		this->SetActorRelativeLocation(FVector(currentLoaction.X, currentLoaction.Y, currentLoaction.Z + 100), false, NULL, ETeleportType::TeleportPhysics);
+		this->SetActorRelativeLocation(FVector(currentLocation.X, currentLocation.Y, currentLocation.Z + 100.0f), false, NULL, ETeleportType::TeleportPhysics);
 		this->SetActorRotation(FRotator(0.0f, currentRotation.Yaw, 0.0f), ETeleportType::TeleportPhysics);
 
 		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
@@ -453,11 +461,9 @@ void AToyCar::ResetPositionAndRotation()
 
 void AToyCar::Respawn()
 {
-	static float lastRespawn(0.0f);
-
-	if (GetWorld()->GetTimeSeconds() - lastRespawn >= RespawnDelay)
+	if (GetWorld()->GetTimeSeconds() - fLastRespawn >= RespawnDelay)
 	{
-		lastRespawn = GetWorld()->GetTimeSeconds();
+		fLastRespawn = GetWorld()->GetTimeSeconds();
 
 		for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
