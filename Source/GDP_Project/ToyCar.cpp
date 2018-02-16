@@ -137,9 +137,6 @@ AToyCar::AToyCar()
 	// Set the inertia scale. This controls how the mass of the vehicle is distributed.
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
 
-	//CameraParent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraParent"));
-	//CameraParent->SetupAttachment(RootComponent);
-
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
@@ -245,7 +242,6 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("DisplayHUD", IE_Released, this, &AToyCar::ChangeHUD);
 	PlayerInputComponent->BindAction("ResetCar", IE_Released, this, &AToyCar::ResetPositionAndRotation);
 	PlayerInputComponent->BindAction("RespawnCar", IE_Released, this, &AToyCar::Respawn);
-	//PlayerInputComponent->BindAction("ResetCamera", IE_Released, this, &AToyCar::ResetCamera);
 }
 
 void AToyCar::MoveForward(float AxisValue)
