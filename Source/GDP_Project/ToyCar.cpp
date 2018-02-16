@@ -132,16 +132,17 @@ AToyCar::AToyCar()
 	// Set the inertia scale. This controls how the mass of the vehicle is distributed.
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
 
-	CameraParent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraParent"));
-	CameraParent->SetupAttachment(RootComponent);
+	//CameraParent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraParent"));
+	//CameraParent->SetupAttachment(RootComponent);
 
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
 	SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
-	SpringArm->SetupAttachment(CameraParent);
-	SpringArm->TargetArmLength = 300.0f;
-	SpringArm->bEnableCameraLag = false;
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->TargetArmLength = 200.0f;
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->CameraLagSpeed = 20.0f;
 	
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
@@ -209,7 +210,7 @@ void AToyCar::Tick(float DeltaTime)
 
 	FRotator cameraRot = SpringArm->GetComponentRotation();
 	cameraRot.Yaw += CameraInput.X;
-	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch + CameraInput.Y, -80.0f, -15.0f);
+	//cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch + CameraInput.Y, -80.0f, -15.0f);
 	cameraRot.Roll = 0;
 	SpringArm->SetWorldRotation(cameraRot);
 
@@ -358,7 +359,7 @@ void AToyCar::OnHandbrakeReleased()
 
 void AToyCar::ResetCamera()
 {
-	SpringArm->SetWorldRotation(CameraParent->GetComponentRotation());
+	//SpringArm->SetWorldRotation(CameraParent->GetComponentRotation());
 }
 
 void AToyCar::UpdatePhysicsMaterial()
