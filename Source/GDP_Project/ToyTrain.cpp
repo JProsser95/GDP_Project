@@ -97,6 +97,8 @@ void AToyTrain::BeginPlay()
 			}
 		}
 	}
+
+	TrainState = PossessableTrain;
 }
 
 void AToyTrain::Restart()
@@ -166,7 +168,6 @@ void AToyTrain::UpdateState()
 
 	case TRAIN_STATES::RunawayTrain_Failed:
 	case TRAIN_STATES::RunawayTrain2_Failed:
-	case TRAIN_STATES::RunawayTrain3:
 		AutomatedMovement();
 		break;
 
@@ -175,6 +176,18 @@ void AToyTrain::UpdateState()
 		{
 			ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
 		}
+		break;
+
+	case TRAIN_STATES::RunawayTrain3:
+		if (!AutomatedMovement())
+		{
+			ChangeToState(PossessableTrain);
+			splinePointer = pathPointLocation[TrainState].Num() - 1;
+		}
+		break;
+
+	case TRAIN_STATES::PossessableTrain:
+
 		break;
 
 

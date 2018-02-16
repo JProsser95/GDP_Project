@@ -25,6 +25,8 @@ enum TRAIN_STATES
 
 	RunawayTrain3,
 
+	PossessableTrain,
+
 	TRAIN_STATES_MAX
 };
 
