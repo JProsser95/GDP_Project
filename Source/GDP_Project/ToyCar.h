@@ -59,6 +59,15 @@ public:
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
 
+	UPROPERTY(Category = Rotation, EditAnywhere)
+	float MaxAngle;
+
+	UPROPERTY(Category = Rotation, EditAnywhere)
+	float RotateSpeed;
+
+	UPROPERTY(Category = Rotation, EditAnywhere)
+	bool LimitRotation;
+
 protected:
 	virtual void BeginPlay() override;
 

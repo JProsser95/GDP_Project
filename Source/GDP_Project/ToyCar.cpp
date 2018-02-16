@@ -17,20 +17,20 @@
 #include "UObject/ConstructorHelpers.h"
 #include "PossessableActorComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "PossessableActorComponent.h"
 #include "EngineUtils.h"
 #include "RespawnPoint.h"
 #include "ToyTrain.h"
 #include "Macros.h"
 #include "Sound/SoundCue.h"
+#include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 
 const FName AToyCar::LookUpBinding("LookUp");
 const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
-	:RespawnDelay(1.5f)
+	:RespawnDelay(1.5f), MaxAngle(90.0f), RotateSpeed(2.0f), LimitRotation(true)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -217,26 +217,58 @@ void AToyCar::Tick(float DeltaTime)
 	cam.Roll = 0;
 	Camera->SetWorldRotation(cam);
 
-	//float rotationCap(85.0f);
+
 
 	// Update physics material
 	//UpdatePhysicsMaterial();
 
-	FRotator currentRotation(GetActorRotation());
 
-	// Cap pitch
-	//if (currentRotation.Pitch > rotationCap)
-	//	currentRotation.Pitch = rotationCap;
-	//else if (currentRotation.Pitch < -rotationCap)
-	//	currentRotation.Pitch = -rotationCap;
-	//
-	//// Cap roll
-	//if (currentRotation.Roll > rotationCap)
-	//	currentRotation.Roll = rotationCap;
-	//else if (currentRotation.Roll < -rotationCap)
-	//	currentRotation.Roll = -rotationCap;
-	//
-	//SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
+
+	if (LimitRotation)
+	{
+		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
+
+		FRotator currentRotation(GetActorRotation());
+		FRotator targetRotation(0.0f, currentRotation.Yaw, 0.0f);
+
+		bool rotated(false);
+
+		// Cap pitch
+		if (currentRotation.Pitch > MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Pitch = rotationCap;
+		}
+		else if (currentRotation.Pitch < -MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Pitch = -rotationCap;
+		}
+
+		// Cap roll
+		if (currentRotation.Roll > MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Roll = rotationCap;
+		}
+		else if (currentRotation.Roll < -MaxAngle)
+		{
+			rotated = true;
+			//currentRotation.Roll = -rotationCap;
+		}
+
+		if (rotated)
+		{
+			//FRotator rotateAmount(currentRotation);
+			FRotator rotateAmount = (targetRotation - currentRotation).GetNormalized();
+			//FRotator rotateAmount(FMath::RInterpTo(currentRotation, targetRotation, DeltaTime, 1.0f));
+			//OUTPUT_STRING("Over Rotated... Rotating Back!");
+			//SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
+			pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(rotateAmount.Roll, rotateAmount.Pitch, rotateAmount.Yaw)*RotateSpeed);
+			//pPrimComponent->SetPhysicsAngularVelocityInRadians(FVector(-currentRotation.Roll, -currentRotation.Pitch, 0.0f)*DeltaTime);
+		}
+	}
 }
 
 void AToyCar::Restart()
@@ -411,9 +443,10 @@ void AToyCar::ResetPositionAndRotation()
 		this->SetActorRelativeLocation(FVector(currentLoaction.X, currentLoaction.Y, currentLoaction.Z + 100), false, NULL, ETeleportType::TeleportPhysics);
 		this->SetActorRotation(FRotator(0.0f, currentRotation.Yaw, 0.0f), ETeleportType::TeleportPhysics);
 
-		//UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
-		//Vehicle4W->Velocity = FVector(0.0f, 0.0f, 0.0f);
-		//RootComponent->ComponentVelocity = FVector(0.0f, 0.0f, 0.0f);
+		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
+		pPrimComponent->SetPhysicsLinearVelocity(FVector(0, 0, 0));
+		pPrimComponent->SetPhysicsAngularVelocity(FVector(0, 0, 0));
 	}
 }
 
@@ -435,9 +468,10 @@ void AToyCar::Respawn()
 				spawnLocation.Z += 100;
 				this->SetActorLocationAndRotation(spawnLocation, FRotator(0.0f, currentRotation.Yaw, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
 				GetWorld()->GetTimeSeconds();
-				//UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
-				//Vehicle4W->Velocity = FVector(0.0f, 0.0f, 0.0f);
-				//RootComponent->ComponentVelocity = FVector(0.0f, 0.0f, 0.0f);
+				UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+				UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
+				pPrimComponent->SetPhysicsLinearVelocity(FVector(0, 0, 0));
+				pPrimComponent->SetPhysicsAngularVelocity(FVector(0, 0, 0));
 			}
 		}
 	}
