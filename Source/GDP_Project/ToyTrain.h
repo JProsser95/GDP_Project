@@ -10,14 +10,27 @@
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
 
+#include "TrackSwappingManager.h"
+
 #include "ToyTrain.generated.h"
 
+
+#define NUMBEROFTRACKSWITCHERS 2 // Used for the car to weigh down
 
 enum TRAIN_STATES
 {
 	RunawayTrain,
 	RunawayTrain_Failed,
-	RunawayTrain_Succeeded,
+
+	RunawayTrain2,
+	RunawayTrain2_Failed,
+
+	RunawayTrain3,
+
+	PossessableTrain,
+	PossessableTrain2,
+	PossessableTrain3,
+	PossessableTrain4,
 
 	TRAIN_STATES_MAX
 };
@@ -39,6 +52,8 @@ private:
 	void UpdateState();
 	void ChangeToState(TRAIN_STATES newState);
 
+	bool AutomatedMovement(); // returns false if the train can't move
+
 	void UpdateSplinePointer();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
@@ -55,10 +70,11 @@ private:
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;
+	TRAIN_STATES NextTrainState;
 
 	// Variables used in each train state
 	// Runaway train
-	bool TrackSwitched; // Has the car pressed the track switcher in time?
+	bool TrackSwitched[NUMBEROFTRACKSWITCHERS]; // Has the car pressed the track switcher in time?
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -76,12 +92,14 @@ public:
 
 	/** Handle pressing forwards */
 	void MoveForward(float fValue);	
-	// Posses other Actor;
+	// Possess other Actor;
 	void ChangePossesion();
+	// Swap closest track
+	void SwapTrack();
 
 
 	// Trigger functions that can be called from other classes
-	void TrackSwitcherHit();
+	void TrackSwitcherHit(int TrackSwitchNumber);
 
 protected:
 	// Allows the addition of a static mesh componenet in the editor
@@ -91,6 +109,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
+
+	UPROPERTY(EditAnywhere)
+	ATrackSwappingManager* TrackSwappingManager;
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> SplineBPs;
@@ -103,4 +124,5 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Carriages;
+
 };

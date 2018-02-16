@@ -23,10 +23,17 @@ void ATrackSwitcher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsOverlappingActor(ToyCar))
+	TArray<UPrimitiveComponent*> components;
+
+	GetOverlappingComponents(components);
+
+	for (UPrimitiveComponent* pComponent : components)
 	{
-		ToyTrain->TrackSwitcherHit();
-		PrimaryActorTick.bCanEverTick = false; // Object has done its job, destroy it.
+		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+		{
+			ToyTrain->TrackSwitcherHit(TrackSwitchNumber);
+			PrimaryActorTick.bCanEverTick = false; // Object has done its job, destroy it.
+		}
 	}
 
 }
