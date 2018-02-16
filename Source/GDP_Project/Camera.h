@@ -53,8 +53,8 @@ public:
 private:
 
 	enum Direction {
-		CW,
-		CC
+		CLOCKWISE,
+		COUNTER_CLOCKWISE
 	};
 
 	Direction eDirection;

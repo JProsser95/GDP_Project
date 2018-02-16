@@ -15,7 +15,7 @@ const int ROTATE_TIME(7);
 
 // Sets default values
 ACamera::ACamera()
-	: eDirection(CW), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(true), iWaitTime(WAIT_TIME), iRotateTime(ROTATE_TIME)
+	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(true), iWaitTime(WAIT_TIME), iRotateTime(ROTATE_TIME)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -65,7 +65,7 @@ void ACamera::Tick(float DeltaTime)
 
 		FRotator NewRotation = GetActorRotation();
 
-		if (eDirection == CW)
+		if (eDirection == CLOCKWISE)
 		{
 			NewRotation += FRotator(0, 10 * DeltaTime, 0);
 		}
@@ -94,7 +94,7 @@ void ACamera::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 	GetWorldTimerManager().ClearTimer(RotationTimer);
 	iWaitTime = WAIT_TIME;
 	iRotateTime = ROTATE_TIME;
-	eDirection = CW;
+	eDirection = CLOCKWISE;
 
 	this->SetActorRotation(rOriginalRotation);
 
@@ -110,10 +110,10 @@ void ACamera::Wait()
 	{
 		bIsRotating = true;
 		iWaitTime = WAIT_TIME;
-		if (eDirection == CC)
-			eDirection = CW;
+		if (eDirection == COUNTER_CLOCKWISE)
+			eDirection = CLOCKWISE;
 		else
-			eDirection = CC;
+			eDirection = COUNTER_CLOCKWISE;
 		GetWorldTimerManager().ClearTimer(WaitTimer);
 		GetWorldTimerManager().SetTimer(RotationTimer, this, &ACamera::Rotate, 1.0f, true, 0.0f);
 	}
