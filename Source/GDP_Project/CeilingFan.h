@@ -22,8 +22,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* CeilingCylinderMeshComponent;
+
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* CeilingFanMeshComponent;
+
+	UPROPERTY(EditAnywhere)
+	float RotationsPerSecond;
 
 public:	
 	// Called every frame
