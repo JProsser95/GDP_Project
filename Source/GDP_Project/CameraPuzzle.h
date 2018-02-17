@@ -10,7 +10,10 @@ class UWidgetComponent;
 class UStaticMeshComponent;
 class UBoxComponent;
 class UDirectionalLightComponent;
+class UCameraComponent;
+class ACameraDirector;
 class ACamera;
+class AToyCar;
 
 UCLASS()
 class GDP_PROJECT_API ACameraPuzzle : public AActor
@@ -26,7 +29,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* MeshComponent;
+	UStaticMeshComponent* Safe;
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* TriggerWidget;
@@ -40,13 +43,30 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UDirectionalLightComponent* DirectionalLight;
 
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* Camera;
+
+	FTimerHandle SafeTimer;
+
+	ACameraDirector* CameraDirector;
+
+	AToyCar* Car;
+
+	void OpenSafe();
+	void CloseSafe();
+
+
 private:
 
 	TArray<ACamera*> Cameras;
 
 	bool bIsActive;
 	bool bPuzzleFailed;
+	bool bIsClosingSafe;
+	bool bIsOpeningSafe;
 	int iBrighter;
+	int iSafeTime;
+
 
 	float fLightIntensity;
 	float fOpenSafeHeight;

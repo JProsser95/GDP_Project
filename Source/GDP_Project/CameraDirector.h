@@ -28,9 +28,13 @@ public:
 	AActor* CarCamera;
 
 	UPROPERTY(EditAnywhere)
-	AActor* GarageCamera;
+	AActor* TimePuzzleCamera;
 
-	void BeginCameraChange();
+	UPROPERTY(EditAnywhere)
+	AActor* CameraPuzzleCamera;
+
+	void BeginTimePuzzleCameraChange();
+	void BeginCameraPuzzleCameraChange();
 
 	float TimeToNextCameraChange;
 

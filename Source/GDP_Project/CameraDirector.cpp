@@ -27,7 +27,7 @@ void ACameraDirector::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACameraDirector::BeginCameraChange()
+void ACameraDirector::BeginTimePuzzleCameraChange()
 {
 	float SmoothBlendTime = 0.75f;
 
@@ -38,14 +38,35 @@ void ACameraDirector::BeginCameraChange()
 		if ((OurPlayerController->GetViewTarget() != CarCamera) && (CarCamera != nullptr))
 		{
 			//Cut instantly to camera one.
-			OurPlayerController->SetViewTarget(CarCamera);
+			OurPlayerController->SetViewTargetWithBlend(CarCamera, SmoothBlendTime);
 			AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 			GameMode->BeginTimer();
 		}
-		else if ((OurPlayerController->GetViewTarget() != GarageCamera) && (GarageCamera != nullptr))
+		else if ((OurPlayerController->GetViewTarget() != TimePuzzleCamera) && (TimePuzzleCamera != nullptr))
 		{
 			//Blend smoothly to camera two.
-			OurPlayerController->SetViewTargetWithBlend(GarageCamera, SmoothBlendTime);
+			OurPlayerController->SetViewTargetWithBlend(TimePuzzleCamera, SmoothBlendTime);
+		}
+	}
+}
+
+void ACameraDirector::BeginCameraPuzzleCameraChange()
+{
+	float SmoothBlendTime = 0.75f;
+
+	//Find the actor that handles control for the local player.
+	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (OurPlayerController)
+	{
+		if ((OurPlayerController->GetViewTarget() != CarCamera) && (CarCamera != nullptr))
+		{
+			//Cut instantly to camera one.
+			OurPlayerController->SetViewTargetWithBlend(CarCamera, SmoothBlendTime);
+		}
+		else if ((OurPlayerController->GetViewTarget() != CameraPuzzleCamera) && (CameraPuzzleCamera != nullptr))
+		{
+			//Blend smoothly to camera two.
+			OurPlayerController->SetViewTargetWithBlend(CameraPuzzleCamera, SmoothBlendTime);
 		}
 	}
 }
