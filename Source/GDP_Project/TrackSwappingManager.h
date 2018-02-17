@@ -28,5 +28,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Swappers;
+
+	UMaterialInterface* MaterialOff;
+	UMaterialInterface* MaterialOn;
 	
 };
