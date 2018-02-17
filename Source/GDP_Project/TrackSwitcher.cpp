@@ -32,7 +32,7 @@ void ATrackSwitcher::Tick(float DeltaTime)
 		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
 		{
 			ToyTrain->TrackSwitcherHit(TrackSwitchNumber);
-			PrimaryActorTick.bCanEverTick = false; // Object has done its job, destroy it.
+			Destroy();
 		}
 	}
 
