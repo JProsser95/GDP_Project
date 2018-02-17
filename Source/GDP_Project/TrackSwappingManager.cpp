@@ -28,9 +28,12 @@ void ATrackSwappingManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	for (int i = 0; i < Swappers.Num(); ++i)
+	if (MaterialOff)
 	{
-		Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+		for (int i = 0; i < Swappers.Num(); ++i)
+		{
+			Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+		}
 	}
 }
 
@@ -47,10 +50,13 @@ int ATrackSwappingManager::GetNearestSwapper(AActor* ToyTrain)
 	{
 		if (Swappers[i]->IsOverlappingActor(ToyTrain))
 		{
-			if(Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0) == MaterialOff)
-				Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOn);
-			else
-				Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+			if (MaterialOff && MaterialOn)
+			{
+				if (Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0) == MaterialOff)
+					Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOn);
+				else
+					Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+			}
 			return i;
 		}
 	}
