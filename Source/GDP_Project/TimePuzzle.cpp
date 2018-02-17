@@ -120,7 +120,7 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	bIsOpeningDoor = true;
 
 	if (CameraDirector != nullptr)
-		CameraDirector->BeginCameraChange();
+		CameraDirector->BeginTimePuzzleCameraChange();
 
 	Car = Cast<AToyCar>(OtherActor);
 
@@ -148,7 +148,7 @@ void ATimePuzzle::OpenDoor()
 		bIsOpeningDoor = false;
 		iDoorTime = MAX_DOOR_TIMER;
 		if (CameraDirector != nullptr)
-			CameraDirector->BeginCameraChange();
+			CameraDirector->BeginTimePuzzleCameraChange();
 		if (Car != nullptr)
 			Car->SetCanMove(true);
 		GetWorldTimerManager().ClearTimer(DoorTimer);

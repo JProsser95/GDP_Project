@@ -7,28 +7,33 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/SceneComponent.h"
+#include "CameraDirector.h"
 #include "EngineUtils.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
 #include "Camera.h"
 #include "Macros.h"
+#include "ToyCar.h"
 
-const int MAX_SAFE_HEIGHT(450);
+//const int MAX_SAFE_HEIGHT(450);
+const int MAX_SAFE_TIMER(6);
 
 // Sets default values
 ACameraPuzzle::ACameraPuzzle()
-	: bIsActive(false), bPuzzleFailed(false), iBrighter(1), fLightIntensity(0.0f)
+	: bIsActive(false), bPuzzleFailed(false), bIsClosingSafe(false), bIsOpeningSafe(false)
+	 ,iBrighter(1), iSafeTime(MAX_SAFE_TIMER + 1), fLightIntensity(0.0f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	Safe = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	Safe->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	if (MeshAssetBody.Object)
-		MeshComponent->SetStaticMesh(MeshAssetBody.Object);
+		Safe->SetStaticMesh(MeshAssetBody.Object);
 
 	//For testing
 	TriggerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RespawnWidgetComponent"));
@@ -56,6 +61,9 @@ ACameraPuzzle::ACameraPuzzle()
 	DirectionalLight->SetWorldRotation(FRotator(-90, 0, 0));
 	DirectionalLight->SetIntensity(0);
 	DirectionalLight->SetLightColor(FColor(255, 0, 40));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -68,8 +76,14 @@ void ACameraPuzzle::BeginPlay()
 		Cameras.Add(*ActorItr);
 	}
 
-	fOpenSafeHeight = MeshComponent->GetComponentLocation().Z - MAX_SAFE_HEIGHT;
-	fClosedSafeHeight = MeshComponent->GetComponentLocation().Z;
+	// Get the Camera Director that is in the scene
+	for (TActorIterator<ACameraDirector> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		CameraDirector = *ActorItr;
+	}
+
+	//fOpenSafeHeight = MeshComponent->GetComponentLocation().Z - MAX_SAFE_HEIGHT;
+	//fClosedSafeHeight = MeshComponent->GetComponentLocation().Z;
 
 }
 
@@ -84,23 +98,35 @@ void ACameraPuzzle::Tick(float DeltaTime)
 	TriggerWidget->SetRelativeRotation(PlayerRot);
 	CompleteWidget->SetRelativeRotation(PlayerRot);
 
-	if (bIsActive)
+	//if (bIsActive)
+	//{
+	//	if (MeshComponent->GetComponentLocation().Z >= fOpenSafeHeight)
+	//	{
+	//		FVector SafeLocation = MeshComponent->GetComponentLocation();
+	//		MeshComponent->SetWorldLocation(SafeLocation - FVector(0, 0, DeltaTime * 100));
+	//	}
+	//}
+
+	if (bIsClosingSafe)
 	{
-		if (MeshComponent->GetComponentLocation().Z >= fOpenSafeHeight)
-		{
-			FVector SafeLocation = MeshComponent->GetComponentLocation();
-			MeshComponent->SetWorldLocation(SafeLocation - FVector(0, 0, DeltaTime * 100));
-		}
+		FVector SafeLocation = Safe->GetComponentLocation();
+		Safe->SetWorldLocation(SafeLocation + FVector(0, 0, DeltaTime * 100));
+	}
+
+	if (bIsOpeningSafe)
+	{
+		FVector SafeLocation = Safe->GetComponentLocation();
+		Safe->SetWorldLocation(SafeLocation - FVector(0, 0, DeltaTime * 100));
 	}
 
 
 	if (bPuzzleFailed)
 	{
-		if (MeshComponent->GetComponentLocation().Z <= fClosedSafeHeight)
-		{
-			FVector SafeLocation = MeshComponent->GetComponentLocation();
-			MeshComponent->SetWorldLocation(SafeLocation + FVector(0, 0, DeltaTime * 100));
-		}
+		//if (MeshComponent->GetComponentLocation().Z <= fClosedSafeHeight)
+		//{
+		//	FVector SafeLocation = MeshComponent->GetComponentLocation();
+		//	MeshComponent->SetWorldLocation(SafeLocation + FVector(0, 0, DeltaTime * 100));
+		//}
 
 		if (fLightIntensity >= 10.0f)
 			iBrighter = -1;
@@ -119,18 +145,56 @@ void ACameraPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 
 	bIsActive = true;
 	bPuzzleFailed = false;
+	bIsOpeningSafe = true;
 
 	DirectionalLight->SetIntensity(0);
 
+	if (CameraDirector != nullptr)
+		CameraDirector->BeginCameraPuzzleCameraChange();
+
+	Car = Cast<AToyCar>(OtherActor);
+
+	if (Car != nullptr)
+		Car->SetCanMove(false);
 
 	for (ACamera* Actor : Cameras)
 	{
 		Actor->SetIsActive(true);
 	}
+
+	iSafeTime = MAX_SAFE_TIMER;
+	GetWorldTimerManager().SetTimer(SafeTimer, this, &ACameraPuzzle::OpenSafe, 1.0f, true, 0.0f);
+
 }
 
 void ACameraPuzzle::PuzzleFailed()
 {
 	bIsActive = false;
 	bPuzzleFailed = true;
+	iSafeTime = MAX_SAFE_TIMER;
+	GetWorldTimerManager().SetTimer(SafeTimer, this, &ACameraPuzzle::CloseSafe, 1.0f, true, 0.0f);
+}
+
+void ACameraPuzzle::CloseSafe()
+{
+	if (--iSafeTime <= 0)
+	{
+		bIsClosingSafe = false;
+		iSafeTime = MAX_SAFE_TIMER;
+		GetWorldTimerManager().ClearTimer(SafeTimer);
+	}
+}
+
+void ACameraPuzzle::OpenSafe()
+{
+	if (--iSafeTime <= 0)
+	{
+		bIsOpeningSafe = false;
+		iSafeTime = MAX_SAFE_TIMER;
+		if (CameraDirector != nullptr)
+			CameraDirector->BeginCameraPuzzleCameraChange();
+		if (Car != nullptr)
+			Car->SetCanMove(true);
+		GetWorldTimerManager().ClearTimer(SafeTimer);
+	}
 }
