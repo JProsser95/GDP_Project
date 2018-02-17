@@ -101,6 +101,8 @@ void AToyPlane::Tick(float DeltaTime)
 	else if (CurrentBoost > MaximumBoost)
 		CurrentBoost = MaximumBoost;
 
+	StartBoost();
+
 	if (IsBoosting) 
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
@@ -210,8 +212,8 @@ void AToyPlane::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("PlaneBoost", IE_Pressed, this, &AToyPlane::StartBoost);
-	PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
+	//PlayerInputComponent->BindAction("PlaneBoost", IE_Pressed, this, &AToyPlane::StartBoost);
+	//PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
 	PlayerInputComponent->BindAction("PlaneCameraZoom", IE_Released, this, &AToyPlane::CameraZoom);
 
 	//Hook up every-frame handling for our four axes

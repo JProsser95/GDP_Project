@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "ToyPlane.h"
 #include "CeilingFan.generated.h"
 
 UCLASS()
@@ -29,10 +31,15 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float RotationsPerSecond;
 
+	UPROPERTY(EditAnywhere)
+	AToyPlane* ToyPlane;
+
+	UBoxComponent* FanAirFlow;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+private:
+	void PushPlane(float DeltaTime);
 	
 };

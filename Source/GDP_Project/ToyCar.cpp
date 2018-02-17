@@ -45,11 +45,11 @@ AToyCar::AToyCar()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
 
-	//SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
-	//SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	//SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
-	//SphereCollider->OnComponentBeginOverlap.AddDynamic(this, &AToyCar::OnBeginOverlap);
-	//SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
+	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
+	SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
+	SphereCollider->OnComponentBeginOverlap.AddDynamic(this, &AToyCar::OnBeginOverlap);
+	SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
 
 	// Setup friction materials
 	//static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
