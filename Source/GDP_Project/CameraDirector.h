@@ -33,8 +33,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	AActor* CameraPuzzleCamera;
 
-	void BeginTimePuzzleCameraChange();
-	void BeginCameraPuzzleCameraChange();
+	void BeginTimePuzzleCameraChange(AActor* OriginalCamera = nullptr);
+	void BeginCameraPuzzleCameraChange(AActor* OriginalCamera = nullptr);
 
 	float TimeToNextCameraChange;
 

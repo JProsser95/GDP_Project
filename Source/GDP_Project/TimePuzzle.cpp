@@ -120,7 +120,7 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	bIsOpeningDoor = true;
 
 	if (CameraDirector != nullptr)
-		CameraDirector->BeginTimePuzzleCameraChange();
+		CameraDirector->BeginTimePuzzleCameraChange(OtherActor);
 
 	Car = Cast<AToyCar>(OtherActor);
 
