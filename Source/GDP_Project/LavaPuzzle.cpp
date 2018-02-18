@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LavaPuzzle.h"
-#include "Components/WidgetComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/BoxComponent.h"
@@ -16,14 +15,6 @@ ALavaPuzzle::ALavaPuzzle()
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
-	//For testing
-	CompleteWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("CompleteWidgetComponent"));
-	CompleteWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> CWidget(TEXT("/Game/TestingPurpose/PuzzleComplete"));
-	CompleteWidget->SetWidgetClass(CWidget.Class);
-	CompleteWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	CompleteWidget->SetTwoSided(true);
 
 	//Trigger Box for activating this spawn point
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
@@ -42,11 +33,6 @@ void ALavaPuzzle::BeginPlay()
 void ALavaPuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//For the widget testing
-	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	CompleteWidget->SetRelativeRotation(PlayerRot);
 }
 
 void ALavaPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)

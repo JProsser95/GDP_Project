@@ -43,14 +43,6 @@ ACameraPuzzle::ACameraPuzzle()
 	TriggerWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 	TriggerWidget->SetTwoSided(true);
 
-	//For testing
-	CompleteWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("CompleteWidgetComponent"));
-	CompleteWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> CWidget(TEXT("/Game/TestingPurpose/PuzzleComplete"));
-	CompleteWidget->SetWidgetClass(CWidget.Class);
-	CompleteWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	CompleteWidget->SetTwoSided(true);
-
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->SetupAttachment(RootComponent);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ACameraPuzzle::OnBeginOverlap);
@@ -96,7 +88,6 @@ void ACameraPuzzle::Tick(float DeltaTime)
 	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
 	TriggerWidget->SetRelativeRotation(PlayerRot);
-	CompleteWidget->SetRelativeRotation(PlayerRot);
 
 	//if (bIsActive)
 	//{
