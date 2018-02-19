@@ -92,6 +92,11 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLavaPuzzleLevel"), ar, NULL, true);
 			break;
+
+		case PLANE_PUZZLE:
+
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlanePuzzleLevel"), ar, NULL, true);
+			break;
 	}
 
 	OtherActor->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
