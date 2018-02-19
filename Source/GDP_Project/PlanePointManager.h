@@ -36,6 +36,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	AToyPlane* ToyPlane;
 
+	UPROPERTY(EditAnywhere)
+	float BoostIncrement;
+
 	void AllPointsCollected();
 private:
 	int GetVisibleActors();

@@ -8,7 +8,7 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
-	:ToyPlane(nullptr)
+	:ToyPlane(nullptr), BoostIncrement(50.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -41,7 +41,7 @@ void APlanePointManager::Tick(float DeltaTime)
 	
 	if (Actors[0]->IsOverlappingActor(ToyPlane))
 	{
-		ToyPlane->UpdateCurrentBoost(10.0f);
+		ToyPlane->UpdateCurrentBoost(BoostIncrement);
 
 		GetWorld()->DestroyActor(Actors[0]);
 		Actors.RemoveAt(0);
