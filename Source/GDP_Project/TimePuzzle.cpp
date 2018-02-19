@@ -33,14 +33,6 @@ ATimePuzzle::ATimePuzzle()
 	TriggerWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
 	TriggerWidget->SetTwoSided(true);
 
-	//For testing
-	CompleteWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("CompleteWidgetComponent"));
-	CompleteWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> CWidget(TEXT("/Game/TestingPurpose/PuzzleComplete"));
-	CompleteWidget->SetWidgetClass(CWidget.Class);
-	CompleteWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	CompleteWidget->SetTwoSided(true);
-
 	//Trigger Box for activating this spawn point
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->SetupAttachment(RootComponent);
@@ -108,7 +100,6 @@ void ATimePuzzle::Tick(float DeltaTime)
 	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
 	TriggerWidget->SetRelativeRotation(PlayerRot);
-	CompleteWidget->SetRelativeRotation(PlayerRot);
 }
 
 void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -120,7 +111,7 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	bIsOpeningDoor = true;
 
 	if (CameraDirector != nullptr)
-		CameraDirector->BeginTimePuzzleCameraChange();
+		CameraDirector->BeginTimePuzzleCameraChange(OtherActor);
 
 	Car = Cast<AToyCar>(OtherActor);
 

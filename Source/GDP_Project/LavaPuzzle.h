@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "LavaPuzzle.generated.h"
 
-class UWidgetComponent;
 class UBoxComponent;
 
 
@@ -22,9 +21,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* CompleteWidget;
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* TriggerBox;

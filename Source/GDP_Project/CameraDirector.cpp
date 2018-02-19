@@ -18,7 +18,6 @@ ACameraDirector::ACameraDirector()
 void ACameraDirector::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 // Called every frame
@@ -27,8 +26,11 @@ void ACameraDirector::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACameraDirector::BeginTimePuzzleCameraChange()
+void ACameraDirector::BeginTimePuzzleCameraChange(AActor* OriginalCamera)
 {
+	if (OriginalCamera != nullptr)
+		CarCamera = OriginalCamera;
+
 	float SmoothBlendTime = 0.75f;
 
 	//Find the actor that handles control for the local player.
@@ -50,8 +52,12 @@ void ACameraDirector::BeginTimePuzzleCameraChange()
 	}
 }
 
-void ACameraDirector::BeginCameraPuzzleCameraChange()
+void ACameraDirector::BeginCameraPuzzleCameraChange(AActor* OriginalCamera)
 {
+
+	if (OriginalCamera != nullptr)
+		CarCamera = OriginalCamera;
+
 	float SmoothBlendTime = 0.75f;
 
 	//Find the actor that handles control for the local player.

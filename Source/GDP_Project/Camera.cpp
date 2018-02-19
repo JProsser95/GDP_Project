@@ -90,13 +90,10 @@ void ACamera::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 	bIsActive = false;
 
-	GetWorldTimerManager().ClearTimer(WaitTimer);
-	GetWorldTimerManager().ClearTimer(RotationTimer);
-	iWaitTime = WAIT_TIME;
-	iRotateTime = ROTATE_TIME;
-	eDirection = CLOCKWISE;
-
-	this->SetActorRotation(rOriginalRotation);
+	for (TActorIterator<ACamera> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->SetIsActive(false);
+	}
 
 	for (TActorIterator<ACameraPuzzle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
@@ -133,5 +130,17 @@ void ACamera::Rotate()
 void ACamera::SetIsActive(bool Value)
 {
 	bIsActive = Value;
-	GetWorldTimerManager().SetTimer(RotationTimer, this, &ACamera::Rotate, 1.0f, true, 0.0f);
+
+	if (bIsActive)
+		GetWorldTimerManager().SetTimer(RotationTimer, this, &ACamera::Rotate, 1.0f, true, 0.0f);
+	else
+	{
+		GetWorldTimerManager().ClearTimer(WaitTimer);
+		GetWorldTimerManager().ClearTimer(RotationTimer);
+		iWaitTime = WAIT_TIME;
+		iRotateTime = ROTATE_TIME;
+		eDirection = CLOCKWISE;
+
+		this->SetActorRotation(rOriginalRotation);
+	}
 }

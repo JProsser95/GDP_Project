@@ -35,9 +35,6 @@ protected:
 	UWidgetComponent* TriggerWidget;
 
 	UPROPERTY(EditAnywhere)
-	UWidgetComponent* CompleteWidget;
-
-	UPROPERTY(EditAnywhere)
 	UBoxComponent* TriggerBox;
 
 	UPROPERTY(EditAnywhere)
