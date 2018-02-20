@@ -19,7 +19,14 @@ UToyCarWheelRear::UToyCarWheelRear()
 	//SuspensionNaturalFrequency = 9.0f;
 	//SuspensionDampingRatio = 1.05f;
 
+	LatStiffValue = 100.0f;
+
 	// Find the tire object and set the data for it
 	static ConstructorHelpers::FObjectFinder<UTireConfig> TireData(TEXT("TireConfig'/Game/VehicleAdv/Vehicle/WheelData/Vehicle_BackTireConfig.Vehicle_BackTireConfig'"));
 	TireConfig = TireData.Object;
+}
+
+void UToyCarWheelRear::ModifyFriction(float fNewFriction)
+{
+	LatStiffValue = fNewFriction;
 }

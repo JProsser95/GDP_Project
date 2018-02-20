@@ -16,5 +16,5 @@ class GDP_PROJECT_API UToyCarWheelFront : public UVehicleWheel
 	
 public:
 	UToyCarWheelFront();
-	
+	void ModifyFriction(float fNewFriction);
 };

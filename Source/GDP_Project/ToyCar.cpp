@@ -297,6 +297,10 @@ void AToyCar::OnHandbrakePressed()
 
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
 	isBreaking = true;
+
+	//UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+	//CastChecked<UToyCarWheelFront>(Vehicle4W->WheelSetups[0].WheelClass)->ModifyFriction(30.0f);
+	//CastChecked<UToyCarWheelFront>(Vehicle4W->WheelSetups[2].WheelClass)->ModifyFriction(30.0f);
 }
 
 void AToyCar::OnHandbrakeReleased()
