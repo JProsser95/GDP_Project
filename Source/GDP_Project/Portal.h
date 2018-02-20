@@ -15,7 +15,8 @@ enum PuzzleName {
 	CAMERA_PUZZLE       UMETA(DisplayName = "Camera/Stealth Puzzle"),
 	TIMER_PUZZLE		UMETA(DisplayName = "Timer Puzzle"),
 	FRICTION_PUZZLE		UMETA(DisplayName = "Friction Puzzle"),
-	LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle")
+	LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle"),
+	PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
 };
 
 UCLASS()
