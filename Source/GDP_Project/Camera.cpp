@@ -11,14 +11,17 @@
 #include "Macros.h"
 
 const int WAIT_TIME(3);
-const int ROTATE_TIME(7);
+const int ACTION_TIME(7);
 
 // Sets default values
 ACamera::ACamera()
-	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(true), iWaitTime(WAIT_TIME), iRotateTime(ROTATE_TIME)
+	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(false), iWaitTime(WAIT_TIME), iActionTime(ACTION_TIME)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
@@ -37,7 +40,7 @@ ACamera::ACamera()
 	SpotLightComponent->AttenuationRadius = 1500;
 
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
-	TriggerBox->SetupAttachment(RootComponent);
+	TriggerBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ACamera::OnBeginOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 	TriggerBox->SetWorldScale3D(FVector(4.25f, 3.5f, 4.75f));
@@ -86,8 +89,6 @@ void ACamera::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 	if (!bIsActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
-	OUTPUT_STRING("PUZZLE FAILED!");
-
 	bIsActive = false;
 
 	for (TActorIterator<ACamera> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -105,25 +106,48 @@ void ACamera::Wait()
 {
 	if (--iWaitTime <= 0)
 	{
-		bIsRotating = true;
+		switch (_CameraType)
+		{
+		case ROTATING_CAMERA:
+			
+			if (eDirection == COUNTER_CLOCKWISE)
+				eDirection = CLOCKWISE;
+			else
+				eDirection = COUNTER_CLOCKWISE;
+			
+			bIsRotating = true;
+			break;
+
+		case FLICKERING_CAMERA:
+
+			SpotLightComponent->SetIntensity(100000.0f);
+			TriggerBox->SetActive(true);
+		}
+
 		iWaitTime = WAIT_TIME;
-		if (eDirection == COUNTER_CLOCKWISE)
-			eDirection = CLOCKWISE;
-		else
-			eDirection = COUNTER_CLOCKWISE;
 		GetWorldTimerManager().ClearTimer(WaitTimer);
-		GetWorldTimerManager().SetTimer(RotationTimer, this, &ACamera::Rotate, 1.0f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(ActionTimer, this, &ACamera::Action, 1.0f, true, 0.0f);
+
+		
 	}
 }
 
-void ACamera::Rotate()
+void ACamera::Action()
 {
-	if (--iRotateTime <= 0)
+	if (--iActionTime <= 0)
 	{
 		bIsRotating = false;
-		iRotateTime = ROTATE_TIME;
-		GetWorldTimerManager().ClearTimer(RotationTimer);
+
+		iActionTime = ACTION_TIME;
+		GetWorldTimerManager().ClearTimer(ActionTimer);
 		GetWorldTimerManager().SetTimer(WaitTimer, this, &ACamera::Wait, 1.0f, true, 0.0f);
+
+		if (_CameraType == FLICKERING_CAMERA)
+		{
+			SpotLightComponent->SetIntensity(0.0f);
+			TriggerBox->SetActive(false);
+		}
+		
 	}
 }
 
@@ -131,15 +155,23 @@ void ACamera::SetIsActive(bool Value)
 {
 	bIsActive = Value;
 
+	if (_CameraType == STATIC_CAMERA)
+		return;
+
 	if (bIsActive)
-		GetWorldTimerManager().SetTimer(RotationTimer, this, &ACamera::Rotate, 1.0f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(ActionTimer, this, &ACamera::Action, 1.0f, true, 0.0f);
 	else
 	{
 		GetWorldTimerManager().ClearTimer(WaitTimer);
-		GetWorldTimerManager().ClearTimer(RotationTimer);
+		GetWorldTimerManager().ClearTimer(ActionTimer);
 		iWaitTime = WAIT_TIME;
-		iRotateTime = ROTATE_TIME;
-		eDirection = CLOCKWISE;
+		iActionTime = ACTION_TIME;
+
+		if (_CameraType == ROTATING_CAMERA)
+		{
+			eDirection = CLOCKWISE;
+			bIsRotating = true;
+		}
 
 		this->SetActorRotation(rOriginalRotation);
 	}
