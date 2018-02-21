@@ -11,12 +11,18 @@ class UStaticMeshComponent;
 class USpotLightComponent;
 class UBoxComponent;
 
+UENUM()
+enum CameraType {
+	ROTATING_CAMERA     UMETA(DisplayName = "Rotating Camera"),
+	STATIC_CAMERA		UMETA(DisplayName = "Static Camera"),
+	FLICKERING_CAMERA   UMETA(DisplayName = "Flickering Camera")
+};
+
 UCLASS()
 class GDP_PROJECT_API ACamera : public AActor
 {
 	GENERATED_BODY()
 
-	
 	
 public:	
 	// Sets default values for this actor's properties
@@ -36,7 +42,10 @@ protected:
 	UBoxComponent* TriggerBox;
 
 	FTimerHandle WaitTimer;
-	FTimerHandle RotationTimer;
+	FTimerHandle ActionTimer;
+
+	UPROPERTY(EditAnywhere, Category = "Type of Camera")
+	TEnumAsByte<CameraType> _CameraType;
 
 
 public:	
@@ -62,13 +71,13 @@ private:
 	FRotator rOriginalRotation;
 
 	void Wait();
-	void Rotate();
+	void Action();
 
 	bool bIsActive;
 	bool bIsRotating;
 
 	int iWaitTime;
-	int iRotateTime;
+	int iActionTime;
 
 	
 	
