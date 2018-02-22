@@ -26,8 +26,6 @@
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 
-const FName AToyCar::LookUpBinding("LookUp");
-const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
 	:// Reset
@@ -391,21 +389,7 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
-	if (possesActor != nullptr)
-	{
-		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
-		AToyPlane* tp = Cast<AToyPlane>(possesActor);
-		AToyTrain* tt = Cast<AToyTrain>(possesActor);
-		if (tp != nullptr) 
-		{
-			tp->SetIsActive(true);
-		} 
-		else if (tt != nullptr)
-		{
-			tt->SetIsActive(true);
-			tt->SetToyCar(this);
-		}
-	}
+	PossessionChangerManager->ChangePossession();
 }
 
 void AToyCar::ChangeHUD()
