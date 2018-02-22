@@ -14,7 +14,7 @@
 AToyPlane::AToyPlane()
 	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f),
-	ControlTypeRealistic(true)
+	ControlTypeRealistic(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -100,8 +100,6 @@ void AToyPlane::Tick(float DeltaTime)
 		IsBoosting = false;
 	else if (CurrentBoost > MaximumBoost)
 		CurrentBoost = MaximumBoost;
-
-	StartBoost();
 
 	if (IsBoosting) 
 	{
