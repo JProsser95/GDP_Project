@@ -75,6 +75,7 @@ private:
 
 	bool bIsActive;
 	bool bIsRotating;
+	bool bIsShining;
 
 	int iWaitTime;
 	int iActionTime;

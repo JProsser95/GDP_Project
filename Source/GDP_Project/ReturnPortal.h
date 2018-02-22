@@ -29,29 +29,29 @@ protected:
 
 
 	UPROPERTY(EditAnywhere)
-	UWidgetComponent* CameraPuzzleCompleteWidget;
+	UWidgetComponent* LoungeReturnPointWidget;
+
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* TimerPuzzleCompleteWidget;
+	//
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* FrictionPuzzleCompleteWidget;
+	//
+	//UPROPERTY(EditAnywhere)
+	//UWidgetComponent* LavaPuzzleCompleteWidget;
+
 
 	UPROPERTY(EditAnywhere)
-	UWidgetComponent* TimerPuzzleCompleteWidget;
+	UBoxComponent* LoungeReturnPointTriggerBox;
 
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* FrictionPuzzleCompleteWidget;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* LavaPuzzleCompleteWidget;
-
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* CameraPuzzleTriggerBox;
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* TimerPuzzleTriggerBox;
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* FrictionPuzzleTriggerBox;
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* LavaPuzzleTriggerBox;
+	//UPROPERTY(EditAnywhere)
+	//UBoxComponent* TimerPuzzleTriggerBox;
+	//
+	//UPROPERTY(EditAnywhere)
+	//UBoxComponent* FrictionPuzzleTriggerBox;
+	//
+	//UPROPERTY(EditAnywhere)
+	//UBoxComponent* LavaPuzzleTriggerBox;
 
 public:	
 	// Called every frame

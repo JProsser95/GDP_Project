@@ -15,7 +15,7 @@ const int ACTION_TIME(7);
 
 // Sets default values
 ACamera::ACamera()
-	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(false), iWaitTime(WAIT_TIME), iActionTime(ACTION_TIME)
+	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(false), bIsShining(true), iWaitTime(WAIT_TIME), iActionTime(ACTION_TIME)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -33,7 +33,7 @@ ACamera::ACamera()
 
 	SpotLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLightComponent"));
 	SpotLightComponent->SetupAttachment(MeshComponent);
-	SpotLightComponent->Intensity = 100000;
+	SpotLightComponent->Intensity = 0.0f;
 	SpotLightComponent->InnerConeAngle = 25.0f;
 	SpotLightComponent->OuterConeAngle = 31.0f;
 	SpotLightComponent->LightColor = FColor(255, 153, 181);
@@ -86,7 +86,7 @@ void ACamera::Tick(float DeltaTime)
 
 void ACamera::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (!bIsActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
+	if (!bIsActive || !bIsShining || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
 	bIsActive = false;
@@ -121,7 +121,7 @@ void ACamera::Wait()
 		case FLICKERING_CAMERA:
 
 			SpotLightComponent->SetIntensity(100000.0f);
-			TriggerBox->SetActive(true);
+			bIsShining = true;
 		}
 
 		iWaitTime = WAIT_TIME;
@@ -145,7 +145,7 @@ void ACamera::Action()
 		if (_CameraType == FLICKERING_CAMERA)
 		{
 			SpotLightComponent->SetIntensity(0.0f);
-			TriggerBox->SetActive(false);
+			bIsShining = false;
 		}
 		
 	}
@@ -154,6 +154,7 @@ void ACamera::Action()
 void ACamera::SetIsActive(bool Value)
 {
 	bIsActive = Value;
+	SpotLightComponent->SetIntensity(100000.0f);
 
 	if (_CameraType == STATIC_CAMERA)
 		return;

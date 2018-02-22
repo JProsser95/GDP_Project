@@ -73,29 +73,33 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 	// This switch can be removed if anyone can figure out how to pass an argument using FOutputDevice!
 	switch (_PuzzleName)
 	{
-		case CAMERA_PUZZLE:
+		//case CAMERA_PUZZLE:
+		//
+		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowCameraPuzzleLevel"), ar, NULL, true);
+		//	break;
+		//
+		//case TIMER_PUZZLE:
+		//
+		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowTimerPuzzleLevel"), ar, NULL, true);
+		//	break;
+		//
+		//case FRICTION_PUZZLE:
+		//
+		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowFrictionPuzzleLevel"), ar, NULL, true);
+		//	break;
+		//
+		//case LAVA_PUZZLE:
+		//
+		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLavaPuzzleLevel"), ar, NULL, true);
+		//	break;
+		//
+		//case PLANE_PUZZLE:
+		//
+		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlanePuzzleLevel"), ar, NULL, true);
+		//	break;
 
-			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowCameraPuzzleLevel"), ar, NULL, true);
-			break;
-
-		case TIMER_PUZZLE:
-
-			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowTimerPuzzleLevel"), ar, NULL, true);
-			break;
-
-		case FRICTION_PUZZLE:
-
-			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowFrictionPuzzleLevel"), ar, NULL, true);
-			break;
-
-		case LAVA_PUZZLE:
-
-			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLavaPuzzleLevel"), ar, NULL, true);
-			break;
-
-		case PLANE_PUZZLE:
-
-			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlanePuzzleLevel"), ar, NULL, true);
+		case LOUNGE:
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLounge"), ar, NULL, true);
 			break;
 	}
 

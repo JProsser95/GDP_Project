@@ -12,11 +12,13 @@ class USceneComponent;
 
 UENUM()
 enum PuzzleName {
-	CAMERA_PUZZLE       UMETA(DisplayName = "Camera/Stealth Puzzle"),
-	TIMER_PUZZLE		UMETA(DisplayName = "Timer Puzzle"),
-	FRICTION_PUZZLE		UMETA(DisplayName = "Friction Puzzle"),
-	LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle"),
-	PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
+	//CAMERA_PUZZLE       UMETA(DisplayName = "Camera/Stealth Puzzle"),
+	//TIMER_PUZZLE		UMETA(DisplayName = "Timer Puzzle"),
+	//FRICTION_PUZZLE		UMETA(DisplayName = "Friction Puzzle"),
+	//LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle"),
+	//PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
+	LOUNGE				UMETA(DisplayName = "Lounge")
+
 };
 
 UCLASS()
