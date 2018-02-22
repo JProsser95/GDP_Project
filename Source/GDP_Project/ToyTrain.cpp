@@ -279,7 +279,9 @@ void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");
 	PrimaryActorTick.bCanEverTick = false;
-	ChangePossesion();
+	
+	if (PossessionChangerManager)
+		PossessionChangerManager->ForceChangePossession(POSSESSABLE_VEHICLES::Car);
 }
 
 // Called to bind functionality to input
@@ -311,16 +313,8 @@ void AToyTrain::MoveForward(float fValue)
 
 void AToyTrain::ChangePossesion()
 {
-	isActive = false;
-	if (ToyCar != nullptr)
-	{
-		GetWorld()->GetFirstPlayerController()->Possess(ToyCar);
-		AToyCar* TC = Cast<AToyCar>(ToyCar);
-		if (TC != nullptr)
-		{
-			TC->SetIsActive(true);
-		}
-	}
+	if (PossessionChangerManager)
+		PossessionChangerManager->CheckPossessionPads();
 }
 
 void AToyTrain::SwapTrack()

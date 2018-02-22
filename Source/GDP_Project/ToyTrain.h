@@ -11,6 +11,7 @@
 #include "Components/SplineMeshComponent.h"
 
 #include "TrackSwappingManager.h"
+#include "PossessionChangerManager.h"
 
 #include "ToyTrain.generated.h"
 
@@ -125,4 +126,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Carriages;
 
+	UPROPERTY(EditAnywhere)
+	APossessionChangerManager* PossessionChangerManager;
 };

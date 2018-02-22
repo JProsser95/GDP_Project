@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
+#include "PossessionChangerManager.h"
 #include "ToyCar.generated.h"
 
 class UPhysicalMaterial;
@@ -134,10 +135,10 @@ public:
 	static const FName EngineAudioRPM;
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* SphereCollider;
-
-	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CameraParent;
+
+	UPROPERTY(EditAnywhere)
+	APossessionChangerManager* PossessionChangerManager;
 
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);

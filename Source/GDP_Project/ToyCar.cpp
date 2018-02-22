@@ -26,8 +26,6 @@
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 
-const FName AToyCar::LookUpBinding("LookUp");
-const FName AToyCar::LookRightBinding("LookRight");
 
 AToyCar::AToyCar()
 	:// Reset
@@ -44,12 +42,6 @@ AToyCar::AToyCar()
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/Car/TOYCAR_Skeleton_AnimBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
-
-	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
-	SphereCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	SphereCollider->SetRelativeScale3D(FVector(7.0f, 7.0f, 7.0f));
-	SphereCollider->OnComponentBeginOverlap.AddDynamic(this, &AToyCar::OnBeginOverlap);
-	SphereCollider->OnComponentEndOverlap.AddDynamic(this, &AToyCar::OnEndOverlap);
 
 	// Setup friction materials
 	//static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
@@ -391,21 +383,8 @@ void AToyCar::UpdatePhysicsMaterial()
 
 void AToyCar::ChangePossesion()
 {
-	if (possesActor != nullptr)
-	{
-		GetWorld()->GetFirstPlayerController()->Possess(possesActor);
-		AToyPlane* tp = Cast<AToyPlane>(possesActor);
-		AToyTrain* tt = Cast<AToyTrain>(possesActor);
-		if (tp != nullptr) 
-		{
-			tp->SetIsActive(true);
-		} 
-		else if (tt != nullptr)
-		{
-			tt->SetIsActive(true);
-			tt->SetToyCar(this);
-		}
-	}
+	if (PossessionChangerManager)
+		PossessionChangerManager->CheckPossessionPads();
 }
 
 void AToyCar::ChangeHUD()
@@ -454,8 +433,8 @@ void AToyCar::ResetPositionAndRotation()
 
 		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
-		pPrimComponent->SetPhysicsLinearVelocity(FVector(0, 0, 0));
-		pPrimComponent->SetPhysicsAngularVelocity(FVector(0, 0, 0));
+		pPrimComponent->SetPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
+		pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(0.0f, 0.0f, 0.0f));
 	}
 }
 
@@ -477,8 +456,8 @@ void AToyCar::Respawn()
 				GetWorld()->GetTimeSeconds();
 				UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 				UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
-				pPrimComponent->SetPhysicsLinearVelocity(FVector(0, 0, 0));
-				pPrimComponent->SetPhysicsAngularVelocity(FVector(0, 0, 0));
+				pPrimComponent->SetPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
+				pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(0.0f, 0.0f, 0.0f));
 			}
 		}
 	}
