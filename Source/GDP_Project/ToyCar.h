@@ -135,9 +135,6 @@ public:
 	static const FName EngineAudioRPM;
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* SphereCollider;
-
-	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CameraParent;
 
 	UPROPERTY(EditAnywhere)

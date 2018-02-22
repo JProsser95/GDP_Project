@@ -24,11 +24,15 @@ protected:
 
 	POSSESSABLE_VEHICLES CurrentVehicle;
 
+	void ChangePossession(POSSESSABLE_VEHICLES NewVehicle);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void ChangePossession();
+	void CheckPossessionPads();
+
+	void ForceChangePossession(POSSESSABLE_VEHICLES NewVehicle);
 
 	UPROPERTY(EditAnywhere)
 	TArray<APawn*> Vehicles;

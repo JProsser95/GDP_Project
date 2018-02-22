@@ -26,16 +26,29 @@ void APossessionChangerManager::Tick(float DeltaTime)
 
 }
 
-void APossessionChangerManager::ChangePossession()
+void APossessionChangerManager::CheckPossessionPads()
 {
 	for (int i = 0; i < PossessionChangers.Num(); ++i)
 	{
-		int iNewVehicle = PossessionChangers[i]->ShouldChangePossession(Vehicles[(int)CurrentVehicle]);
-		if (iNewVehicle != -1)
+		if (PossessionChangers[i]->VehicleToChangeFrom == CurrentVehicle)
 		{
-			GetWorld()->GetFirstPlayerController()->Possess(Vehicles[iNewVehicle]);
-			CurrentVehicle = (POSSESSABLE_VEHICLES)iNewVehicle;
+			int iNewVehicle = PossessionChangers[i]->ShouldChangePossession(Vehicles[(int)CurrentVehicle]);
+			if (iNewVehicle != -1)
+			{
+				ChangePossession((POSSESSABLE_VEHICLES)iNewVehicle);
+				return; // We're done, return out.
+			}
 		}
 	}
 }
 
+void APossessionChangerManager::ForceChangePossession(POSSESSABLE_VEHICLES NewVehicle)
+{
+	ChangePossession(NewVehicle);
+}
+
+void APossessionChangerManager::ChangePossession(POSSESSABLE_VEHICLES NewVehicle)
+{
+	GetWorld()->GetFirstPlayerController()->Possess(Vehicles[(int)NewVehicle]);
+	CurrentVehicle = NewVehicle;
+}
