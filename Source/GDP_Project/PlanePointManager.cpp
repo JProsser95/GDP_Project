@@ -8,11 +8,10 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
-	:ToyPlane(nullptr), BoostIncrement(50.0f)
+	:ToyPlane(nullptr), BoostIncrement(10.0f), VisibleRings(3), RingSmallScale(0.25f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -24,7 +23,12 @@ void APlanePointManager::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("ToyPlane has not been setup in PlanePointManager!"));
 	}
 
-	for (int i = 3; i < Actors.Num(); ++i)
+	for (int i = 1; i < GetVisibleActors(); ++i)
+	{
+		Actors[i]->SetActorHiddenInGame(false);
+		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
+	}
+	for (int i = VisibleRings; i < Actors.Num(); ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(true);
 	}
@@ -38,28 +42,36 @@ void APlanePointManager::Tick(float DeltaTime)
 	if (!Actors.Num())
 		return;
 
-	
 	if (Actors[0]->IsOverlappingActor(ToyPlane))
 	{
 		ToyPlane->UpdateCurrentBoost(BoostIncrement);
 
 		GetWorld()->DestroyActor(Actors[0]);
 		Actors.RemoveAt(0);
-		for (int i = 0; i < GetVisibleActors(); ++i)
+		for (int i = GetVisibleActors()-1; i < GetVisibleActors(); ++i)
 		{
 			Actors[i]->SetActorHiddenInGame(false);
+			Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 		}
-		if (!Actors.Num())
-			AllPointsCollected();
-		return;
+	}
+	if (!Actors.Num())
+		AllPointsCollected();
+	else
+	{
+		float scale = Actors[0]->GetActorScale3D().X;
+		if (scale + DeltaTime <= 1.0f)
+			scale += DeltaTime;
+		else
+			scale = 1.0f;
+		Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 
 }
 
 int APlanePointManager::GetVisibleActors()
 {
-	if (Actors.Num() >= 3)
-		return 3;
+	if (Actors.Num() >= VisibleRings)
+		return VisibleRings;
 	return Actors.Num();
 }
 

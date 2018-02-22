@@ -41,5 +41,11 @@ public:
 
 	void AllPointsCollected();
 private:
+	UPROPERTY(EditAnywhere)
+	int VisibleRings;
+
+	UPROPERTY(EditAnywhere)
+	float RingSmallScale;
+
 	int GetVisibleActors();
 };
