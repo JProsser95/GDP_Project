@@ -3,6 +3,7 @@
 #include "TrackSwappingManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/StaticMeshComponent.h"
+#include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
 ATrackSwappingManager::ATrackSwappingManager()
@@ -44,22 +45,32 @@ void ATrackSwappingManager::Tick(float DeltaTime)
 
 }
 
-int ATrackSwappingManager::GetNearestSwapper(AActor* ToyTrain)
+int ATrackSwappingManager::GetNearestSwapper(AActor* ToyTrain, bool bSwaptrack)
 {
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	for (int i = 0; i < Swappers.Num(); ++i)
 	{
 		if (Swappers[i]->IsOverlappingActor(ToyTrain))
 		{
-			if (MaterialOff && MaterialOn)
+			if (bSwaptrack)
 			{
-				if (Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0) == MaterialOff)
-					Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOn);
-				else
-					Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+				if (MaterialOff && MaterialOn)
+				{
+					if (Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0) == MaterialOff)
+						Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOn);
+					else
+						Swappers[i]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+				}
 			}
+			else if (GameMode)
+				GameMode->SetInteractionHUD();
+
 			return i;
 		}
 	}
+
+	if (GameMode)
+		GameMode->RemoveInteractionHUD();
 
 	return -1;
 }

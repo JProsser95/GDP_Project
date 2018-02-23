@@ -58,6 +58,7 @@ void AGDP_ProjectGameModeBase::SetVehicleHUD()
 {
 	if (VehicleWidget)
 		return;
+
 	VehicleWidget = CreateWidget<UUserWidget>(GetWorld(), ChangeVehicleHUDClass);
 	if (VehicleWidget != nullptr)
 	{
@@ -71,6 +72,27 @@ void AGDP_ProjectGameModeBase::RemoveVehicleHUD()
 	{
 		VehicleWidget->RemoveFromViewport();
 		VehicleWidget = nullptr;
+	}
+}
+
+void AGDP_ProjectGameModeBase::SetInteractionHUD()
+{
+	if (InteractionWidget)
+		return;
+
+	InteractionWidget = CreateWidget<UUserWidget>(GetWorld(), InteractionHUDClass);
+	if (InteractionWidget != nullptr)
+	{
+		InteractionWidget->AddToViewport();
+	}
+}
+
+void AGDP_ProjectGameModeBase::RemoveInteractionHUD()
+{
+	if (InteractionWidget)
+	{
+		InteractionWidget->RemoveFromViewport();
+		InteractionWidget = nullptr;
 	}
 }
 

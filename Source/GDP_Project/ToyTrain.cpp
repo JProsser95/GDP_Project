@@ -102,8 +102,8 @@ void AToyTrain::Restart()
 {
 	Super::Restart();
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("ToyTrain");
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->ChangeHUD("ToyTrain");
 }
 
 // Called every frame
@@ -114,8 +114,9 @@ void AToyTrain::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	UpdateState();
+	UpdateState(); // Check train state and update if neccessary
 
+	// Handle the updating of the spline pointer
 	static float SplineTimer = 0.0f;
 
 	if (MovementDirection)
@@ -130,6 +131,8 @@ void AToyTrain::Tick(float DeltaTime)
 	else
 		SplineTimer = 0.0f;
 
+
+	// Move the train and its carriage
 	if (!Rotating)
 	{
 		UpdateTrainOnSpline();
@@ -144,6 +147,8 @@ void AToyTrain::Tick(float DeltaTime)
 			splinePointer = 0;
 		}
 	}
+
+	TrackSwappingManager->GetNearestSwapper(this, false); // Update the train's interaction UI
 
 	//End movement at end of Spline
 	if (MeshComponent->IsOverlappingActor(TrainHouse) && CarriageAttached)

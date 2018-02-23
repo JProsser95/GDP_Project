@@ -23,7 +23,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	int GetNearestSwapper(AActor* ToyTrain);
+	int GetNearestSwapper(AActor* ToyTrain, bool bSwaptrack = true);
 
 
 	UPROPERTY(EditAnywhere)
