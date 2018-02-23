@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyTrain.h"
-#include "ToyCar.h"
 #include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 #include "GDP_ProjectGameModeBase.h"
@@ -14,7 +13,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), CarriageAttached(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,10 +39,6 @@ AToyTrain::AToyTrain()
 
 	//Take control of the default Player
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-
-	ToyCar = nullptr;
-
-	isActive = true;
 
 	for (int i = 0; i < NUMBEROFTRACKSWITCHERS; ++i)
 	{
@@ -99,7 +94,7 @@ void AToyTrain::BeginPlay()
 	}
 
 	// Uncomment the two lines below to test the train puzzle from near the end
-	//TrainState = PossessableTrain4;
+	//TrainState = PossessableTrain;
 	//splinePointer = 100;
 }
 
@@ -151,7 +146,7 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 
 	//End movement at end of Spline
-	if (MeshComponent->IsOverlappingActor(TrainHouse))
+	if (MeshComponent->IsOverlappingActor(TrainHouse) && CarriageAttached)
 	{
 		CompleteTrainPuzzle();
 	}
@@ -189,7 +184,16 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::PossessableTrain:
+		break;	
+	
+	case TRAIN_STATES::PossessableTrain2:
+		if (EndOfCurrentLine())
+		{
+			TrainState = NextTrainState;
+			splinePointer = 1;
+		}
 		break;
+	
 	case TRAIN_STATES::PossessableTrain3:
 	case TRAIN_STATES::PossessableTrain4:
 		if (splinePointer <= 0)
@@ -198,12 +202,10 @@ void AToyTrain::UpdateState()
 			splinePointer = pathPointLocation[TrainState].Num() - 2;
 		}
 		break;
-	case TRAIN_STATES::PossessableTrain2:
-		if (splinePointer >= pathPointLocation[TrainState].Num() - 1)
-		{
-			TrainState = NextTrainState;
-			splinePointer = 1;
-		}
+
+	case TRAIN_STATES::PossessableTrain5:
+		if (StartOfCurrentLine())
+			CarriageAttached = true; // You've reached the carriage's location, attach it to the train.
 		break;
 
 
@@ -223,7 +225,7 @@ void AToyTrain::ChangeToState(TRAIN_STATES newState)
 
 bool AToyTrain::AutomatedMovement()
 {
-	if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+	if (!EndOfCurrentLine())
 	{
 		MoveForward(1.0f);
 		return true;
@@ -258,6 +260,9 @@ void AToyTrain::UpdateTrainOnSpline()
 
 void AToyTrain::UpdateCarriages()
 {
+	if (!CarriageAttached) // The carriage is not attached, so don't update its location
+		return;
+
 	int carriageSplinePointer = 0;
 	for (int i = 0; i < Carriages.Num(); ++i)
 	{
@@ -284,6 +289,16 @@ void AToyTrain::CompleteTrainPuzzle()
 		PossessionChangerManager->ForceChangePossession(POSSESSABLE_VEHICLES::Car);
 }
 
+bool AToyTrain::StartOfCurrentLine()
+{
+	return splinePointer <= 0;
+}
+
+bool AToyTrain::EndOfCurrentLine()
+{
+	return splinePointer >= pathPointLocation[TrainState].Num() - 1;
+}
+
 // Called to bind functionality to input
 void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -294,16 +309,6 @@ void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyTrain::ChangePossesion);
 
 	PlayerInputComponent->BindAction("TrainSwapTrack", IE_Released, this, &AToyTrain::SwapTrack);
-}
-
-void AToyTrain::SetIsActive(bool Value)
-{
-	isActive = Value;
-}
-
-void AToyTrain::SetToyCar(APawn* TC)
-{
-	ToyCar = TC;
 }
 
 void AToyTrain::MoveForward(float fValue)
@@ -341,6 +346,19 @@ void AToyTrain::SwapTrack()
 				NextTrainState = TRAIN_STATES::PossessableTrain4;
 			else
 				NextTrainState = TRAIN_STATES::PossessableTrain3;
+			break;
+
+		case 2:
+			if (TrainState == TRAIN_STATES::PossessableTrain3)
+			{
+				TrainState = TRAIN_STATES::PossessableTrain5;
+				splinePointer = pathPointLocation[PossessableTrain5].Num() - (pathPointLocation[PossessableTrain3].Num() - splinePointer);
+			}
+			else
+			{
+				TrainState = TRAIN_STATES::PossessableTrain3;
+				splinePointer = pathPointLocation[PossessableTrain3].Num() - (pathPointLocation[PossessableTrain5].Num() - splinePointer);
+			}
 			break;
 		}
 	}
