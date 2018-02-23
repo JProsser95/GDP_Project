@@ -12,8 +12,9 @@
 #include "CameraDirector.h"
 #include "ToyCar.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Components/PrimitiveComponent.h"
+#include "Engine/World.h"
 #include "EngineUtils.h"
-#include "PointToPointManager.h"
 #include "Macros.h"
 
 const int MAX_DOOR_TIMER(5);
@@ -62,10 +63,12 @@ void ATimePuzzle::BeginPlay()
 		CameraDirector = *ActorItr;
 	}
 
-	for (TActorIterator<APointToPointManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (int i = 0; i < Actors.Num(); ++i)
 	{
-		PointManager = *ActorItr;
+		Actors[i]->SetActorHiddenInGame(true);
 	}
+
+	CopyActors = Actors;
 }
 
 // Called every frame
@@ -73,24 +76,26 @@ void ATimePuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsPuzzleTriggered && !bIsOpeningDoor) 
+	if (bIsPuzzleTriggered) 
 	{
 		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 		if (GameMode != nullptr)
 		{
 			if (GameMode->GetTimeLeft() <= 0)
 			{
-				bIsPuzzleTriggered = false;
 				GameMode->RemoveTimerWidget();
-				iDoorTime = MAX_DOOR_TIMER;
+				PuzzleFailed();
 			}
 		}
 
-		if (PointManager->AllPointsCollected())
+		if (AllPointsCollected())
 		{
 			PuzzleComplete();
 		}
+
+		PointManage();
 	}
+
 
 	if (bIsOpeningDoor)
 	{
@@ -110,6 +115,11 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		return;
 
 	bIsPuzzleTriggered = true;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		Actors[i]->SetActorHiddenInGame(false);
+	}
 
 	Car = Cast<AToyCar>(OtherActor);
 
@@ -143,4 +153,54 @@ void ATimePuzzle::PuzzleComplete()
 
 	iDoorTime = MAX_DOOR_TIMER;
 	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
+}
+
+void ATimePuzzle::PointManage()
+{
+	if (!Actors.Num())
+		return;
+
+	TArray<UPrimitiveComponent*> components;
+
+	Actors[0]->GetOverlappingComponents(components);
+
+	for (UPrimitiveComponent* pComponent : components)
+	{
+		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+		{
+			Actors[0]->SetActorHiddenInGame(true);
+			Actors.RemoveAt(0);
+			for (int i = 0; i < GetVisibleActors(); ++i)
+			{
+				Actors[i]->SetActorHiddenInGame(false);
+			}
+			return;
+		}
+	}
+}
+
+int ATimePuzzle::GetVisibleActors()
+{
+	if (Actors.Num() >= 3)
+		return 3;
+	return Actors.Num();
+}
+
+bool ATimePuzzle::AllPointsCollected()
+{
+	if (!Actors.Num())
+		return true;
+
+	return false;
+}
+
+void ATimePuzzle::PuzzleFailed()
+{
+	bIsPuzzleTriggered = false;
+	iDoorTime = MAX_DOOR_TIMER;
+	for (AActor* Actor : Actors)
+	{
+		Actor->SetActorHiddenInGame(true);
+	}
+	Actors = CopyActors;
 }

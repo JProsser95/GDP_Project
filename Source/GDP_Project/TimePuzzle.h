@@ -14,7 +14,6 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class ACameraDirector;
 class AToyCar;
-class APointToPointManager;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -47,10 +46,15 @@ protected:
 
 	AToyCar* Car;
 
-	APointToPointManager* PointManager;
-
 	void OpenDoor();
 	void PuzzleComplete();
+
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> Actors;
+
+	TArray<AActor*> CopyActors;
+
+	bool AllPointsCollected();
 
 public:	
 	// Called every frame
@@ -60,6 +64,10 @@ public:
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
 private:
+
+	int GetVisibleActors();
+	void PointManage();
+	void PuzzleFailed();
 
 	bool bIsPuzzleTriggered;
 	bool bIsOpeningDoor;
