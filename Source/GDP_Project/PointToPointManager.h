@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Actors;
 	
-	void AllPointsCollected();
+	bool AllPointsCollected();
 private:
 	int GetVisibleActors();
 };

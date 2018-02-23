@@ -14,6 +14,7 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class ACameraDirector;
 class AToyCar;
+class APointToPointManager;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -46,8 +47,10 @@ protected:
 
 	AToyCar* Car;
 
+	APointToPointManager* PointManager;
+
 	void OpenDoor();
-	void CloseDoor();
+	void PuzzleComplete();
 
 public:	
 	// Called every frame
@@ -59,7 +62,6 @@ public:
 private:
 
 	bool bIsPuzzleTriggered;
-	bool bIsClosingDoor;
 	bool bIsOpeningDoor;
 
 	int iDoorTime;

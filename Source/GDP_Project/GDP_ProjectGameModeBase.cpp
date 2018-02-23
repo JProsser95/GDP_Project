@@ -7,7 +7,7 @@
 #include "TimerWidgetParent.h"
 #include "Macros.h"
 
-const int MAX_TIME(25);
+const int MAX_TIME(5);
 
 void AGDP_ProjectGameModeBase::BeginPlay()
 {

@@ -13,6 +13,7 @@
 #include "ToyCar.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "EngineUtils.h"
+#include "PointToPointManager.h"
 #include "Macros.h"
 
 const int MAX_DOOR_TIMER(5);
@@ -46,7 +47,6 @@ ATimePuzzle::ATimePuzzle()
 	Camera->SetupAttachment(RootComponent);
 
 	bIsPuzzleTriggered = false;
-	bIsClosingDoor = false;
 	bIsOpeningDoor = false;
 	iDoorTime = MAX_DOOR_TIMER;
 }
@@ -61,6 +61,11 @@ void ATimePuzzle::BeginPlay()
 	{
 		CameraDirector = *ActorItr;
 	}
+
+	for (TActorIterator<APointToPointManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		PointManager = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -68,7 +73,7 @@ void ATimePuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsPuzzleTriggered && !bIsClosingDoor && !bIsOpeningDoor) 
+	if (bIsPuzzleTriggered && !bIsOpeningDoor) 
 	{
 		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 		if (GameMode != nullptr)
@@ -77,17 +82,14 @@ void ATimePuzzle::Tick(float DeltaTime)
 			{
 				bIsPuzzleTriggered = false;
 				GameMode->RemoveTimerWidget();
-				bIsClosingDoor = true;
 				iDoorTime = MAX_DOOR_TIMER;
-				GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::CloseDoor, 1.0f, true, 0.0f);
 			}
 		}
-	}
 
-	if (bIsClosingDoor)
-	{
-		FVector DoorLocation = Door->GetComponentLocation();
-		Door->SetWorldLocation(DoorLocation - FVector(0, 0, DeltaTime * 100));
+		if (PointManager->AllPointsCollected())
+		{
+			PuzzleComplete();
+		}
 	}
 
 	if (bIsOpeningDoor)
@@ -108,28 +110,11 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		return;
 
 	bIsPuzzleTriggered = true;
-	bIsOpeningDoor = true;
-
-	if (CameraDirector != nullptr)
-		CameraDirector->BeginTimePuzzleCameraChange(OtherActor);
 
 	Car = Cast<AToyCar>(OtherActor);
 
-	if (Car != nullptr)
-		Car->SetCanMove(false);
-
-	iDoorTime = MAX_DOOR_TIMER;
-	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
-}
-
-void ATimePuzzle::CloseDoor()
-{
-	if (--iDoorTime <= 0)
-	{
-		bIsClosingDoor = false;
-		iDoorTime = MAX_DOOR_TIMER;
-		GetWorldTimerManager().ClearTimer(DoorTimer);
-	}
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->BeginTimer();
 }
 
 void ATimePuzzle::OpenDoor()
@@ -144,4 +129,18 @@ void ATimePuzzle::OpenDoor()
 			Car->SetCanMove(true);
 		GetWorldTimerManager().ClearTimer(DoorTimer);
 	}
+}
+
+void ATimePuzzle::PuzzleComplete()
+{
+	bIsOpeningDoor = true;
+
+	if (CameraDirector != nullptr)
+		CameraDirector->BeginTimePuzzleCameraChange(Car);
+
+	if (Car != nullptr)
+		Car->SetCanMove(false);
+
+	iDoorTime = MAX_DOOR_TIMER;
+	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
 }
