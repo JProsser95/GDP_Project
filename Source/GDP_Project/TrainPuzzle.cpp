@@ -16,7 +16,7 @@ void ATrainPuzzle::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	TrainPuzzleStates.SetNum(Triggers.Num());
+	TrainPuzzleStates.SetNum(Triggers.Num()); // This makes sure that there are the same number of states and triggers
 }
 
 // Called every frame
@@ -30,15 +30,13 @@ void ATrainPuzzle::Tick(float DeltaTime)
 	{
 		ResetToLastCheckpoint();
 	}
-
-
 }
 
 void ATrainPuzzle::CheckAndUpdateTriggers()
 {
 	for (int i = 0; i < Triggers.Num(); ++i)
 	{
-		if (!ToyTrain->OnFailureTrainLine() && Triggers[i] && Triggers[i]->IsOverlappingActor(ToyCar))
+		if (Triggers[i] && !ToyTrain->OnFailureTrainLine() && Triggers[i]->IsOverlappingActor(ToyCar))
 		{
 			Triggers[i]->Destroy();
 			Triggers[i] = nullptr;
@@ -53,9 +51,9 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 
 void ATrainPuzzle::ResetToLastCheckpoint()
 {
-	for (int i = Triggers.Num() - 1; i >= 0; --i)
+	for (int i = Triggers.Num() - 1; i >= 0; --i) // Count backwards so we get the latest checkpoint
 	{
-		if (!Triggers[i])
+		if (!Triggers[i]) // If the trigger has already been destroyed then that checkpoint has been saved
 		{
 			ToyCar->SetActorRelativeLocation(TrainPuzzleStates[i].CarPosition, false, NULL, ETeleportType::TeleportPhysics);
 			ToyCar->SetActorRotation(FQuat(TrainPuzzleStates[i].CarRotation), ETeleportType::TeleportPhysics);

@@ -94,8 +94,8 @@ void AToyTrain::BeginPlay()
 	}
 
 	// Uncomment the two lines below to test the train puzzle from near the end
-	//TrainState = PossessableTrain;
-	//splinePointer = 100;
+	//TrainState = RunawayTrain3;
+	//splinePointer = 0;
 }
 
 void AToyTrain::Restart()
@@ -140,10 +140,10 @@ void AToyTrain::Tick(float DeltaTime)
 	else
 	{
 		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw + (30.0f * DeltaTime), 0.0f));
-		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][0].Rotator().Yaw) < 1.0f)
+		MoveForward(0.0f); // Make sure the train can't move
+		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
-			//LineSwapped = true;
 			splinePointer = 0;
 		}
 	}
@@ -184,7 +184,7 @@ void AToyTrain::UpdateState()
 		if (!AutomatedMovement())
 		{
 			ChangeToState(PossessableTrain);
-			splinePointer = pathPointLocation[TrainState].Num() - 1;
+			Rotating = true; // The train will rotate BEFORE the player can move on the new line
 		}
 		break;
 
@@ -354,8 +354,8 @@ void AToyTrain::SwapTrack()
 			if (TrainState == TRAIN_STATES::PossessableTrain)
 			{
 				TrainState = TRAIN_STATES::PossessableTrain2;
-				if(NextTrainState == TRAIN_STATES::RunawayTrain)
-					NextTrainState = TRAIN_STATES::PossessableTrain3;
+				if(NextTrainState == TRAIN_STATES::RunawayTrain)		// NextTrainState is set to RunawayTrain in constructor, so this should only happen once
+					NextTrainState = TRAIN_STATES::PossessableTrain3;	// Setup the spline jump between PossTrain2 and PossTrain3, see "case TRAIN_STATES::PossessableTrain2:"
 			}
 			else
 				TrainState = TRAIN_STATES::PossessableTrain;
@@ -372,12 +372,12 @@ void AToyTrain::SwapTrack()
 			if (TrainState == TRAIN_STATES::PossessableTrain3)
 			{
 				TrainState = TRAIN_STATES::PossessableTrain5;
-				splinePointer = pathPointLocation[PossessableTrain5].Num() - (pathPointLocation[PossessableTrain3].Num() - splinePointer);
+				splinePointer = pathPointLocation[TrainState].Num() - (pathPointLocation[PossessableTrain3].Num() - splinePointer);
 			}
 			else
 			{
 				TrainState = TRAIN_STATES::PossessableTrain3;
-				splinePointer = pathPointLocation[PossessableTrain3].Num() - (pathPointLocation[PossessableTrain5].Num() - splinePointer);
+				splinePointer = pathPointLocation[TrainState].Num() - (pathPointLocation[PossessableTrain5].Num() - splinePointer);
 			}
 			break;
 		}
