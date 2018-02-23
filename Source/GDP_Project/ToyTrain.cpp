@@ -148,7 +148,7 @@ void AToyTrain::Tick(float DeltaTime)
 		}
 	}
 
-	TrackSwappingManager->GetNearestSwapper(this, false); // Update the train's interaction UI
+	TrackSwappingManager->UpdateInteractionUI(this); // Update the train's interaction UI
 
 	//End movement at end of Spline
 	if (MeshComponent->IsOverlappingActor(TrainHouse) && CarriageAttached)

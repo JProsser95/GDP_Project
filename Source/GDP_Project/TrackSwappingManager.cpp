@@ -74,3 +74,8 @@ int ATrackSwappingManager::GetNearestSwapper(AActor* ToyTrain, bool bSwaptrack)
 
 	return -1;
 }
+
+void ATrackSwappingManager::UpdateInteractionUI(AActor * ToyTrain)
+{
+	GetNearestSwapper(ToyTrain, false);
+}
