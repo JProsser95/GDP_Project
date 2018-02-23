@@ -47,7 +47,14 @@ protected:
 	AToyCar* Car;
 
 	void OpenDoor();
-	void CloseDoor();
+	void PuzzleComplete();
+
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> Actors;
+
+	TArray<AActor*> CopyActors;
+
+	bool AllPointsCollected();
 
 public:	
 	// Called every frame
@@ -58,9 +65,15 @@ public:
 	
 private:
 
+	int GetVisibleActors();
+	void PointManage(float DeltaTime);
+	void PuzzleFailed();
+
 	bool bIsPuzzleTriggered;
-	bool bIsClosingDoor;
+	bool bIsPuzzleComplete;
 	bool bIsOpeningDoor;
 
 	int iDoorTime;
+
+	float RingSmallScale;
 };

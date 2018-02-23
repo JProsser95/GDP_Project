@@ -134,6 +134,14 @@ void ACameraPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 	if (bIsActive)
 		return;
 
+	if (!Car)
+		Car = Cast<AToyCar>(OtherActor);
+
+	if (Car->GetIsInPuzzle())
+		return;
+
+	Car->SetIsInPuzzle(true);
+
 	bIsActive = true;
 	bPuzzleFailed = false;
 	bIsOpeningSafe = true;
@@ -143,7 +151,6 @@ void ACameraPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 	if (CameraDirector != nullptr)
 		CameraDirector->BeginCameraPuzzleCameraChange(OtherActor);
 
-	Car = Cast<AToyCar>(OtherActor);
 
 	if (Car != nullptr)
 		Car->SetCanMove(false);
@@ -163,6 +170,7 @@ void ACameraPuzzle::PuzzleFailed()
 	bIsActive = false;
 	bPuzzleFailed = true;
 	bIsClosingSafe = true;
+	Car->SetIsInPuzzle(false);
 	iSafeTime = MAX_SAFE_TIMER;
 	GetWorldTimerManager().SetTimer(SafeTimer, this, &ACameraPuzzle::CloseSafe, 1.0f, true, 0.0f);
 }

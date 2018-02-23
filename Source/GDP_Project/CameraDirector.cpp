@@ -41,8 +41,6 @@ void ACameraDirector::BeginTimePuzzleCameraChange(AActor* OriginalCamera)
 		{
 			//Cut instantly to camera one.
 			OurPlayerController->SetViewTargetWithBlend(CarCamera, SmoothBlendTime);
-			AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-			GameMode->BeginTimer();
 		}
 		else if ((OurPlayerController->GetViewTarget() != TimePuzzleCamera) && (TimePuzzleCamera != nullptr))
 		{

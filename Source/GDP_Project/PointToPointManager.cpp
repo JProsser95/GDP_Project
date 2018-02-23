@@ -45,8 +45,6 @@ void APointToPointManager::Tick(float DeltaTime)
 			{
 				Actors[i]->SetActorHiddenInGame(false);
 			}
-			if (!Actors.Num())
-				AllPointsCollected();
 			return;
 		}
 	}
@@ -60,7 +58,10 @@ int APointToPointManager::GetVisibleActors()
 	return Actors.Num();
 }
 
-void APointToPointManager::AllPointsCollected()
+bool APointToPointManager::AllPointsCollected()
 {
-	OUTPUT_FSTRING("All \"rings\" have been collected!");
+	if (!Actors.Num())
+		return true;
+
+	return false;
 }
