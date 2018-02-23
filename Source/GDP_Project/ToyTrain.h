@@ -99,6 +99,16 @@ public:
 	// Trigger functions that can be called from other classes
 	void TrackSwitcherHit(int TrackSwitchNumber);
 
+	// Accessors
+	int GetSplineCounter() { return splinePointer; }
+	TRAIN_STATES GetTrainState() { return TrainState; }
+	bool OnFailureTrainLine();
+	bool TrainPuzzleFailed();
+
+	// Mutators
+	void SetSplineCounter(int iSplineCounter) { splinePointer = iSplineCounter; }
+	void SetTrainState(TRAIN_STATES eTrainState) { TrainState = eTrainState; }
+
 protected:
 	// Allows the addition of a static mesh componenet in the editor
 	UPROPERTY(EditAnywhere)

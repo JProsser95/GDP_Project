@@ -285,6 +285,21 @@ void AToyTrain::UpdateCarriages()
 	}
 }
 
+bool AToyTrain::OnFailureTrainLine()
+{
+	return TrainState == TRAIN_STATES::RunawayTrain_Failed || TrainState == TRAIN_STATES::RunawayTrain2_Failed;
+}
+
+bool AToyTrain::TrainPuzzleFailed()
+{
+	if (OnFailureTrainLine())
+	{
+		return EndOfCurrentLine();
+	}
+
+	return false; // We haven't failed the train puzzle
+}
+
 void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");

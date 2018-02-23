@@ -23,16 +23,19 @@ void ATrackSwitcher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TArray<UPrimitiveComponent*> components;
-
-	GetOverlappingComponents(components);
-
-	for (UPrimitiveComponent* pComponent : components)
+	if (!ToyTrain->OnFailureTrainLine()) // If the train is already on the failure line then there's no point updating anything
 	{
-		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+		TArray<UPrimitiveComponent*> components;
+
+		GetOverlappingComponents(components);
+
+		for (UPrimitiveComponent* pComponent : components)
 		{
-			ToyTrain->TrackSwitcherHit(TrackSwitchNumber);
-			Destroy();
+			if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+			{
+				ToyTrain->TrackSwitcherHit(TrackSwitchNumber);
+				Destroy();
+			}
 		}
 	}
 
