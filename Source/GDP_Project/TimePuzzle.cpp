@@ -49,7 +49,9 @@ ATimePuzzle::ATimePuzzle()
 
 	bIsPuzzleTriggered = false;
 	bIsOpeningDoor = false;
+	bIsPuzzleComplete = false;
 	iDoorTime = MAX_DOOR_TIMER;
+	RingSmallScale = 0.25f;
 }
 
 // Called when the game starts or when spawned
@@ -66,6 +68,7 @@ void ATimePuzzle::BeginPlay()
 	for (int i = 0; i < Actors.Num(); ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(true);
+		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
 	CopyActors = Actors;
@@ -88,19 +91,14 @@ void ATimePuzzle::Tick(float DeltaTime)
 			}
 		}
 
-		if (AllPointsCollected())
-		{
-			PuzzleComplete();
-		}
-
-		PointManage();
+		PointManage(DeltaTime);
 	}
 
 
 	if (bIsOpeningDoor)
 	{
 		FVector DoorLocation = Door->GetComponentLocation();
-		Door->SetWorldLocation(DoorLocation + FVector(0, 0, DeltaTime * 100));
+		Door->SetWorldLocation(DoorLocation - FVector(0, 0, DeltaTime * 30));
 	}
 
 	//For the widget testing
@@ -111,17 +109,24 @@ void ATimePuzzle::Tick(float DeltaTime)
 
 void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (bIsPuzzleTriggered)
+	if (bIsPuzzleTriggered || bIsPuzzleComplete)
 		return;
 
+	if (!Car)
+	{
+		Car = Cast<AToyCar>(OtherActor);
+	}
+
+	if (Car->GetIsInPuzzle())
+		return;
+
+	Car->SetIsInPuzzle(true);
 	bIsPuzzleTriggered = true;
 
 	for (int i = 0; i < 3; ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(false);
 	}
-
-	Car = Cast<AToyCar>(OtherActor);
 
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->BeginTimer();
@@ -143,7 +148,8 @@ void ATimePuzzle::OpenDoor()
 
 void ATimePuzzle::PuzzleComplete()
 {
-	bIsOpeningDoor = true;
+	bIsPuzzleTriggered = false;
+	bIsPuzzleComplete = true;
 
 	if (CameraDirector != nullptr)
 		CameraDirector->BeginTimePuzzleCameraChange(Car);
@@ -153,29 +159,37 @@ void ATimePuzzle::PuzzleComplete()
 
 	iDoorTime = MAX_DOOR_TIMER;
 	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
+	bIsOpeningDoor = true;
+	Car->SetIsInPuzzle(false);
+	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->RemoveTimerWidget();
 }
 
-void ATimePuzzle::PointManage()
+void ATimePuzzle::PointManage(float DeltaTime)
 {
 	if (!Actors.Num())
 		return;
 
-	TArray<UPrimitiveComponent*> components;
-
-	Actors[0]->GetOverlappingComponents(components);
-
-	for (UPrimitiveComponent* pComponent : components)
+	if (Actors[0]->IsOverlappingActor(Car))
 	{
-		if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
-		{
-			Actors[0]->SetActorHiddenInGame(true);
-			Actors.RemoveAt(0);
-			for (int i = 0; i < GetVisibleActors(); ++i)
-			{
-				Actors[i]->SetActorHiddenInGame(false);
-			}
-			return;
-		}
+		Actors[0]->SetActorHiddenInGame(true);
+		Actors.RemoveAt(0);
+		if (Actors.Num())
+			Actors[GetVisibleActors() - 1]->SetActorHiddenInGame(false);
+	}
+
+	if (!Actors.Num()) 
+	{
+		PuzzleComplete();
+	}
+	else 
+	{
+		float scale = Actors[0]->GetActorScale3D().X;
+		if (scale + (5*DeltaTime) <= 1.0f)
+			scale += 5*DeltaTime;
+		else
+			scale = 1.0f;
+		Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 }
 
@@ -201,6 +215,7 @@ void ATimePuzzle::PuzzleFailed()
 	for (AActor* Actor : Actors)
 	{
 		Actor->SetActorHiddenInGame(true);
+		Actor->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 	Actors = CopyActors;
 }

@@ -66,11 +66,14 @@ public:
 private:
 
 	int GetVisibleActors();
-	void PointManage();
+	void PointManage(float DeltaTime);
 	void PuzzleFailed();
 
 	bool bIsPuzzleTriggered;
+	bool bIsPuzzleComplete;
 	bool bIsOpeningDoor;
 
 	int iDoorTime;
+
+	float RingSmallScale;
 };

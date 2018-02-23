@@ -126,6 +126,9 @@ public:
 	bool GetCanMove() { return bCanMove; }
 	void SetCanMove(bool Value) { bCanMove = Value; }
 
+	bool GetIsInPuzzle() { return bIsInPuzzle; }
+	void SetIsInPuzzle(bool Value) { bIsInPuzzle = Value; }
+
 	// For the Friction Puzzle
 	void OnSticky();
 	void OffSticky();
@@ -168,6 +171,8 @@ private:
 	bool isBreaking;
 	//Set this to false if we don't want the car to be able to move
 	bool bCanMove;
+
+	bool bIsInPuzzle;
 
 	// For the friction puzzle
 	float fSitckyFriction;
