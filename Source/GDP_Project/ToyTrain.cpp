@@ -94,8 +94,8 @@ void AToyTrain::BeginPlay()
 	}
 
 	// Uncomment the two lines below to test the train puzzle from near the end
-	TrainState = PossessableTrain;
-	splinePointer = 0;
+	//TrainState = PossessableTrain4;
+	//splinePointer = 2750;
 }
 
 void AToyTrain::Restart()
@@ -139,12 +139,11 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 	else
 	{
-		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw + (30.0f * DeltaTime), 0.0f));
+		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
 		MoveForward(0.0f); // Make sure the train can't move
 		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
-			splinePointer = 0;
 		}
 	}
 
@@ -192,23 +191,20 @@ void AToyTrain::UpdateState()
 	case TRAIN_STATES::PossessableTrain2:
 	case TRAIN_STATES::PossessableTrain3:
 	case TRAIN_STATES::PossessableTrain5:
-		break;	
+		break;
+	case TRAIN_STATES::PossessableTrain6:
+		if(!CarriageAttached)
+			CarriageAttached = true;
+		break;
 	
 	case TRAIN_STATES::PossessableTrain4:
 		// Rotate the train then attach the carriage
-		break;
-
-	case TRAIN_STATES::PossessableTrain6:
-		if (splinePointer <= 0)
+		if (EndOfCurrentLine())
 		{
-			TrainState = TRAIN_STATES::PossessableTrain2;
-			splinePointer = pathPointLocation[TrainState].Num() - 2;
+			Rotating = true;
+			ChangeToState(PossessableTrain6);
 		}
 		break;
-
-		//if (StartOfCurrentLine())
-		//	CarriageAttached = true; // You've reached the carriage's location, attach it to the train.
-		//break;
 
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
