@@ -33,6 +33,7 @@ enum TRAIN_STATES
 	PossessableTrain3,
 	PossessableTrain4,
 	PossessableTrain5,
+	PossessableTrain6,
 
 	TRAIN_STATES_MAX
 };
@@ -63,6 +64,8 @@ private:
 
 	bool StartOfCurrentLine();
 	bool EndOfCurrentLine();
+
+	void SetTrainStateToChangeTo(int SwitchActivated);
 	
 	int splinePointer; //this counter is incremented in the Tick() function to move us to the next point on the spline
 	TArray<TArray<FVector>> pathPointLocation;//save sampled point locations into an array
@@ -73,7 +76,6 @@ private:
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;		// Current state of the train. Used to swap between train lines.
-	TRAIN_STATES NextTrainState;	// Next train state. Used to jump between spline gaps.
 
 	// Variables used in each train state
 	// Runaway train

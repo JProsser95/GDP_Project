@@ -26,6 +26,8 @@ public:
 	int GetNearestSwapper(AActor* ToyTrain, bool bSwaptrack = true);
 	void UpdateInteractionUI(AActor* ToyTrain);
 
+	bool IsSwapperActivated(int iSwapper);
+
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Swappers;
 

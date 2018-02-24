@@ -79,3 +79,8 @@ void ATrackSwappingManager::UpdateInteractionUI(AActor * ToyTrain)
 {
 	GetNearestSwapper(ToyTrain, false);
 }
+
+bool ATrackSwappingManager::IsSwapperActivated(int iSwapper)
+{
+	return Swappers[iSwapper]->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0) == MaterialOn;
+}

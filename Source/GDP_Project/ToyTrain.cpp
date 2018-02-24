@@ -13,7 +13,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), CarriageAttached(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), CarriageAttached(false), MovementDirection(0), TrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -94,8 +94,8 @@ void AToyTrain::BeginPlay()
 	}
 
 	// Uncomment the two lines below to test the train puzzle from near the end
-	//TrainState = RunawayTrain3;
-	//splinePointer = 0;
+	TrainState = PossessableTrain;
+	splinePointer = 0;
 }
 
 void AToyTrain::Restart()
@@ -189,18 +189,16 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::PossessableTrain:
+	case TRAIN_STATES::PossessableTrain2:
+	case TRAIN_STATES::PossessableTrain3:
+	case TRAIN_STATES::PossessableTrain5:
 		break;	
 	
-	case TRAIN_STATES::PossessableTrain2:
-		if (EndOfCurrentLine())
-		{
-			TrainState = NextTrainState;
-			splinePointer = 1;
-		}
-		break;
-	
-	case TRAIN_STATES::PossessableTrain3:
 	case TRAIN_STATES::PossessableTrain4:
+		// Rotate the train then attach the carriage
+		break;
+
+	case TRAIN_STATES::PossessableTrain6:
 		if (splinePointer <= 0)
 		{
 			TrainState = TRAIN_STATES::PossessableTrain2;
@@ -208,10 +206,9 @@ void AToyTrain::UpdateState()
 		}
 		break;
 
-	case TRAIN_STATES::PossessableTrain5:
-		if (StartOfCurrentLine())
-			CarriageAttached = true; // You've reached the carriage's location, attach it to the train.
-		break;
+		//if (StartOfCurrentLine())
+		//	CarriageAttached = true; // You've reached the carriage's location, attach it to the train.
+		//break;
 
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
@@ -319,6 +316,71 @@ bool AToyTrain::EndOfCurrentLine()
 	return splinePointer >= pathPointLocation[TrainState].Num() - 1;
 }
 
+void AToyTrain::SetTrainStateToChangeTo(int SwitchActivated)
+{
+	switch (SwitchActivated)
+	{
+	case 0:
+		if (TrainState == TRAIN_STATES::PossessableTrain)
+		{
+			if (TrackSwappingManager->IsSwapperActivated(1))
+				TrainState = TRAIN_STATES::PossessableTrain3; // Train yard
+			else if (TrackSwappingManager->IsSwapperActivated(2))
+			{
+				if (TrackSwappingManager->IsSwapperActivated(3))
+					TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+				else
+					TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+
+			}
+			else
+				TrainState = TRAIN_STATES::PossessableTrain2;
+		}
+		else
+			TrainState = TRAIN_STATES::PossessableTrain;
+		break;
+
+	case 1:
+		TrainState = TRAIN_STATES::PossessableTrain2;
+		if (TrackSwappingManager->IsSwapperActivated(1))
+			TrainState = TRAIN_STATES::PossessableTrain3; // Train yard
+		else if (TrackSwappingManager->IsSwapperActivated(2))
+		{
+			if (TrackSwappingManager->IsSwapperActivated(3))
+				TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+			else
+				TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+		}
+		break;
+
+	case 2:
+		TrainState = TRAIN_STATES::PossessableTrain2;
+		if(TrackSwappingManager->IsSwapperActivated(2))
+		{
+			if (TrackSwappingManager->IsSwapperActivated(3))
+				TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+			else
+				TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+		}
+		break;
+
+	case 3:
+		if (TrainState == TRAIN_STATES::PossessableTrain4)
+			TrainState = TRAIN_STATES::PossessableTrain5;
+		else
+			TrainState = TRAIN_STATES::PossessableTrain4;
+		break;
+
+	case 4:
+
+		break;
+
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("AToyTrain::SwapTrack has attempted to use an invalid Track Swapper"));
+		break;
+	}
+}
+
 // Called to bind functionality to input
 void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -348,39 +410,7 @@ void AToyTrain::SwapTrack()
 
 	if (SplineToSwap != -1)
 	{
-		switch (SplineToSwap)
-		{
-		case 0:
-			if (TrainState == TRAIN_STATES::PossessableTrain)
-			{
-				TrainState = TRAIN_STATES::PossessableTrain2;
-				if(NextTrainState == TRAIN_STATES::RunawayTrain)		// NextTrainState is set to RunawayTrain in constructor, so this should only happen once
-					NextTrainState = TRAIN_STATES::PossessableTrain3;	// Setup the spline jump between PossTrain2 and PossTrain3, see "case TRAIN_STATES::PossessableTrain2:"
-			}
-			else
-				TrainState = TRAIN_STATES::PossessableTrain;
-			break;
-
-		case 1:
-			if (NextTrainState == TRAIN_STATES::PossessableTrain3)
-				NextTrainState = TRAIN_STATES::PossessableTrain4;
-			else
-				NextTrainState = TRAIN_STATES::PossessableTrain3;
-			break;
-
-		case 2:
-			if (TrainState == TRAIN_STATES::PossessableTrain3)
-			{
-				TrainState = TRAIN_STATES::PossessableTrain5;
-				splinePointer = pathPointLocation[TrainState].Num() - (pathPointLocation[PossessableTrain3].Num() - splinePointer);
-			}
-			else
-			{
-				TrainState = TRAIN_STATES::PossessableTrain3;
-				splinePointer = pathPointLocation[TrainState].Num() - (pathPointLocation[PossessableTrain5].Num() - splinePointer);
-			}
-			break;
-		}
+		SetTrainStateToChangeTo(SplineToSwap);
 	}
 }
 
