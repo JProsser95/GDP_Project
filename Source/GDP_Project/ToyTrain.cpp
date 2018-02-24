@@ -95,7 +95,7 @@ void AToyTrain::BeginPlay()
 
 	// Uncomment the two lines below to test the train puzzle from near the end
 	//TrainState = PossessableTrain4;
-	//splinePointer = 2750;
+	//splinePointer = 1500;
 }
 
 void AToyTrain::Restart()
@@ -148,6 +148,15 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 
 	TrackSwappingManager->UpdateInteractionUI(this); // Update the train's interaction UI
+
+	if (PossessionChangerManager->PuzzleSolutionPadIsOverlapped())
+	{
+		BridgePieces[0]->SetActorLocation(FVector(1453.0f, 1854.0f, 150.5f));
+		BridgePieces[0]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
+
+		BridgePieces[1]->SetActorLocation(FVector(1703.0f, 1854.0f, 150.5f));
+		BridgePieces[1]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
+	}
 
 	//End movement at end of Spline
 	if (MeshComponent->IsOverlappingActor(TrainHouse) && CarriageAttached)
@@ -203,6 +212,7 @@ void AToyTrain::UpdateState()
 		{
 			Rotating = true;
 			ChangeToState(PossessableTrain6);
+			TrackSwappingManager->ForceSwitch(2, false);
 		}
 		break;
 
@@ -233,19 +243,30 @@ bool AToyTrain::AutomatedMovement()
 
 void AToyTrain::UpdateSplinePointer()
 {
-	if (MovementDirection == 1)
+	if (MeshComponent->IsOverlappingActor(RotatingTrack))
 	{
-		if (!MeshComponent->IsOverlappingActor(Obstacle))
+		--splinePointer; // Attempt to revert the spline pointer to remove the collision
+		UpdateTrainOnSpline();
+		if (MeshComponent->IsOverlappingActor(RotatingTrack)) // If we're still colliding then we must for gone the wrong way
 		{
-			if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
-				splinePointer = pathPointLocation[TrainState].Num() - 1;
+			splinePointer += 2;
+			UpdateTrainOnSpline();
 		}
 	}
-	else
-	{
-		if (--splinePointer < 0)
-			splinePointer = 0;
-	}
+		if (MovementDirection == 1)
+		{
+			if (!MeshComponent->IsOverlappingActor(Obstacle))
+			{
+				if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
+					splinePointer = pathPointLocation[TrainState].Num() - 1;
+			}
+		}
+		else
+		{
+			if (--splinePointer < 0)
+				splinePointer = 0;
+		}
+	
 }
 
 void AToyTrain::UpdateTrainOnSpline()
@@ -368,9 +389,12 @@ void AToyTrain::SetTrainStateToChangeTo(int SwitchActivated)
 		break;
 
 	case 4:
-
+	{
+		FRotator Rotation = RotatingTrack->GetActorRotation();
+		Rotation.Yaw += 90.0f;
+		RotatingTrack->SetActorRotation(FQuat(Rotation));
 		break;
-
+	}
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("AToyTrain::SwapTrack has attempted to use an invalid Track Swapper"));
 		break;

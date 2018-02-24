@@ -75,6 +75,17 @@ int ATrackSwappingManager::GetNearestSwapper(AActor* ToyTrain, bool bSwaptrack)
 	return -1;
 }
 
+void ATrackSwappingManager::ForceSwitch(int iSwitch, bool bState)
+{
+	if (MaterialOff && MaterialOn)
+	{
+		if (bState)
+			Swappers[iSwitch]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOn);
+		else
+			Swappers[iSwitch]->FindComponentByClass<UStaticMeshComponent>()->SetMaterial(0, MaterialOff);
+	}
+}
+
 void ATrackSwappingManager::UpdateInteractionUI(AActor * ToyTrain)
 {
 	GetNearestSwapper(ToyTrain, false);

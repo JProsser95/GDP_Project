@@ -121,20 +121,26 @@ protected:
 	UCameraComponent* OurCamera;
 
 	UPROPERTY(EditAnywhere)
+	APossessionChangerManager* PossessionChangerManager;
+
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	ATrackSwappingManager* TrackSwappingManager;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	TArray<AActor*> SplineBPs;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
 	AActor* Obstacle;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
+	AActor* RotatingTrack;
+
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
+	AActor* BridgePieces[2];
+
+	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	AActor* TrainHouse;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	TArray<AActor*> Carriages;
-
-	UPROPERTY(EditAnywhere)
-	APossessionChangerManager* PossessionChangerManager;
 };

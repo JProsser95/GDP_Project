@@ -34,6 +34,8 @@ public:
 
 	void ForceChangePossession(POSSESSABLE_VEHICLES NewVehicle);
 
+	bool PuzzleSolutionPadIsOverlapped();
+
 	UPROPERTY(EditAnywhere)
 	TArray<APawn*> Vehicles;
 	

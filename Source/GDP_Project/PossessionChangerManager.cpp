@@ -59,6 +59,21 @@ void APossessionChangerManager::ForceChangePossession(POSSESSABLE_VEHICLES NewVe
 	ChangePossession(NewVehicle);
 }
 
+bool APossessionChangerManager::PuzzleSolutionPadIsOverlapped()
+{
+	for (int i = 0; i < PossessionChangers.Num(); ++i)
+	{
+		if (PossessionChangers[i]->VehicleToChangeFrom == CurrentVehicle)
+		{
+			if(PossessionChangers[i]->PuzzleSolutionOverlapped(Vehicles[(int)CurrentVehicle]))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void APossessionChangerManager::ChangePossession(POSSESSABLE_VEHICLES NewVehicle)
 {
 	GetWorld()->GetFirstPlayerController()->Possess(Vehicles[(int)NewVehicle]);
