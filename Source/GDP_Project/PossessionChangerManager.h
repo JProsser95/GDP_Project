@@ -30,9 +30,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void CheckPossessionPads();
+	void CheckPossessionPads(bool bChangePossession = true);
 
 	void ForceChangePossession(POSSESSABLE_VEHICLES NewVehicle);
+
+	bool PuzzleSolutionPadIsOverlapped();
 
 	UPROPERTY(EditAnywhere)
 	TArray<APawn*> Vehicles;

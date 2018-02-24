@@ -32,6 +32,8 @@ enum TRAIN_STATES
 	PossessableTrain2,
 	PossessableTrain3,
 	PossessableTrain4,
+	PossessableTrain5,
+	PossessableTrain6,
 
 	TRAIN_STATES_MAX
 };
@@ -60,18 +62,20 @@ private:
 	void UpdateCarriages();
 	void CompleteTrainPuzzle();
 
-	bool isActive;
-	APawn* ToyCar;
+	bool StartOfCurrentLine();
+	bool EndOfCurrentLine();
+
+	void SetTrainStateToChangeTo(int SwitchActivated);
 	
 	int splinePointer; //this counter is incremented in the Tick() function to move us to the next point on the spline
 	TArray<TArray<FVector>> pathPointLocation;//save sampled point locations into an array
 	TArray<TArray<FQuat>> pathPointRotation;//save sampled point rotations into an array
 	
-	bool Rotating;
+	bool Rotating; // Is the train currently rotating?
+	bool CarriageAttached; // Has the carriage been attached to the train?
 
 	int MovementDirection;
-	TRAIN_STATES TrainState;
-	TRAIN_STATES NextTrainState;
+	TRAIN_STATES TrainState;		// Current state of the train. Used to swap between train lines.
 
 	// Variables used in each train state
 	// Runaway train
@@ -86,11 +90,6 @@ public:
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
 
-	bool GetIsActive() { return isActive; }
-	void SetIsActive(bool Value);
-
-	void SetToyCar(APawn* TC);
-
 	/** Handle pressing forwards */
 	void MoveForward(float fValue);	
 	// Possess other Actor;
@@ -102,6 +101,16 @@ public:
 	// Trigger functions that can be called from other classes
 	void TrackSwitcherHit(int TrackSwitchNumber);
 
+	// Accessors
+	int GetSplineCounter() { return splinePointer; }
+	TRAIN_STATES GetTrainState() { return TrainState; }
+	bool OnFailureTrainLine();
+	bool TrainPuzzleFailed();
+
+	// Mutators
+	void SetSplineCounter(int iSplineCounter) { splinePointer = iSplineCounter; }
+	void SetTrainState(TRAIN_STATES eTrainState) { TrainState = eTrainState; }
+
 protected:
 	// Allows the addition of a static mesh componenet in the editor
 	UPROPERTY(EditAnywhere)
@@ -112,20 +121,26 @@ protected:
 	UCameraComponent* OurCamera;
 
 	UPROPERTY(EditAnywhere)
+	APossessionChangerManager* PossessionChangerManager;
+
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	ATrackSwappingManager* TrackSwappingManager;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	TArray<AActor*> SplineBPs;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
 	AActor* Obstacle;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
+	AActor* RotatingTrack;
+
+	UPROPERTY(Category = TrackPieces, EditAnywhere)
+	AActor* BridgePieces[2];
+
+	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	AActor* TrainHouse;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	TArray<AActor*> Carriages;
-
-	UPROPERTY(EditAnywhere)
-	APossessionChangerManager* PossessionChangerManager;
 };

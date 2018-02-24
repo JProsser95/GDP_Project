@@ -39,6 +39,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	POSSESSABLE_VEHICLES VehicleToChangeTo;
+
+	UPROPERTY(EditAnywhere)
+	bool IsAPuzzleSolution;
 	
 	int ShouldChangePossession(APawn* FromVehicle);
+	bool PuzzleSolutionOverlapped(APawn* FromVehicle);
 };

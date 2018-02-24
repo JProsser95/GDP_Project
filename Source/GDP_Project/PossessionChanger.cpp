@@ -36,3 +36,8 @@ int APossessionChanger::ShouldChangePossession(APawn* FromVehicle)
 
 	return -1;
 }
+
+bool APossessionChanger::PuzzleSolutionOverlapped(APawn * FromVehicle)
+{
+	return IsAPuzzleSolution && IsOverlappingActor(FromVehicle);
+}

@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyTrain.h"
-#include "ToyCar.h"
 #include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 #include "GDP_ProjectGameModeBase.h"
@@ -14,7 +13,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), Rotating(false), MovementDirection(0), TrainState(RunawayTrain), NextTrainState(RunawayTrain)
+	: splinePointer(0), Rotating(false), CarriageAttached(false), MovementDirection(0), TrainState(RunawayTrain)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,10 +39,6 @@ AToyTrain::AToyTrain()
 
 	//Take control of the default Player
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-
-	ToyCar = nullptr;
-
-	isActive = true;
 
 	for (int i = 0; i < NUMBEROFTRACKSWITCHERS; ++i)
 	{
@@ -100,15 +95,15 @@ void AToyTrain::BeginPlay()
 
 	// Uncomment the two lines below to test the train puzzle from near the end
 	//TrainState = PossessableTrain4;
-	//splinePointer = 100;
+	//splinePointer = 1500;
 }
 
 void AToyTrain::Restart()
 {
 	Super::Restart();
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("ToyTrain");
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->ChangeHUD("ToyTrain");
 }
 
 // Called every frame
@@ -119,8 +114,9 @@ void AToyTrain::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	UpdateState();
+	UpdateState(); // Check train state and update if neccessary
 
+	// Handle the updating of the spline pointer
 	static float SplineTimer = 0.0f;
 
 	if (MovementDirection)
@@ -135,23 +131,35 @@ void AToyTrain::Tick(float DeltaTime)
 	else
 		SplineTimer = 0.0f;
 
+
+	// Move the train and its carriage
 	if (!Rotating)
 	{
 		UpdateTrainOnSpline();
 	}
 	else
 	{
-		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw + (30.0f * DeltaTime), 0.0f));
-		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][0].Rotator().Yaw) < 1.0f)
+		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
+		MoveForward(0.0f); // Make sure the train can't move
+		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
-			//LineSwapped = true;
-			splinePointer = 0;
 		}
 	}
 
+	TrackSwappingManager->UpdateInteractionUI(this); // Update the train's interaction UI
+
+	if (PossessionChangerManager->PuzzleSolutionPadIsOverlapped())
+	{
+		BridgePieces[0]->SetActorLocation(FVector(1453.0f, 1854.0f, 150.5f));
+		BridgePieces[0]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
+
+		BridgePieces[1]->SetActorLocation(FVector(1703.0f, 1854.0f, 150.5f));
+		BridgePieces[1]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
+	}
+
 	//End movement at end of Spline
-	if (MeshComponent->IsOverlappingActor(TrainHouse))
+	if (MeshComponent->IsOverlappingActor(TrainHouse) && CarriageAttached)
 	{
 		CompleteTrainPuzzle();
 	}
@@ -184,25 +192,27 @@ void AToyTrain::UpdateState()
 		if (!AutomatedMovement())
 		{
 			ChangeToState(PossessableTrain);
-			splinePointer = pathPointLocation[TrainState].Num() - 1;
+			Rotating = true; // The train will rotate BEFORE the player can move on the new line
 		}
 		break;
 
 	case TRAIN_STATES::PossessableTrain:
-		break;
-	case TRAIN_STATES::PossessableTrain3:
-	case TRAIN_STATES::PossessableTrain4:
-		if (splinePointer <= 0)
-		{
-			TrainState = TRAIN_STATES::PossessableTrain2;
-			splinePointer = pathPointLocation[TrainState].Num() - 2;
-		}
-		break;
 	case TRAIN_STATES::PossessableTrain2:
-		if (splinePointer >= pathPointLocation[TrainState].Num() - 1)
+	case TRAIN_STATES::PossessableTrain3:
+	case TRAIN_STATES::PossessableTrain5:
+		break;
+	case TRAIN_STATES::PossessableTrain6:
+		if(!CarriageAttached)
+			CarriageAttached = true;
+		break;
+	
+	case TRAIN_STATES::PossessableTrain4:
+		// Rotate the train then attach the carriage
+		if (EndOfCurrentLine())
 		{
-			TrainState = NextTrainState;
-			splinePointer = 1;
+			Rotating = true;
+			ChangeToState(PossessableTrain6);
+			TrackSwappingManager->ForceSwitch(2, false);
 		}
 		break;
 
@@ -223,7 +233,7 @@ void AToyTrain::ChangeToState(TRAIN_STATES newState)
 
 bool AToyTrain::AutomatedMovement()
 {
-	if (splinePointer < pathPointLocation[TrainState].Num() - 1)
+	if (!EndOfCurrentLine())
 	{
 		MoveForward(1.0f);
 		return true;
@@ -233,19 +243,30 @@ bool AToyTrain::AutomatedMovement()
 
 void AToyTrain::UpdateSplinePointer()
 {
-	if (MovementDirection == 1)
+	if (MeshComponent->IsOverlappingActor(RotatingTrack))
 	{
-		if (!MeshComponent->IsOverlappingActor(Obstacle))
+		--splinePointer; // Attempt to revert the spline pointer to remove the collision
+		UpdateTrainOnSpline();
+		if (MeshComponent->IsOverlappingActor(RotatingTrack)) // If we're still colliding then we must for gone the wrong way
 		{
-			if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
-				splinePointer = pathPointLocation[TrainState].Num() - 1;
+			splinePointer += 2;
+			UpdateTrainOnSpline();
 		}
 	}
-	else
-	{
-		if (--splinePointer < 0)
-			splinePointer = 0;
-	}
+		if (MovementDirection == 1)
+		{
+			if (!MeshComponent->IsOverlappingActor(Obstacle))
+			{
+				if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
+					splinePointer = pathPointLocation[TrainState].Num() - 1;
+			}
+		}
+		else
+		{
+			if (--splinePointer < 0)
+				splinePointer = 0;
+		}
+	
 }
 
 void AToyTrain::UpdateTrainOnSpline()
@@ -258,6 +279,9 @@ void AToyTrain::UpdateTrainOnSpline()
 
 void AToyTrain::UpdateCarriages()
 {
+	if (!CarriageAttached) // The carriage is not attached, so don't update its location
+		return;
+
 	int carriageSplinePointer = 0;
 	for (int i = 0; i < Carriages.Num(); ++i)
 	{
@@ -275,6 +299,21 @@ void AToyTrain::UpdateCarriages()
 	}
 }
 
+bool AToyTrain::OnFailureTrainLine()
+{
+	return TrainState == TRAIN_STATES::RunawayTrain_Failed || TrainState == TRAIN_STATES::RunawayTrain2_Failed;
+}
+
+bool AToyTrain::TrainPuzzleFailed()
+{
+	if (OnFailureTrainLine())
+	{
+		return EndOfCurrentLine();
+	}
+
+	return false; // We haven't failed the train puzzle
+}
+
 void AToyTrain::CompleteTrainPuzzle()
 {
 	OUTPUT_STRING("END");
@@ -282,6 +321,84 @@ void AToyTrain::CompleteTrainPuzzle()
 	
 	if (PossessionChangerManager)
 		PossessionChangerManager->ForceChangePossession(POSSESSABLE_VEHICLES::Car);
+}
+
+bool AToyTrain::StartOfCurrentLine()
+{
+	return splinePointer <= 0;
+}
+
+bool AToyTrain::EndOfCurrentLine()
+{
+	return splinePointer >= pathPointLocation[TrainState].Num() - 1;
+}
+
+void AToyTrain::SetTrainStateToChangeTo(int SwitchActivated)
+{
+	switch (SwitchActivated)
+	{
+	case 0:
+		if (TrainState == TRAIN_STATES::PossessableTrain)
+		{
+			if (TrackSwappingManager->IsSwapperActivated(1))
+				TrainState = TRAIN_STATES::PossessableTrain3; // Train yard
+			else if (TrackSwappingManager->IsSwapperActivated(2))
+			{
+				if (TrackSwappingManager->IsSwapperActivated(3))
+					TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+				else
+					TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+
+			}
+			else
+				TrainState = TRAIN_STATES::PossessableTrain2;
+		}
+		else
+			TrainState = TRAIN_STATES::PossessableTrain;
+		break;
+
+	case 1:
+		TrainState = TRAIN_STATES::PossessableTrain2;
+		if (TrackSwappingManager->IsSwapperActivated(1))
+			TrainState = TRAIN_STATES::PossessableTrain3; // Train yard
+		else if (TrackSwappingManager->IsSwapperActivated(2))
+		{
+			if (TrackSwappingManager->IsSwapperActivated(3))
+				TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+			else
+				TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+		}
+		break;
+
+	case 2:
+		TrainState = TRAIN_STATES::PossessableTrain2;
+		if(TrackSwappingManager->IsSwapperActivated(2))
+		{
+			if (TrackSwappingManager->IsSwapperActivated(3))
+				TrainState = TRAIN_STATES::PossessableTrain5; // Track rotator controls
+			else
+				TrainState = TRAIN_STATES::PossessableTrain4; // To the carriage
+		}
+		break;
+
+	case 3:
+		if (TrainState == TRAIN_STATES::PossessableTrain4)
+			TrainState = TRAIN_STATES::PossessableTrain5;
+		else
+			TrainState = TRAIN_STATES::PossessableTrain4;
+		break;
+
+	case 4:
+	{
+		FRotator Rotation = RotatingTrack->GetActorRotation();
+		Rotation.Yaw += 90.0f;
+		RotatingTrack->SetActorRotation(FQuat(Rotation));
+		break;
+	}
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("AToyTrain::SwapTrack has attempted to use an invalid Track Swapper"));
+		break;
+	}
 }
 
 // Called to bind functionality to input
@@ -294,16 +411,6 @@ void AToyTrain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Posses", IE_Released, this, &AToyTrain::ChangePossesion);
 
 	PlayerInputComponent->BindAction("TrainSwapTrack", IE_Released, this, &AToyTrain::SwapTrack);
-}
-
-void AToyTrain::SetIsActive(bool Value)
-{
-	isActive = Value;
-}
-
-void AToyTrain::SetToyCar(APawn* TC)
-{
-	ToyCar = TC;
 }
 
 void AToyTrain::MoveForward(float fValue)
@@ -323,26 +430,7 @@ void AToyTrain::SwapTrack()
 
 	if (SplineToSwap != -1)
 	{
-		switch (SplineToSwap)
-		{
-		case 0:
-			if (TrainState == TRAIN_STATES::PossessableTrain)
-			{
-				TrainState = TRAIN_STATES::PossessableTrain2;
-				if(NextTrainState == TRAIN_STATES::RunawayTrain)
-					NextTrainState = TRAIN_STATES::PossessableTrain3;
-			}
-			else
-				TrainState = TRAIN_STATES::PossessableTrain;
-			break;
-
-		case 1:
-			if (NextTrainState == TRAIN_STATES::PossessableTrain3)
-				NextTrainState = TRAIN_STATES::PossessableTrain4;
-			else
-				NextTrainState = TRAIN_STATES::PossessableTrain3;
-			break;
-		}
+		SetTrainStateToChangeTo(SplineToSwap);
 	}
 }
 

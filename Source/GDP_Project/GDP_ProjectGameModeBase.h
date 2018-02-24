@@ -42,6 +42,9 @@ public:
 	void SetVehicleHUD();
 	void RemoveVehicleHUD();
 
+	void SetInteractionHUD();
+	void RemoveInteractionHUD();
+
 	void SetPlanePartCollected(PlaneParts PartCollected);
 	bool GetPlanePartCollected(PlaneParts PartCollected);
 
@@ -76,7 +79,10 @@ protected:
 	TSubclassOf<class UUserWidget> PlanePartsHUDClass; // The main HUD. Used to display plane parts collected.
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
-	TSubclassOf<class UUserWidget> TimePuzzleHUDClass; // The main HUD. Used to display plane parts collected.
+	TSubclassOf<class UUserWidget> TimePuzzleHUDClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> InteractionHUDClass; // Used to display when an object can be interacted with
 
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
@@ -89,6 +95,9 @@ protected:
 
 	UPROPERTY()
 	UUserWidget* TimerWidget;
+
+	UPROPERTY()
+	UUserWidget* InteractionWidget;
 
 	FTimerHandle Timer;
 
