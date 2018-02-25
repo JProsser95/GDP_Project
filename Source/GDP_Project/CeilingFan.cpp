@@ -58,6 +58,7 @@ void ACeilingFan::PushPlane(float DeltaTime)
 {
 	if (FanAirFlow->IsOverlappingActor(ToyPlane))
 	{
-		ToyPlane->SetActorLocation(ToyPlane->GetActorLocation() - FVector(0.0f, 0.0f, 350.0f * DeltaTime));
+		ToyPlane->MoveUp(-1.0f);
+		ToyPlane->SetActorLocation(ToyPlane->GetActorLocation() - FVector(0.0f, 0.0f, 100.0f * DeltaTime));
 	}
 }

@@ -116,6 +116,8 @@ public:
 	void SetIsActive(bool Value);
 	bool GetIsActive() { return bIsActive; }
 
+	void MoveUp(float AxisValue);
+
 protected:
 
 	// The buleprint for the camera shake 
@@ -151,7 +153,6 @@ protected:
 	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	//Input functions
-	void MoveUp(float AxisValue);
 	void MoveRight(float AxisValue);
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);

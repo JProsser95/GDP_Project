@@ -12,7 +12,7 @@
 
 // Sets default values
 AToyPlane::AToyPlane()
-	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.5f), TurnSpeed(2.5f), PropRotateSpeed(3.0f),
+	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.5f), TurnSpeed(1.0f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f),
 	ControlTypeRealistic(false)
 {
