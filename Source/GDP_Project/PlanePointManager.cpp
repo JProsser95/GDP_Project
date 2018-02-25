@@ -8,7 +8,7 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
-	:ToyPlane(nullptr), BoostIncrement(10.0f), VisibleRings(3), RingSmallScale(0.25f)
+	:ToyPlane(nullptr), BoostIncrement(3.125f), VisibleRings(10), RingSmallScale(0.25f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,7 +48,8 @@ void APlanePointManager::Tick(float DeltaTime)
 
 		GetWorld()->DestroyActor(Actors[0]);
 		Actors.RemoveAt(0);
-		for (int i = GetVisibleActors()-1; i < GetVisibleActors(); ++i)
+		int i(GetVisibleActors() - 1);
+		if (i >= 0)
 		{
 			Actors[i]->SetActorHiddenInGame(false);
 			Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
