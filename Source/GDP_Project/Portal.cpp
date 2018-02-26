@@ -2,7 +2,6 @@
 
 #include "Portal.h"
 #include "Components/SceneComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -28,20 +27,6 @@ APortal::APortal()
 
 	PortalEndPoint = CreateDefaultSubobject<USceneComponent>(TEXT("EndPointComponent"));
 	PortalEndPoint->SetupAttachment(RootComponent);
-
-	//For testing
-	PortalStartWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RespawnWidgetComponent"));
-	PortalStartWidget->SetupAttachment(PortalTriggerBox);
-	PortalStartWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	PortalStartWidget->SetTwoSided(true);
-
-	//For testing
-	PortalEndWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RespawnWidgetComponent2"));
-	PortalEndWidget->SetupAttachment(PortalEndPoint);
-	static ConstructorHelpers::FClassFinder<UUserWidget> AWidget(TEXT("/Game/TestingPurpose/RespawnSpot"));
-	PortalEndWidget->SetWidgetClass(AWidget.Class);
-	PortalEndWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	PortalEndWidget->SetTwoSided(true);
 }
 
 // Called when the game starts or when spawned
@@ -54,12 +39,6 @@ void APortal::BeginPlay()
 void APortal::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//For the widget testing
-	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	PortalStartWidget->SetRelativeRotation(PlayerRot);
-	PortalEndWidget->SetRelativeRotation(PlayerRot);
 }
 
 void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -67,41 +46,22 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 	if (!OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
-
 	FOutputDeviceNull ar;
 
 	// This switch can be removed if anyone can figure out how to pass an argument using FOutputDevice!
 	switch (_PuzzleName)
 	{
-		//case CAMERA_PUZZLE:
-		//
-		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowCameraPuzzleLevel"), ar, NULL, true);
-		//	break;
-		//
-		//case TIMER_PUZZLE:
-		//
-		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowTimerPuzzleLevel"), ar, NULL, true);
-		//	break;
-		//
-		//case FRICTION_PUZZLE:
-		//
-		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowFrictionPuzzleLevel"), ar, NULL, true);
-		//	break;
-		//
-		//case LAVA_PUZZLE:
-		//
-		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLavaPuzzleLevel"), ar, NULL, true);
-		//	break;
-		//
-		//case PLANE_PUZZLE:
-		//
-		//	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlanePuzzleLevel"), ar, NULL, true);
-		//	break;
+		case WARP_ROOM:
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowWarpRoom"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideLounge"), ar, NULL, true);
+			break;
 
 		case LOUNGE:
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLounge"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
 			break;
 	}
 
 	OtherActor->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
+
 }

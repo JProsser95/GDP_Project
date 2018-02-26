@@ -58,6 +58,8 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
 
@@ -72,10 +74,12 @@ private:
 
 	void Wait();
 	void Action();
+	void CameraHit();
 
 	bool bIsActive;
 	bool bIsRotating;
 	bool bIsShining;
+	bool bIsSafe;
 
 	int iWaitTime;
 	int iActionTime;

@@ -15,7 +15,7 @@ const int ACTION_TIME(7);
 
 // Sets default values
 ACamera::ACamera()
-	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(false), bIsShining(true), iWaitTime(WAIT_TIME), iActionTime(ACTION_TIME)
+	: eDirection(CLOCKWISE), rOriginalRotation(0, 0, 0), bIsActive(false), bIsRotating(false), bIsShining(true), bIsSafe(true), iWaitTime(WAIT_TIME), iActionTime(ACTION_TIME)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -42,6 +42,7 @@ ACamera::ACamera()
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ACamera::OnBeginOverlap);
+	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ACamera::OnEndOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 	TriggerBox->SetWorldScale3D(FVector(4.25f, 3.5f, 4.75f));
 }
@@ -80,26 +81,26 @@ void ACamera::Tick(float DeltaTime)
 		this->SetActorRotation(NewRotation);
 
 	}
-
 	
 }
 
 void ACamera::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (!bIsActive || !bIsShining || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
+	if (!bIsActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
 
-	bIsActive = false;
-
-	for (TActorIterator<ACamera> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	if (!bIsShining)
 	{
-		ActorItr->SetIsActive(false);
+		bIsSafe = false;
+		return;
 	}
 
-	for (TActorIterator<ACameraPuzzle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		ActorItr->PuzzleFailed();
-	}
+	CameraHit();
+}
+
+void ACamera::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bIsSafe = true;
 }
 
 void ACamera::Wait()
@@ -122,13 +123,15 @@ void ACamera::Wait()
 
 			SpotLightComponent->SetIntensity(100000.0f);
 			bIsShining = true;
+			if (!bIsSafe)
+			{
+				CameraHit();
+			}
 		}
 
 		iWaitTime = WAIT_TIME;
 		GetWorldTimerManager().ClearTimer(WaitTimer);
 		GetWorldTimerManager().SetTimer(ActionTimer, this, &ACamera::Action, 1.0f, true, 0.0f);
-
-		
 	}
 }
 
@@ -175,5 +178,21 @@ void ACamera::SetIsActive(bool Value)
 		}
 
 		this->SetActorRotation(rOriginalRotation);
+	}
+}
+
+void ACamera::CameraHit()
+{
+	bIsActive = false;
+	bIsSafe = true;
+
+	for (TActorIterator<ACamera> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->SetIsActive(false);
+	}
+
+	for (TActorIterator<ACameraPuzzle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->PuzzleFailed();
 	}
 }

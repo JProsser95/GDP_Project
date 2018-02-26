@@ -17,7 +17,9 @@ enum PuzzleName {
 	//FRICTION_PUZZLE		UMETA(DisplayName = "Friction Puzzle"),
 	//LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle"),
 	//PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
-	LOUNGE				UMETA(DisplayName = "Lounge")
+	WARP_ROOM			UMETA(DisplayName = "Warp Room"),
+	LOUNGE				UMETA(DisplayName = "Lounge"),
+	KITCHEN				UMETA(DisplayName = "Kitchen")
 
 };
 
@@ -33,13 +35,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	/** Widgets for testing */
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* PortalStartWidget;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* PortalEndWidget;
 
 	UPROPERTY(EditAnywhere)
 	USceneComponent* PortalEndPoint;

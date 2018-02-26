@@ -27,31 +27,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* WarpRoomReturnPoint;
 
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* LoungeReturnPointWidget;
-
-	//UPROPERTY(EditAnywhere)
-	//UWidgetComponent* TimerPuzzleCompleteWidget;
-	//
-	//UPROPERTY(EditAnywhere)
-	//UWidgetComponent* FrictionPuzzleCompleteWidget;
-	//
-	//UPROPERTY(EditAnywhere)
-	//UWidgetComponent* LavaPuzzleCompleteWidget;
-
-
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* LoungeReturnPointTriggerBox;
-
-	//UPROPERTY(EditAnywhere)
-	//UBoxComponent* TimerPuzzleTriggerBox;
-	//
-	//UPROPERTY(EditAnywhere)
-	//UBoxComponent* FrictionPuzzleTriggerBox;
-	//
-	//UPROPERTY(EditAnywhere)
-	//UBoxComponent* LavaPuzzleTriggerBox;
 
 public:	
 	// Called every frame
