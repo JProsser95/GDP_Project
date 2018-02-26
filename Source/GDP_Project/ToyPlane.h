@@ -67,7 +67,10 @@ private:
 	float BoostSpeedIncrement;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool SwapSWandArrows;
+	bool SwapSwAndArrows;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	bool PitchInverted;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PitchAmount;

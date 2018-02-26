@@ -16,7 +16,7 @@ AToyPlane::AToyPlane()
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.1f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false), SwapSWandArrows(false)
+	bAlreadyRestarted(false), SwapSwAndArrows(false), PitchInverted(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -239,10 +239,14 @@ void AToyPlane::InterpolateMovementInput(float DeltaTime)
 {
 	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
 	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
-	if (!SwapSWandArrows)
+
+	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
+	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
+
+	if (!SwapSwAndArrows)
 	{
 		MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
-		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);
+		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);		
 	}
 	else
 	{
@@ -254,6 +258,8 @@ void AToyPlane::InterpolateMovementInput(float DeltaTime)
 //Input functions
 void AToyPlane::Pitch(float AxisValue)
 {
+	if (PitchInverted && !SwapSwAndArrows)
+		AxisValue *= -1.0f;
 	TargetInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
@@ -269,7 +275,8 @@ void AToyPlane::Roll(float AxisValue)
 
 void AToyPlane::Throttle(float AxisValue)
 {
-	//TargetInput.W = FMath::Clamp<float>(MovementInput.X, -1.0f, 1.0f);
+	if (PitchInverted && SwapSwAndArrows)
+		AxisValue *= -1.0f;
 	TargetInput.W = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
