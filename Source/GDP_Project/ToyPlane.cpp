@@ -14,6 +14,7 @@
 AToyPlane::AToyPlane()
 	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), RotateSpeed(1.5f), TurnSpeed(1.0f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f),
+	bAlreadyRestarted(false),
 	ControlTypeRealistic(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -80,6 +81,12 @@ void AToyPlane::Restart()
 
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->ChangeHUD("ToyPlane");
+
+	if (bAlreadyRestarted)
+		bIsActive = true;
+	else
+		bAlreadyRestarted = true;
+
 }
 
 // Called when the game starts or when spawned

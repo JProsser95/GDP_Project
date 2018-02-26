@@ -80,6 +80,7 @@ private:
 
 	float fPropRotation;
 	float fSpeed;
+	bool bAlreadyRestarted;
 
 public:	
 	// Called every frame
