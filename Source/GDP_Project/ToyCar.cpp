@@ -33,7 +33,7 @@ AToyCar::AToyCar()
 	// Anti flip rotation
 	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true), 
 	// Camera
-	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(3.0f), fLastUnFocusTime(-AutoFocusDelay)
+	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));

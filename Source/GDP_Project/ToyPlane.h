@@ -64,19 +64,37 @@ private:
 	float BoostSpeedIncrement;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	float RotateSpeed;
+	float PitchAmount;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	float TurnSpeed;
+	float YawAmount;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float RollAmount;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PropRotateSpeed;
 
+	UPROPERTY(Category = Camera, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FRotator CameraRotation;
+	FRotator CameraRotationOffset;
+
+	UPROPERTY(Category = Camera, EditAnywhere)
+	bool AutoFocus;
+
+	UPROPERTY(Category = Camera, EditAnywhere)
+	float AutoFocusDelay;
+	float fLastUnFocusTime;
+
+	// (0-1) Lerp amount per second for changing the rotate speed to the maximum rotation speed
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	float RotationInterpolation;
+
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	bool bIsActive;
 
-	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool ControlTypeRealistic;
+	// Resets the camera to the be directly behind the plane
+	void UpdateCamera(float DeltaTime);
 
 	float fPropRotation;
 	float fSpeed;
@@ -117,8 +135,7 @@ public:
 	void SetIsActive(bool Value);
 	bool GetIsActive() { return bIsActive; }
 
-	void MoveUp(float AxisValue);
-
+	void RotateDown(float DeltaTime);
 protected:
 
 	// The buleprint for the camera shake 
@@ -146,17 +163,25 @@ protected:
 	CameraType eCameraType;
 	
 	//Input variables
-	FVector2D MovementInput;
+	FVector4 TargetInput;
+	FVector4 MovementInput;
 	FVector2D CameraInput;
 
 	//Collision functions
 	UFUNCTION()
 	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
+	void InterpolateMovementInput(float DeltaTime);
+
 	//Input functions
-	void MoveRight(float AxisValue);
+	void Pitch(float AxisValue);
+	void Yaw(float AxisValue);
+	void Roll(float AxisValue);
+	void Throttle(float AxisValue);
+
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);
+
 	void StartBoost();
 	void EndBoost();
 	void CameraZoom();
