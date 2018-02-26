@@ -39,7 +39,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float BoostIncrement;
 
-	void AllPointsCollected();
+	void AllPointsCollected(float DeltaTime);
 private:
 	UPROPERTY(EditAnywhere)
 	int VisibleRings;

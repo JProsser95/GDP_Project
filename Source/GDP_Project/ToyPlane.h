@@ -55,6 +55,9 @@ private:
 	float MaxSpeed;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
+	float MaxBoostSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
 	float CamShakeSpeed;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
@@ -62,6 +65,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float BoostSpeedIncrement;
+
+	UPROPERTY(EditAnywhere, Category = "Plane")
+	bool SwapSWandArrows;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PitchAmount;
@@ -136,6 +142,9 @@ public:
 	bool GetIsActive() { return bIsActive; }
 
 	void RotateDown(float DeltaTime);
+	void FlyTowards(FVector targetPosition, float DeltaTime);
+
+	void StartBoost();
 protected:
 
 	// The buleprint for the camera shake 
@@ -182,7 +191,6 @@ protected:
 	void PitchCamera(float AxisValue);
 	void YawCamera(float AxisValue);
 
-	void StartBoost();
 	void EndBoost();
 	void CameraZoom();
 };

@@ -56,7 +56,7 @@ void APlanePointManager::Tick(float DeltaTime)
 		}
 	}
 	if (!Actors.Num())
-		AllPointsCollected();
+		AllPointsCollected(DeltaTime);
 	else
 	{
 		float scale = Actors[0]->GetActorScale3D().X;
@@ -76,7 +76,8 @@ int APlanePointManager::GetVisibleActors()
 	return Actors.Num();
 }
 
-void APlanePointManager::AllPointsCollected()
+void APlanePointManager::AllPointsCollected(float DeltaTime)
 {
-	OUTPUT_FSTRING("All \"rings\" have been collected!");
+	ToyPlane->StartBoost();
+	ToyPlane->FlyTowards(FVector(7000.0f, -11000.0f, 1540.0f), DeltaTime);
 }

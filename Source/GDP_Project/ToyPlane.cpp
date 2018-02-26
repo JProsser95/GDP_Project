@@ -12,11 +12,11 @@
 
 // Sets default values
 AToyPlane::AToyPlane()
-	:MinSpeed(400.0f), MaxSpeed(600.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
+	:MinSpeed(400.0f), MaxSpeed(600.0f), MaxBoostSpeed(800.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.1f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false)
+	bAlreadyRestarted(false), SwapSWandArrows(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -126,7 +126,11 @@ void AToyPlane::Tick(float DeltaTime)
 	else
 	{
 		fSpeed += MovementInput.W * SpeedIncrement * DeltaTime;
-		fSpeed = FMath::Clamp(fSpeed, MinSpeed, MaxSpeed);
+		if (!IsBoosting)
+			fSpeed = FMath::Clamp(fSpeed, MinSpeed, MaxSpeed);
+		else
+			fSpeed = FMath::Clamp(fSpeed, MinSpeed, MaxBoostSpeed);
+
 	}
 
 	if (fSpeed >= CamShakeSpeed) 
@@ -225,11 +229,26 @@ void AToyPlane::RotateDown(float DeltaTime)
 	SetActorRotation(FQuat::FastLerp(oldRotation.Quaternion(), targetRotation.Quaternion(), DeltaTime));
 }
 
+void AToyPlane::FlyTowards(FVector targetPosition, float DeltaTime)
+{
+	FRotator targetRotation = (targetPosition - GetActorLocation()).Rotation();
+	SetActorRotation(FQuat::FastLerp(GetActorRotation().Quaternion(), targetRotation.Quaternion(), DeltaTime));
+}
+
 void AToyPlane::InterpolateMovementInput(float DeltaTime)
 {
-	MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
 	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
 	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
+	if (!SwapSWandArrows)
+	{
+		MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
+		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);
+	}
+	else
+	{
+		MovementInput.X = FMath::Lerp(MovementInput.X, -TargetInput.W, RotationInterpolation * DeltaTime);
+		MovementInput.W = FMath::Lerp(MovementInput.W, -TargetInput.X, RotationInterpolation * DeltaTime);
+	}
 }
 
 //Input functions
@@ -251,7 +270,7 @@ void AToyPlane::Roll(float AxisValue)
 void AToyPlane::Throttle(float AxisValue)
 {
 	//TargetInput.W = FMath::Clamp<float>(MovementInput.X, -1.0f, 1.0f);
-	MovementInput.W = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+	TargetInput.W = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
 //void AToyPlane::MoveUp(float AxisValue)
