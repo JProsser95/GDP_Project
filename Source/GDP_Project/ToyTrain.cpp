@@ -144,6 +144,7 @@ void AToyTrain::Tick(float DeltaTime)
 		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
 		{
 			Rotating = false;
+			splinePointer = 0;
 		}
 	}
 
