@@ -16,6 +16,7 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Macros.h"
+#include "BackgroundMusicManager.h"
 
 const int MAX_DOOR_TIMER(5);
 
@@ -120,6 +121,12 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	if (Car->GetIsInPuzzle())
 		return;
 
+	// Get the Camera Director that is in the scene
+	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->SetSound(ABackgroundMusicManager::Sounds::TIMER_PUZZLE);
+	}
+
 	Car->SetIsInPuzzle(true);
 	bIsPuzzleTriggered = true;
 
@@ -156,6 +163,12 @@ void ATimePuzzle::PuzzleComplete()
 
 	if (Car != nullptr)
 		Car->SetCanMove(false);
+
+	// Get the Camera Director that is in the scene
+	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->SetSound(ABackgroundMusicManager::Sounds::MAIN);
+	}
 
 	iDoorTime = MAX_DOOR_TIMER;
 	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
