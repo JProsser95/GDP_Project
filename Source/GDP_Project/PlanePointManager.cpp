@@ -8,7 +8,7 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
-	:ToyPlane(nullptr), BoostIncrement(3.125f), VisibleRings(10), RingSmallScale(0.25f)
+	:ToyPlane(nullptr), BoostIncrement(3.125f), VisibleRings(10), RingSmallScale(0.25f), ResizeScale(2.0f), ResizeRate(2.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -22,6 +22,12 @@ void APlanePointManager::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("ToyPlane has not been setup in PlanePointManager!"));
 	}
+	if (Actors[0])
+	{
+		Actors[0]->SetActorRelativeScale3D(FVector(ResizeScale));
+	}
+	else
+		UE_LOG(LogTemp, Error, TEXT("ERROR: Plane Points Not Setup Correctly!"));
 
 	for (int i = 1; i < GetVisibleActors(); ++i)
 	{
@@ -56,14 +62,15 @@ void APlanePointManager::Tick(float DeltaTime)
 		}
 	}
 	if (!Actors.Num())
-		AllPointsCollected();
+		AllPointsCollected(DeltaTime);
 	else
 	{
 		float scale = Actors[0]->GetActorScale3D().X;
-		if (scale + DeltaTime <= 1.0f)
-			scale += DeltaTime;
+		float newScale(scale + (DeltaTime * ResizeRate));
+		if (newScale <= ResizeScale)
+			scale = newScale;
 		else
-			scale = 1.0f;
+			scale = ResizeScale;
 		Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 
@@ -76,7 +83,8 @@ int APlanePointManager::GetVisibleActors()
 	return Actors.Num();
 }
 
-void APlanePointManager::AllPointsCollected()
+void APlanePointManager::AllPointsCollected(float DeltaTime)
 {
-	OUTPUT_FSTRING("All \"rings\" have been collected!");
+	ToyPlane->StartBoost();
+	ToyPlane->FlyTowards(FVector(7000.0f, -11000.0f, 1540.0f), DeltaTime);
 }
