@@ -68,11 +68,11 @@ AToyPlane::AToyPlane()
 
 	fSpeed = 0.0f;
 	IsBoosting = false;
-	bIsActive = true;
+	bIsActive = false;
 	fPropRotation = 0.0f;
 
 	//Take control of the default Player
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
