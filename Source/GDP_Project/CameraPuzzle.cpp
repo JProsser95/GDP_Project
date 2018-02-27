@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Macros.h"
 #include "ToyCar.h"
+#include "BackgroundMusicManager.h"
 
 //const int MAX_SAFE_HEIGHT(450);
 const int MAX_SAFE_TIMER(6);
@@ -141,6 +142,11 @@ void ACameraPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 		return;
 
 	Car->SetIsInPuzzle(true);
+
+	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->SetSound(ABackgroundMusicManager::Sounds::CAMERA_PUZZLE);
+	}
 
 	bIsActive = true;
 	bPuzzleFailed = false;
