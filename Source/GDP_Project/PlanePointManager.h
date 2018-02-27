@@ -39,6 +39,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	float BoostIncrement;
 
+	// Scale to resize towards
+	UPROPERTY(EditAnywhere)
+	float ResizeScale;
+
+	// Resize rate per second
+	UPROPERTY(EditAnywhere)
+	float ResizeRate;
+
 	void AllPointsCollected(float DeltaTime);
 private:
 	UPROPERTY(EditAnywhere)

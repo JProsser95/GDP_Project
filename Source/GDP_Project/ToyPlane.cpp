@@ -14,7 +14,7 @@
 AToyPlane::AToyPlane()
 	:MinSpeed(400.0f), MaxSpeed(600.0f), MaxBoostSpeed(800.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
-	RotationInterpolation(0.1f),
+	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
 	bAlreadyRestarted(false), SwapSwAndArrows(false), PitchInverted(false)
 {
@@ -56,12 +56,13 @@ AToyPlane::AToyPlane()
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f, 0.0f, 0.0f));
-	OurCameraSpringArm->TargetArmLength = 100.f;
+	OurCameraSpringArm->TargetArmLength = 150.f;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 20.0f;
 
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
+	OurCamera->SetFieldOfView(90.0f);
 
 	eCameraType = THIRD_PERSON;
 
@@ -115,7 +116,7 @@ void AToyPlane::Tick(float DeltaTime)
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
 		UpdateCurrentBoost(-DeltaTime * 0.3f * MaximumBoost);
-
+		FlyTowards(FVector(7000.0f, -12000.0f, 1540.0f), DeltaTime);
 	}
 	else if (fSpeed <= MinSpeed)
 	{
@@ -181,7 +182,7 @@ void AToyPlane::UpdateCamera(float DeltaTime)
 		if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
 			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
 
-		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f + CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
+		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 0.0f), FRotator(-10.0f + CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
 	}
 	else
 	{
@@ -232,7 +233,7 @@ void AToyPlane::RotateDown(float DeltaTime)
 void AToyPlane::FlyTowards(FVector targetPosition, float DeltaTime)
 {
 	FRotator targetRotation = (targetPosition - GetActorLocation()).Rotation();
-	SetActorRotation(FQuat::FastLerp(GetActorRotation().Quaternion(), targetRotation.Quaternion(), DeltaTime));
+	SetActorRotation(FQuat::FastLerp(GetActorRotation().Quaternion(), targetRotation.Quaternion(), DeltaTime*4.0f));
 }
 
 void AToyPlane::InterpolateMovementInput(float DeltaTime)
