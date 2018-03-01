@@ -60,6 +60,11 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLounge"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
 			break;
+
+		case PLAYROOM:
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlayroom"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
+			break;
 	}
 
 	OtherActor->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);

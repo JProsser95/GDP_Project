@@ -25,7 +25,8 @@ void APossessionChangerManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CheckPossessionPads(false); // Used to check and update the UI
+	if(Vehicles[(int)POSSESSABLE_VEHICLES::Car])
+		CheckPossessionPads(false); // Used to check and update the UI
 }
 
 void APossessionChangerManager::CheckPossessionPads(bool bChangePossession)
@@ -72,6 +73,14 @@ bool APossessionChangerManager::PuzzleSolutionPadIsOverlapped()
 		}
 	}
 	return false;
+}
+
+void APossessionChangerManager::FindVehiclesAndPossessionChangers()
+{
+	Vehicles[(int)POSSESSABLE_VEHICLES::Plane] = nullptr;
+	Vehicles[(int)POSSESSABLE_VEHICLES::Train] = nullptr;
+
+	PossessionChangers.Empty();
 }
 
 void APossessionChangerManager::ChangePossession(POSSESSABLE_VEHICLES NewVehicle)

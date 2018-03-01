@@ -34,6 +34,9 @@ void ATrainPuzzle::Tick(float DeltaTime)
 
 void ATrainPuzzle::CheckAndUpdateTriggers()
 {
+	if (!ToyCar)
+		return;
+
 	for (int i = 0; i < Triggers.Num(); ++i)
 	{
 		if (Triggers[i] && !ToyTrain->OnFailureTrainLine() && Triggers[i]->IsOverlappingActor(ToyCar))
@@ -51,6 +54,9 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 
 void ATrainPuzzle::ResetToLastCheckpoint()
 {
+	if (!ToyCar)
+		return;
+
 	for (int i = Triggers.Num() - 1; i >= 0; --i) // Count backwards so we get the latest checkpoint
 	{
 		if (!Triggers[i]) // If the trigger has already been destroyed then that checkpoint has been saved

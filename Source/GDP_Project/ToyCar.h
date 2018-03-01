@@ -14,6 +14,7 @@ class USphereComponent;
 class UWidgetComponent;
 class UPossessableActorComponent;
 class USoundCue;
+class UAudioComponent;
 
 /**
  * 
