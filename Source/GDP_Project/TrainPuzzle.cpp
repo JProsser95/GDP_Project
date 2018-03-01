@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TrainPuzzle.h"
-
+#include "EngineUtils.h"
 
 // Sets default values
 ATrainPuzzle::ATrainPuzzle()
@@ -17,6 +17,13 @@ void ATrainPuzzle::BeginPlay()
 	Super::BeginPlay();
 	
 	TrainPuzzleStates.SetNum(Triggers.Num()); // This makes sure that there are the same number of states and triggers
+
+	// Get the ToyCar that is now in the scene
+	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if ((*ActorItr)->AutoPossessPlayer == EAutoReceiveInput::Player0)
+			ToyCar = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -34,9 +41,6 @@ void ATrainPuzzle::Tick(float DeltaTime)
 
 void ATrainPuzzle::CheckAndUpdateTriggers()
 {
-	if (!ToyCar)
-		return;
-
 	for (int i = 0; i < Triggers.Num(); ++i)
 	{
 		if (Triggers[i] && !ToyTrain->OnFailureTrainLine() && Triggers[i]->IsOverlappingActor(ToyCar))
@@ -54,9 +58,6 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 
 void ATrainPuzzle::ResetToLastCheckpoint()
 {
-	if (!ToyCar)
-		return;
-
 	for (int i = Triggers.Num() - 1; i >= 0; --i) // Count backwards so we get the latest checkpoint
 	{
 		if (!Triggers[i]) // If the trigger has already been destroyed then that checkpoint has been saved

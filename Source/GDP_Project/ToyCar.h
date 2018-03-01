@@ -130,6 +130,8 @@ public:
 	bool GetIsInPuzzle() { return bIsInPuzzle; }
 	void SetIsInPuzzle(bool Value) { bIsInPuzzle = Value; }
 
+	void SetPossessionChangeManager(APossessionChangerManager* PCM) { PossessionChangerManager = PCM; }
+
 	// For the Friction Puzzle
 	void OnSticky();
 	void OffSticky();
@@ -143,12 +145,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	APossessionChangerManager* PossessionChangerManager;
-
-	UFUNCTION()
-	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
-	UFUNCTION()
-	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* AudioComponent;
@@ -177,8 +173,6 @@ private:
 
 	// For the friction puzzle
 	float fSitckyFriction;
-
-	APawn* possesActor;
 
 	FVector2D CameraInput;
 

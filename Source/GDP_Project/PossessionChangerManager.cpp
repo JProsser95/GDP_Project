@@ -2,6 +2,8 @@
 
 #include "PossessionChangerManager.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "ToyCar.h"
 #include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
@@ -18,6 +20,12 @@ void APossessionChangerManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Get the ToyCar that is now in the scene
+	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		(*ActorItr)->SetPossessionChangeManager(this);
+		Vehicles[(int)POSSESSABLE_VEHICLES::Car] = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -73,14 +81,6 @@ bool APossessionChangerManager::PuzzleSolutionPadIsOverlapped()
 		}
 	}
 	return false;
-}
-
-void APossessionChangerManager::FindVehiclesAndPossessionChangers()
-{
-	Vehicles[(int)POSSESSABLE_VEHICLES::Plane] = nullptr;
-	Vehicles[(int)POSSESSABLE_VEHICLES::Train] = nullptr;
-
-	PossessionChangers.Empty();
 }
 
 void APossessionChangerManager::ChangePossession(POSSESSABLE_VEHICLES NewVehicle)

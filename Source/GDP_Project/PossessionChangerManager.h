@@ -36,8 +36,6 @@ public:
 
 	bool PuzzleSolutionPadIsOverlapped();
 
-	void FindVehiclesAndPossessionChangers();
-
 	UPROPERTY(EditAnywhere)
 	TArray<APawn*> Vehicles;
 	

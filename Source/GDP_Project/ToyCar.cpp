@@ -393,32 +393,6 @@ void AToyCar::ChangeHUD()
 	GameMode->DisplayPlanePartsCollected(true);
 }
 
-void AToyCar::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
-{
-	if (bCanPosses || !isActive || !OtherActor->FindComponentByClass<UPossessableActorComponent>())
-		return;
-
-	OUTPUT_STRING("HIT");
-
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->SetVehicleHUD();
-
-	bCanPosses = true;
-	possesActor = Cast<APawn>(OtherActor);
-}
-
-void AToyCar::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (!bCanPosses)
-		return;
-
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveVehicleHUD();
-
-	bCanPosses = false;
-	possesActor = nullptr;
-}
-
 void AToyCar::ResetPositionAndRotation()
 {
 	if (GetWorld()->GetTimeSeconds() - fLastRespawn >= RespawnDelay)
