@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TrainPuzzle.h"
-
+#include "EngineUtils.h"
 
 // Sets default values
 ATrainPuzzle::ATrainPuzzle()
@@ -17,6 +17,13 @@ void ATrainPuzzle::BeginPlay()
 	Super::BeginPlay();
 	
 	TrainPuzzleStates.SetNum(Triggers.Num()); // This makes sure that there are the same number of states and triggers
+
+	// Get the ToyCar that is now in the scene
+	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if ((*ActorItr)->AutoPossessPlayer == EAutoReceiveInput::Player0)
+			ToyCar = *ActorItr;
+	}
 }
 
 // Called every frame

@@ -54,10 +54,16 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 		case WARP_ROOM:
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowWarpRoom"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideLounge"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HidePlayroom"), ar, NULL, true);
 			break;
 
 		case LOUNGE:
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLounge"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
+			break;
+
+		case PLAYROOM:
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlayroom"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
 			break;
 	}

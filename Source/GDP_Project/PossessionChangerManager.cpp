@@ -2,6 +2,8 @@
 
 #include "PossessionChangerManager.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "ToyCar.h"
 #include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
@@ -18,6 +20,12 @@ void APossessionChangerManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Get the ToyCar that is now in the scene
+	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		(*ActorItr)->SetPossessionChangeManager(this);
+		Vehicles[(int)POSSESSABLE_VEHICLES::Car] = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -25,7 +33,8 @@ void APossessionChangerManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CheckPossessionPads(false); // Used to check and update the UI
+	if(Vehicles[(int)POSSESSABLE_VEHICLES::Car])
+		CheckPossessionPads(false); // Used to check and update the UI
 }
 
 void APossessionChangerManager::CheckPossessionPads(bool bChangePossession)

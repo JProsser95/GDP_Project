@@ -19,7 +19,8 @@ enum PuzzleName {
 	//PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
 	WARP_ROOM			UMETA(DisplayName = "Warp Room"),
 	LOUNGE				UMETA(DisplayName = "Lounge"),
-	KITCHEN				UMETA(DisplayName = "Kitchen")
+	KITCHEN				UMETA(DisplayName = "Kitchen"),
+	PLAYROOM			UMETA(DisplayName = "Playroom")
 
 };
 
