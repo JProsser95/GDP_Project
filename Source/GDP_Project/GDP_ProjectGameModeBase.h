@@ -8,6 +8,7 @@
 #include "Engine/EngineTypes.h"
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine.h"
 #include "GDP_ProjectGameModeBase.generated.h"
 
 enum PlaneParts
