@@ -4,42 +4,42 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FrictionPuzzle.generated.h"
+#include "WaterGlass.generated.h"
 
+class UCleanerObject;
 class UBoxComponent;
+class UStaticMeshComponent;
 class UCameraComponent;
 class ACameraDirector;
 
 UCLASS()
-class GDP_PROJECT_API AFrictionPuzzle : public AActor
+class GDP_PROJECT_API AWaterGlass : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AFrictionPuzzle();
+	AWaterGlass();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* StickyTriggerBox;
+	UBoxComponent* GlassTriggerBox;
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* CameraEventTriggerBox;
+	UBoxComponent* CouchTriggerBox;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* StickyFloor;
+	UStaticMeshComponent* GlassMesh;
+
+	UCleanerObject* Cleaner;
 
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
 
 	ACameraDirector* CameraDirector;
-
-	FTimerHandle CameraTimer;
-
-
 
 public:	
 	// Called every frame
@@ -47,17 +47,10 @@ public:
 
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	
-	UFUNCTION()
-	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 
 private:
 
-	bool bIsCarStuck;
-	bool bCameraChanged;
-
-	int iCameraTime;
-
-	void ChangeCamera();
-	void CleanSticky();
+	bool bCouchHit;
+	
 };

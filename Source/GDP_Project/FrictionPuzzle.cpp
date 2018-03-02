@@ -8,7 +8,15 @@
 #include "PossessableActorComponent.h"
 #include "ToyCar.h"
 #include "CleanerObject.h"
+#include "Camera/CameraComponent.h"
+#include "CameraDirector.h"
 #include "Macros.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
+#include "GDP_ProjectGameModeBase.h"
+
+const int MAX_CUTAWAY_TIMER(4);
+
 
 // Sets default values
 AFrictionPuzzle::AFrictionPuzzle()
@@ -19,16 +27,26 @@ AFrictionPuzzle::AFrictionPuzzle()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
 	//Trigger Box for activating this spawn point
-	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
-	TriggerBox->SetupAttachment(RootComponent);
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AFrictionPuzzle::OnBeginOverlap);
-	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AFrictionPuzzle::OnEndOverlap);
-	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
+	StickyTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("StickTriggerBoxComponent"));
+	StickyTriggerBox->SetupAttachment(RootComponent);
+	StickyTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AFrictionPuzzle::OnBeginOverlap);
+	StickyTriggerBox->OnComponentEndOverlap.AddDynamic(this, &AFrictionPuzzle::OnEndOverlap);
+	StickyTriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
+
+	CameraEventTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraEventTriggerBoxComponent"));
+	CameraEventTriggerBox->SetupAttachment(RootComponent);
+	CameraEventTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AFrictionPuzzle::OnBeginOverlap);
+	CameraEventTriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 
 	StickyFloor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StickyFloorComponent"));
 	StickyFloor->SetupAttachment(RootComponent);
 
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(RootComponent);
+
 	bIsCarStuck = false;
+	bCameraChanged = false;
+	iCameraTime = MAX_CUTAWAY_TIMER;
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +54,11 @@ void AFrictionPuzzle::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Get the Camera Director that is in the scene
+	for (TActorIterator<ACameraDirector> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		CameraDirector = *ActorItr;
+	}
 }
 
 // Called every frame
@@ -47,11 +70,14 @@ void AFrictionPuzzle::Tick(float DeltaTime)
 
 void AFrictionPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (OtherActor->FindComponentByClass<UCleanerObject>())
+	if (OtherActor->FindComponentByClass<UCleanerObject>() && !bCameraChanged)
 	{
-		OUTPUT_STRING("CLEAN");
-		OtherActor->Destroy();
-		this->Destroy();
+		if (CameraDirector != nullptr)
+		{
+			CameraDirector->BeginFrictionPuzzleCameraChange();
+		}
+		GetWorldTimerManager().SetTimer(CameraTimer, this, &AFrictionPuzzle::ChangeCamera, 1.0f, true, 0.0f);
+		bCameraChanged = true;
 		return;
 	}
 
@@ -59,7 +85,7 @@ void AFrictionPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class A
 	{
 		return;
 	}
-	OUTPUT_STRING("Stick");
+
 	AToyCar* Car = Cast<AToyCar>(OtherActor);
 	Car->OnSticky();
 	bIsCarStuck = true;
@@ -71,9 +97,28 @@ void AFrictionPuzzle::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 	{
 		return;
 	}
-	OUTPUT_STRING("UnSTICK");
 
 	AToyCar* Car = Cast<AToyCar>(OtherActor);
 	Car->OffSticky();
 	bIsCarStuck = false;
+}
+
+void AFrictionPuzzle::CleanSticky()
+{
+	StickyFloor->DestroyComponent();
+}
+
+void AFrictionPuzzle::ChangeCamera()
+{
+	if (--iCameraTime <= 0)
+	{
+		CameraDirector->BeginFrictionPuzzleCameraChange();
+		GetWorldTimerManager().ClearTimer(CameraTimer);
+		this->Destroy();
+	}
+
+	if (iCameraTime == 2)
+	{
+		CleanSticky();
+	}
 }

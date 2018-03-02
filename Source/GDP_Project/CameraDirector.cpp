@@ -52,7 +52,6 @@ void ACameraDirector::BeginTimePuzzleCameraChange(AActor* OriginalCamera)
 
 void ACameraDirector::BeginCameraPuzzleCameraChange(AActor* OriginalCamera)
 {
-
 	if (OriginalCamera != nullptr)
 		CarCamera = OriginalCamera;
 
@@ -71,6 +70,54 @@ void ACameraDirector::BeginCameraPuzzleCameraChange(AActor* OriginalCamera)
 		{
 			//Blend smoothly to camera two.
 			OurPlayerController->SetViewTargetWithBlend(CameraPuzzleCamera, SmoothBlendTime);
+		}
+	}
+}
+
+void ACameraDirector::BeginFrictionPuzzleCameraChange(AActor* OriginalCamera)
+{
+	if (OriginalCamera != nullptr)
+		CarCamera = OriginalCamera;
+
+	float SmoothBlendTime = 0.75f;
+
+	//Find the actor that handles control for the local player.
+	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (OurPlayerController)
+	{
+		if ((OurPlayerController->GetViewTarget() != FrictionPuzzleCamera) && (FrictionPuzzleCamera != nullptr))
+		{
+			//Blend smoothly to camera two.
+			OurPlayerController->SetViewTargetWithBlend(FrictionPuzzleCamera, SmoothBlendTime);
+		}
+		else if ((OurPlayerController->GetViewTarget() != CarCamera) && (CarCamera != nullptr))
+		{
+			//Cut instantly to camera one.
+			OurPlayerController->SetViewTargetWithBlend(CarCamera, SmoothBlendTime);
+		}
+	}
+}
+
+void ACameraDirector::BeginWaterGlassCameraChange(AActor* OriginalCamera)
+{
+	if (OriginalCamera != nullptr)
+		CarCamera = OriginalCamera;
+
+	float SmoothBlendTime = 0.75f;
+
+	//Find the actor that handles control for the local player.
+	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (OurPlayerController)
+	{
+		if ((OurPlayerController->GetViewTarget() != WaterGlass) && (WaterGlass != nullptr))
+		{
+			//Cut instantly to camera one.
+			OurPlayerController->SetViewTargetWithBlend(WaterGlass, SmoothBlendTime);
+		}
+		else if ((OurPlayerController->GetViewTarget() != FrictionPuzzleCamera) && (FrictionPuzzleCamera != nullptr))
+		{
+			//Blend smoothly to camera two.
+			OurPlayerController->SetViewTargetWithBlend(FrictionPuzzleCamera, SmoothBlendTime);
 		}
 	}
 }

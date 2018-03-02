@@ -470,7 +470,7 @@ void AToyCar::SetIsActive(bool Value)
 
 void AToyCar::OnSticky()
 {
-	fSitckyFriction = 0.3f;
+	fSitckyFriction = 0.1f;
 }
 
 void AToyCar::OffSticky()
