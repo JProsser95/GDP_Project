@@ -7,6 +7,8 @@
 #include "FrictionPuzzle.generated.h"
 
 class UBoxComponent;
+class UCameraComponent;
+class ACameraDirector;
 
 UCLASS()
 class GDP_PROJECT_API AFrictionPuzzle : public AActor
@@ -22,10 +24,22 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* TriggerBox;
+	UBoxComponent* StickyTriggerBox;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* CameraEventTriggerBox;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* StickyFloor;
+
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* Camera;
+
+	ACameraDirector* CameraDirector;
+
+	FTimerHandle CameraTimer;
+
+
 
 public:	
 	// Called every frame
@@ -40,4 +54,10 @@ public:
 private:
 
 	bool bIsCarStuck;
+	bool bCameraChanged;
+
+	int iCameraTime;
+
+	void ChangeCamera();
+	void CleanSticky();
 };

@@ -33,8 +33,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	AActor* CameraPuzzleCamera;
 
+	UPROPERTY(EditAnywhere)
+	AActor* FrictionPuzzleCamera;
+
+	UPROPERTY(EditAnywhere)
+	AActor* WaterGlass;
+
 	void BeginTimePuzzleCameraChange(AActor* OriginalCamera = nullptr);
 	void BeginCameraPuzzleCameraChange(AActor* OriginalCamera = nullptr);
+	void BeginFrictionPuzzleCameraChange(AActor* OriginalCamera = nullptr);
+	void BeginWaterGlassCameraChange(AActor* OriginalCamera = nullptr);
 
 	float TimeToNextCameraChange;
 
