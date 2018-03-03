@@ -17,6 +17,7 @@
 #include "EngineUtils.h"
 #include "Macros.h"
 #include "BackgroundMusicManager.h"
+#include "Materials/Material.h"
 
 const int MAX_DOOR_TIMER(5);
 
@@ -52,7 +53,6 @@ ATimePuzzle::ATimePuzzle()
 	bIsOpeningDoor = false;
 	bIsPuzzleComplete = false;
 	iDoorTime = MAX_DOOR_TIMER;
-	RingSmallScale = 0.25f;
 }
 
 // Called when the game starts or when spawned
@@ -69,7 +69,6 @@ void ATimePuzzle::BeginPlay()
 	for (int i = 0; i < Actors.Num(); ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(true);
-		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
 	CopyActors = Actors;
@@ -197,12 +196,20 @@ void ATimePuzzle::PointManage(float DeltaTime)
 	}
 	else 
 	{
-		float scale = Actors[0]->GetActorScale3D().X;
-		if (scale + (5*DeltaTime) <= 1.0f)
-			scale += 5*DeltaTime;
-		else
-			scale = 1.0f;
-		Actors[0]->SetActorRelativeScale3D(FVector(scale));
+		TArray<UStaticMeshComponent*> Components;
+		Actors[0]->GetComponents<UStaticMeshComponent>(Components);
+		for (int32 i = 0; i<Components.Num(); i++)
+		{
+			UStaticMeshComponent* StaticMeshComponent = Components[i];
+			StaticMeshComponent->SetMaterial(0, CurrentRingMat);
+			//UStaticMesh* StaticMesh = StaticMeshComponent->StaticMesh;
+		}
+		//float scale = Actors[0]->GetActorScale3D().X;
+		//if (scale + (5*DeltaTime) <= 1.0f)
+		//	scale += 5*DeltaTime;
+		//else
+		//	scale = 5.0f;
+		//Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 }
 
