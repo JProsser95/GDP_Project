@@ -46,6 +46,10 @@ public:
 	void SetInteractionHUD();
 	void RemoveInteractionHUD();
 
+	FString GetHintText();
+	void SetHintHUD(const FString& strHintText);
+	void RemoveHintHUD();
+
 	void SetPlanePartCollected(PlaneParts PartCollected);
 	bool GetPlanePartCollected(PlaneParts PartCollected);
 
@@ -85,6 +89,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
 	TSubclassOf<class UUserWidget> InteractionHUDClass; // Used to display when an object can be interacted with
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD", Meta = (BlueprintProtected = true))
+	TSubclassOf<class UUserWidget> HintHUDClass; // Used to display when an object can be interacted with
+
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 
@@ -100,12 +107,16 @@ protected:
 	UPROPERTY()
 	UUserWidget* InteractionWidget;
 
+	UPROPERTY()
+	UUserWidget* HintWidget;
+
 	FTimerHandle Timer;
 
 	bool CollectedPlaneParts[PlaneParts_MAX];
 
 	void DisplayPlanePartsWidget();
 
+	FString HintText;
 private:
 
 	int iTimeLeft;
