@@ -29,9 +29,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	PlaneParts PlanePart;
+	/*Part PlanePart;
 
 	UPROPERTY(EditAnywhere)
-	FString PlanePartName;
+	FString PlanePartName;*/
 	
 };

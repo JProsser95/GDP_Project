@@ -20,7 +20,7 @@ void UCollectableObject::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	if (PlanePartName == "PlanePart1")
+	/*if (PlanePartName == "PlanePart1")
 		PlanePart = PlanePart1;
 	else if (PlanePartName == "PlanePart2")
 		PlanePart = PlanePart2;
@@ -29,7 +29,7 @@ void UCollectableObject::BeginPlay()
 	else if (PlanePartName == "PlanePart4")
 		PlanePart = PlanePart4;
 	else if (PlanePartName == "PlanePart5")
-		PlanePart = PlanePart5;
+		PlanePart = PlanePart5;*/
 }
 
 
@@ -38,7 +38,7 @@ void UCollectableObject::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	TArray<UPrimitiveComponent*> components;
+	/*TArray<UPrimitiveComponent*> components;
 
 	GetOwner()->GetOverlappingComponents(components);
 
@@ -50,6 +50,6 @@ void UCollectableObject::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 			GameMode->SetPlanePartCollected(PlanePart);
 			GetWorld()->DestroyActor(GetOwner());
 		}
-	}
+	}*/
 }
 
