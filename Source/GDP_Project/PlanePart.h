@@ -48,7 +48,8 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
-	Part _PartName;
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<Part> _PartName;
 
 private:
 

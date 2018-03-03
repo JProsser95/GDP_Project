@@ -8,6 +8,8 @@
 #include "TimePuzzle.h"
 #include "FrictionPuzzle.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Macros.h"
+
 
 // Sets default values
 APlanePart::APlanePart()
@@ -38,6 +40,16 @@ void APlanePart::BeginPlay()
 void APlanePart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	/*FRotator ActorRotation = this->GetActorRotation();
+	ActorRotation.Pitch += 20 * DeltaTime;
+	this->SetActorRotation(ActorRotation);
+	OUTPUT_FLOAT(ActorRotation.Pitch);*/
+
+	FQuat Quaternion = this->GetActorRotation().Quaternion();
+	// Rotate around the world Z axis:
+	Quaternion *= FQuat(FVector::UpVector, FMath::DegreesToRadians(20.0f * DeltaTime));
+	this->SetActorRotation(Quaternion);
 
 }
 
