@@ -47,7 +47,6 @@ protected:
 	AToyCar* Car;
 
 	void OpenDoor();
-	void PuzzleComplete();
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Actors;
@@ -63,6 +62,8 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
+	void PuzzleComplete();
+
 private:
 
 	int GetVisibleActors();

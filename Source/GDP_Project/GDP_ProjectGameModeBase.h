@@ -8,20 +8,9 @@
 #include "Engine/EngineTypes.h"
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
+#include "PlanePart.h"
 #include "Engine.h"
 #include "GDP_ProjectGameModeBase.generated.h"
-
-enum PlaneParts
-{
-	PlanePart1,
-	PlanePart2,
-	PlanePart3,
-	PlanePart4,
-	PlanePart5,
-	PlaneParts_MAX // Used to calculate the number of plane parts in the game
-};
-
-
 
 /**
  * 
@@ -46,9 +35,9 @@ public:
 	void SetInteractionHUD();
 	void RemoveInteractionHUD();
 
-	void SetPlanePartCollected(PlaneParts PartCollected);
-	bool GetPlanePartCollected(PlaneParts PartCollected);
-
+	void SetPlanePartCollected(Part PartCollected);
+	bool GetPlanePartCollected(Part PartCollected);
+	
 	void DisplayPlanePartsCollected(bool bToggle);
 
 	void BeginTimer();
@@ -102,8 +91,8 @@ protected:
 
 	FTimerHandle Timer;
 
-	bool CollectedPlaneParts[PlaneParts_MAX];
-
+	bool CollectedPlaneParts[Part::MAX];
+	
 	void DisplayPlanePartsWidget();
 
 private:

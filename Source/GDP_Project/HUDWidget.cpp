@@ -2,15 +2,16 @@
 
 #include "HUDWidget.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "PlanePart.h"
 
 /** Retrieves FText value currently held in DisplayText */
 FText UHUDWidget::GetDisplayText() 
 {
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	FString strHUDOutput = "";
-	for (int i = 0; i < PlaneParts_MAX; ++i)
+	for (int i = 0; i < Part::MAX; ++i)
 	{
-		strHUDOutput += "PlanePart" + FString::FromInt(i) + ": " + FString::FromInt(GameMode->GetPlanePartCollected((PlaneParts)i)) + "\n";
+		strHUDOutput += "PlanePart" + FString::FromInt(i) + ": " + FString::FromInt(GameMode->GetPlanePartCollected((Part)i)) + "\n";
 	}
 
 	DisplayText = FText::FromString(strHUDOutput);
