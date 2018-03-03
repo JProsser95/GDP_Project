@@ -55,6 +55,7 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowWarpRoom"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideLounge"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HidePlayroom"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideKitchen"), ar, NULL, true);
 			break;
 
 		case LOUNGE:
@@ -64,6 +65,12 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 		case PLAYROOM:
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowPlayroom"), ar, NULL, true);
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
+			break;
+
+
+		case KITCHEN:
+			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowKitchen"), ar, NULL, true);
 			GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
 			break;
 	}
