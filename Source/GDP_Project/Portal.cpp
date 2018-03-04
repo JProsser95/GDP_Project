@@ -9,6 +9,7 @@
 #include "Engine/LevelScriptActor.h"
 #include "OutputDeviceNull.h"
 #include "Macros.h"
+#include "ToyCar.h"
 #include "PossessableActorComponent.h"
 
 // Sets default values
@@ -77,4 +78,5 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 	OtherActor->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
 
+	Cast<AToyCar>(OtherActor)->ResetVelocity();
 }

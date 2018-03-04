@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "PossessableActorComponent.h"
 #include "Engine/LevelScriptActor.h"
+#include "ToyCar.h"
 #include "OutputDeviceNull.h"
 
 
@@ -49,4 +50,5 @@ void AReturnPortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 
 	GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideAllLevels"), ar, NULL, true);
 
+	Cast<AToyCar>(OtherActor)->ResetVelocity();
 }
