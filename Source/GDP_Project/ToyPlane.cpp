@@ -16,8 +16,8 @@ AToyPlane::AToyPlane()
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false), SWControlPitch(false), SwapYawAndRoll(false), PitchInverted(false),
-	m_eControlType(Controls::ASDW_Arrows)
+	bAlreadyRestarted(false), SWControlPitch(false), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
+	m_eControlType(Controls::ASDW_Arrows), m_ePreviousControlType(m_eControlType)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -107,6 +107,13 @@ void AToyPlane::Tick(float DeltaTime)
 		return;
 
 	Super::Tick(DeltaTime);
+
+	if (m_eControlType != m_ePreviousControlType || SWControlPrevious != SWControlPitch)
+	{
+		m_ePreviousControlType = m_eControlType;
+		SWControlPrevious = SWControlPitch;
+		SetupInput();
+	}
 
 	if (CurrentBoost <= 0)
 		IsBoosting = false;
@@ -208,36 +215,56 @@ void AToyPlane::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	m_PlayerInput = PlayerInputComponent;
+
+	SetupInput();
+
+}
+
+void AToyPlane::SetupInput()
+{
+	m_PlayerInput->ClearActionBindings();
+
 	//PlayerInputComponent->BindAction("PlaneBoost", IE_Pressed, this, &AToyPlane::StartBoost);
 	//PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
-	PlayerInputComponent->BindAction("PlaneCameraZoom", IE_Released, this, &AToyPlane::CameraZoom);
-
-	//Hook up every-frame handling for our four axes
-	//PlayerInputComponent->BindAxis("PlaneMoveUp", this, &AToyPlane::MoveUp);
-	//PlayerInputComponent->BindAxis("PlaneMoveRight", this, &AToyPlane::MoveRight);
+	m_PlayerInput->BindAction("PlaneCameraZoom", IE_Released, this, &AToyPlane::CameraZoom);
 
 	if (m_eControlType == Controls::ASDW_Arrows)
 	{
-		PlayerInputComponent->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
-		PlayerInputComponent->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
-		PlayerInputComponent->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
-		PlayerInputComponent->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
-		PlayerInputComponent->BindAxis("PlaneRoll", this, &AToyPlane::Roll);
+		m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
+		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
+		if (!SWControlPitch)
+			m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
+		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
+		m_PlayerInput->BindAxis("PlaneRoll", this, &AToyPlane::Roll);
 	}
-	else if(m_eControlType == Controls::Keyboard_Mouse)
+	else if (m_eControlType == Controls::Keyboard_Mouse)
 	{
-		PlayerInputComponent->BindAxis("PlaneCameraPitch", this, &AToyPlane::Pitch);
-		PlayerInputComponent->BindAxis("PlaneCameraYaw", this, &AToyPlane::Yaw);
-		PlayerInputComponent->BindAxis("PlanePitch", this, &AToyPlane::PitchCamera);
-		PlayerInputComponent->BindAxis("PlaneYaw", this, &AToyPlane::Roll);
-		PlayerInputComponent->BindAxis("PlaneRoll", this, &AToyPlane::YawCamera);
+		if (!SWControlPitch)
+			m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::Pitch);
+		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::Yaw);
+		m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::PitchCamera);
+		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Roll);
+		m_PlayerInput->BindAxis("PlaneRoll", this, &AToyPlane::YawCamera);
 	}
 	if (!SWControlPitch)
-		PlayerInputComponent->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
+		m_PlayerInput->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
 	else
-		PlayerInputComponent->BindAxis("PlaneThrottle", this, &AToyPlane::Pitch);
-	//PlayerInputComponent->ClearActionBindings();
+	{
+		if (m_eControlType == Controls::Keyboard_Mouse)
+		{
+			OUTPUT_STRING("Mouse Controls Confirmed");
+			m_PlayerInput->BindAxis("PlaneThrottleAltMouse", this, &AToyPlane::Throttle);
+			m_PlayerInput->BindAxis("PlanePitchAltMouse", this, &AToyPlane::Pitch);
+		}
+		else if (m_eControlType == Controls::ASDW_Arrows)
+		{
+			OUTPUT_STRING("Arrows Controls Confirmed");
+			m_PlayerInput->BindAxis("PlaneThrottleAltArrows", this, &AToyPlane::Throttle);
+			m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
+		}
 
+	}
 }
 
 void AToyPlane::RotateDown(float DeltaTime)
@@ -285,7 +312,7 @@ void AToyPlane::RegisterInput(float AxisValue, float& input)
 //Input functions
 void AToyPlane::Pitch(float AxisValue)
 {
-	if ((PitchInverted && !SWControlPitch) || (SWControlPitch && !PitchInverted))// && !SwapSwAndArrows)
+	if (PitchInverted)
 		AxisValue *= -1.0f;
 
 	RegisterInput(AxisValue, TargetInput.X);

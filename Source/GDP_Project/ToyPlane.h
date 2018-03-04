@@ -44,6 +44,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Control Method")
 	Controls m_eControlType;
+	Controls m_ePreviousControlType;
 
 	UPROPERTY(EditAnywhere, Category = "Controls")
 	bool PitchInverted;
@@ -51,8 +52,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Swap Yaw & Roll")
 	bool SwapYawAndRoll;
 
-	//UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Use S/W as Pitch")
+	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Use S/W as Pitch")
 	bool SWControlPitch;
+	bool SWControlPrevious;
 
 	// Players initial boost
 	UPROPERTY(EditAnywhere, Category = "Plane")
@@ -109,10 +111,10 @@ private:
 
 	// (0-1) Lerp amount per second for changing the rotate speed to the maximum rotation speed
 	UPROPERTY(EditAnywhere, Category = "Plane")
-		float RotationInterpolation;
+	float RotationInterpolation;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-		bool bIsActive;
+	bool bIsActive;
 
 	// Resets the camera to the be directly behind the plane
 	void UpdateCamera(float DeltaTime);
@@ -121,12 +123,15 @@ private:
 	float fSpeed;
 	bool bAlreadyRestarted;
 
+	UInputComponent* m_PlayerInput;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetupInput();
 
 	// Called when the Pawn is possesed
 	virtual void Restart() override;
