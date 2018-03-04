@@ -96,6 +96,34 @@ void AGDP_ProjectGameModeBase::RemoveInteractionHUD()
 	}
 }
 
+FString AGDP_ProjectGameModeBase::GetHintText()
+{
+	return HintText;
+}
+
+void AGDP_ProjectGameModeBase::SetHintHUD(const FString& strHintText)
+{
+	if (HintWidget)
+		return;
+
+	HintText = strHintText;
+
+	HintWidget = CreateWidget<UUserWidget>(GetWorld(), HintHUDClass);
+	if (HintWidget != nullptr)
+	{
+		HintWidget->AddToViewport();
+	}
+}
+
+void AGDP_ProjectGameModeBase::RemoveHintHUD()
+{
+	if (HintWidget)
+	{
+		HintWidget->RemoveFromViewport();
+		HintWidget = nullptr;
+	}
+}
+
 void AGDP_ProjectGameModeBase::SetPlanePartCollected(Part PartCollected)
 {
 	CollectedPlaneParts[PartCollected] = true;
