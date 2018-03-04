@@ -14,6 +14,12 @@
 
 class UPossessableActorComponent;
 
+UENUM()
+enum class Controls {
+	Keyboard_Mouse	    UMETA(DisplayName = "Keyboard & Mouse"),
+	ASDW_Arrows			UMETA(DisplayName = "ASDW + Arrows")
+};
+
 UCLASS()
 class GDP_PROJECT_API AToyPlane : public APawn
 {
@@ -29,12 +35,24 @@ protected:
 
 private:
 
-	UPossessableActorComponent* possComponent;
+	UPossessableActorComponent * possComponent;
 
 	enum CameraType {
 		FIRST_PERSON,
 		THIRD_PERSON
 	};
+
+	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Control Method")
+	Controls m_eControlType;
+
+	UPROPERTY(EditAnywhere, Category = "Controls")
+	bool PitchInverted;
+
+	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Swap Yaw & Roll")
+	bool SwapYawAndRoll;
+
+	//UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Use S/W as Pitch")
+	bool SWControlPitch;
 
 	// Players initial boost
 	UPROPERTY(EditAnywhere, Category = "Plane")
@@ -67,12 +85,6 @@ private:
 	float BoostSpeedIncrement;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool SwapSwAndArrows;
-
-	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool PitchInverted;
-
-	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PitchAmount;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
@@ -97,10 +109,10 @@ private:
 
 	// (0-1) Lerp amount per second for changing the rotate speed to the maximum rotation speed
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	float RotationInterpolation;
+		float RotationInterpolation;
 
 	UPROPERTY(EditAnywhere, Category = "Plane")
-	bool bIsActive;
+		bool bIsActive;
 
 	// Resets the camera to the be directly behind the plane
 	void UpdateCamera(float DeltaTime);
@@ -109,7 +121,7 @@ private:
 	float fSpeed;
 	bool bAlreadyRestarted;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -121,21 +133,21 @@ public:
 
 	// Accessor for MaximumBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	float GetMaximumBoost() { return MaximumBoost; }
+		float GetMaximumBoost() { return MaximumBoost; }
 
 	// Accessor for CurrentBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	float GetCurrentBoost() { return CurrentBoost; }
+		float GetCurrentBoost() { return CurrentBoost; }
 
 	// Accessor for isBoosting
 	UFUNCTION(BlueprintPure, Category = "Plane")
-	bool GetIsBoosting() { return IsBoosting; }
+		bool GetIsBoosting() { return IsBoosting; }
 
 	/* Updates current boost
-	* @param Boost The amount the boost of the plane will change 
+	* @param Boost The amount the boost of the plane will change
 	*/
 	UFUNCTION(BluePrintCallable, Category = "Plane")
-	void UpdateCurrentBoost(float boostIncrement);
+		void UpdateCurrentBoost(float boostIncrement);
 
 	class UCustomMovementComponent* CustomMovementComponent;
 
@@ -152,28 +164,28 @@ protected:
 
 	// The buleprint for the camera shake 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Plane")
-	TSubclassOf<UCameraShake> CameraShake;
+		TSubclassOf<UCameraShake> CameraShake;
 
 	// Widget class to use for HUD screen
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Plane", Meta = (BlueprintProtected = true))
-	TSubclassOf<class UUSerWidget> HUDWidgetClass;
+		TSubclassOf<class UUSerWidget> HUDWidgetClass;
 
 	// Instance of the HUD
 	UPROPERTY()
-	class UUserWidget* CurrentWidget;
+		class UUserWidget* CurrentWidget;
 
 	UPROPERTY(EditAnywhere)
-	USpringArmComponent* OurCameraSpringArm;
+		USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
 
 	// Allows the addition of a static mesh component in the editor
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* PlaneBodyMeshComponent;
+		UStaticMeshComponent* PlaneBodyMeshComponent;
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* PlanePropMeshComponent;
+		UStaticMeshComponent* PlanePropMeshComponent;
 
 	CameraType eCameraType;
-	
+
 	//Input variables
 	FVector4 TargetInput;
 	FVector4 MovementInput;
@@ -186,6 +198,8 @@ protected:
 	void InterpolateMovementInput(float DeltaTime);
 
 	//Input functions
+	void RegisterInput(float AxisValue, float& input1);
+
 	void Pitch(float AxisValue);
 	void Yaw(float AxisValue);
 	void Roll(float AxisValue);

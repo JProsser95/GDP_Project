@@ -16,7 +16,8 @@ AToyPlane::AToyPlane()
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false), SwapSwAndArrows(false), PitchInverted(false)
+	bAlreadyRestarted(false), SWControlPitch(false), SwapYawAndRoll(false), PitchInverted(false),
+	m_eControlType(Controls::ASDW_Arrows)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -112,7 +113,7 @@ void AToyPlane::Tick(float DeltaTime)
 	else if (CurrentBoost > MaximumBoost)
 		CurrentBoost = MaximumBoost;
 
-	if (IsBoosting) 
+	if (IsBoosting)
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
 		UpdateCurrentBoost(-DeltaTime * 0.3f * MaximumBoost);
@@ -134,7 +135,7 @@ void AToyPlane::Tick(float DeltaTime)
 
 	}
 
-	if (fSpeed >= CamShakeSpeed) 
+	if (fSpeed >= CamShakeSpeed)
 	{
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 		PC->ClientPlayCameraShake(CameraShake, 1);
@@ -214,12 +215,28 @@ void AToyPlane::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//Hook up every-frame handling for our four axes
 	//PlayerInputComponent->BindAxis("PlaneMoveUp", this, &AToyPlane::MoveUp);
 	//PlayerInputComponent->BindAxis("PlaneMoveRight", this, &AToyPlane::MoveRight);
-	PlayerInputComponent->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
-	PlayerInputComponent->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
-	PlayerInputComponent->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
-	PlayerInputComponent->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
-	PlayerInputComponent->BindAxis("PlaneRoll", this, &AToyPlane::Roll);
-	PlayerInputComponent->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
+
+	if (m_eControlType == Controls::ASDW_Arrows)
+	{
+		PlayerInputComponent->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
+		PlayerInputComponent->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
+		PlayerInputComponent->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
+		PlayerInputComponent->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
+		PlayerInputComponent->BindAxis("PlaneRoll", this, &AToyPlane::Roll);
+	}
+	else if(m_eControlType == Controls::Keyboard_Mouse)
+	{
+		PlayerInputComponent->BindAxis("PlaneCameraPitch", this, &AToyPlane::Pitch);
+		PlayerInputComponent->BindAxis("PlaneCameraYaw", this, &AToyPlane::Yaw);
+		PlayerInputComponent->BindAxis("PlanePitch", this, &AToyPlane::PitchCamera);
+		PlayerInputComponent->BindAxis("PlaneYaw", this, &AToyPlane::Roll);
+		PlayerInputComponent->BindAxis("PlaneRoll", this, &AToyPlane::YawCamera);
+	}
+	if (!SWControlPitch)
+		PlayerInputComponent->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
+	else
+		PlayerInputComponent->BindAxis("PlaneThrottle", this, &AToyPlane::Pitch);
+	//PlayerInputComponent->ClearActionBindings();
 
 }
 
@@ -238,74 +255,79 @@ void AToyPlane::FlyTowards(FVector targetPosition, float DeltaTime)
 
 void AToyPlane::InterpolateMovementInput(float DeltaTime)
 {
-	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
-	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
-
-	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
-	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
-
-	if (!SwapSwAndArrows)
+	if (!SwapYawAndRoll)
 	{
-		MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
-		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);		
+		MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
+		MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
 	}
 	else
 	{
+		MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Z, RotationInterpolation * DeltaTime);
+		MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Y, RotationInterpolation * DeltaTime);
+	}
+	//if (!SwapSwAndArrows)
+	{
+		MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
+		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);
+	}
+	/*else
+	{
 		MovementInput.X = FMath::Lerp(MovementInput.X, -TargetInput.W, RotationInterpolation * DeltaTime);
 		MovementInput.W = FMath::Lerp(MovementInput.W, -TargetInput.X, RotationInterpolation * DeltaTime);
-	}
+	}*/
+}
+
+void AToyPlane::RegisterInput(float AxisValue, float& input)
+{
+	input = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
 //Input functions
 void AToyPlane::Pitch(float AxisValue)
 {
-	if (PitchInverted && !SwapSwAndArrows)
+	if ((PitchInverted && !SWControlPitch) || (SWControlPitch && !PitchInverted))// && !SwapSwAndArrows)
 		AxisValue *= -1.0f;
-	TargetInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+
+	RegisterInput(AxisValue, TargetInput.X);
 }
 
 void AToyPlane::Yaw(float AxisValue)
 {
-	TargetInput.Y = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+	RegisterInput(AxisValue, TargetInput.Y);
 }
 
 void AToyPlane::Roll(float AxisValue)
 {
-	TargetInput.Z = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+	RegisterInput(AxisValue, TargetInput.Z);
 }
 
 void AToyPlane::Throttle(float AxisValue)
 {
-	if (PitchInverted && SwapSwAndArrows)
-		AxisValue *= -1.0f;
-	TargetInput.W = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+	// modify speed or plane pitch
+	RegisterInput(AxisValue, TargetInput.W);
 }
 
-//void AToyPlane::MoveUp(float AxisValue)
-//{
-//	MovementInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
-//}
-//
-//void AToyPlane::MoveRight(float AxisValue)
-//{
-//	MovementInput.Y = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
-//}
-//
 void AToyPlane::PitchCamera(float AxisValue)
 {
 	if (AxisValue != 0.0f)
 		fLastUnFocusTime = GetWorld()->GetTimeSeconds();
-	CameraInput.Y = AxisValue;
+
+	// Pitch camera or pitch plane
+	RegisterInput(AxisValue, CameraInput.Y);
+
 }
 
 void AToyPlane::YawCamera(float AxisValue)
 {
 	if (AxisValue != 0.0f)
 		fLastUnFocusTime = GetWorld()->GetTimeSeconds();
-	CameraInput.X = AxisValue;
+
+	// Rotate camera or pitch plane
+	RegisterInput(AxisValue, CameraInput.X);
+
 }
 
-void AToyPlane::StartBoost() 
+void AToyPlane::StartBoost()
 {
 	if (CurrentBoost > 0.0f) {
 		IsBoosting = true;
@@ -342,4 +364,4 @@ void AToyPlane::SetIsActive(bool Value)
 {
 	bIsActive = Value;
 }
-	
+
