@@ -117,6 +117,8 @@ void AGDP_ProjectGameModeBase::SetHintHUD(const FString& strHintText)
 
 void AGDP_ProjectGameModeBase::RemoveHintHUD()
 {
+	HintText = "";
+
 	if (HintWidget)
 	{
 		HintWidget->RemoveFromViewport();

@@ -10,7 +10,7 @@
 const int HEIGHT = 0;//height of player above spline
 
 #define CARRIAGESPACING 38
-#define TIMETOUPDATETRAIN 0.01f
+#define TIMETOUPDATETRAIN 0.017f
 
 // Sets default values
 AToyTrain::AToyTrain()
@@ -126,8 +126,13 @@ void AToyTrain::Tick(float DeltaTime)
 		SplineTimer += DeltaTime;
 		if (SplineTimer >= TIMETOUPDATETRAIN)
 		{
-			SplineTimer = 0.0f;
-			UpdateSplinePointer();
+			int iUpdates = (int)(SplineTimer / TIMETOUPDATETRAIN);
+
+			for (int i = 0; i < iUpdates; ++i)
+			{
+				SplineTimer = SplineTimer - TIMETOUPDATETRAIN;
+				UpdateSplinePointer();
+			}
 		}
 	}
 	else
