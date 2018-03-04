@@ -159,10 +159,10 @@ void AToyTrain::Tick(float DeltaTime)
 
 	if (PossessionChangerManager->PuzzleSolutionPadIsOverlapped())
 	{
-		BridgePieces[0]->SetActorLocation(FVector(1453.0f, 1854.0f, 150.5f));
+		BridgePieces[0]->SetActorLocation(FVector(10593.0f, -6460.0f, 164.5f));
 		BridgePieces[0]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
 
-		BridgePieces[1]->SetActorLocation(FVector(1703.0f, 1854.0f, 150.5f));
+		BridgePieces[1]->SetActorLocation(FVector(10843.0f, -6460.0f, 164.5f));
 		BridgePieces[1]->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
 	}
 
