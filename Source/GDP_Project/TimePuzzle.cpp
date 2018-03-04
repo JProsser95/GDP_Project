@@ -202,14 +202,7 @@ void ATimePuzzle::PointManage(float DeltaTime)
 		{
 			UStaticMeshComponent* StaticMeshComponent = Components[i];
 			StaticMeshComponent->SetMaterial(0, CurrentRingMat);
-			//UStaticMesh* StaticMesh = StaticMeshComponent->StaticMesh;
 		}
-		//float scale = Actors[0]->GetActorScale3D().X;
-		//if (scale + (5*DeltaTime) <= 1.0f)
-		//	scale += 5*DeltaTime;
-		//else
-		//	scale = 5.0f;
-		//Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 }
 
