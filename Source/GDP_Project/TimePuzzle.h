@@ -14,6 +14,7 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class ACameraDirector;
 class AToyCar;
+class UMaterial;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -39,6 +40,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere, Category = "RingMaterial")
+	UMaterial* CurrentRingMat;
 
 	FTimerHandle DoorTimer;
 
