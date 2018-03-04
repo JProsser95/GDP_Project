@@ -7,7 +7,7 @@
 #include "BackgroundMusicManager.generated.h"
 
 class USoundCue;
-class UAduioComponent;
+class UAudioComponent;
 
 
 
