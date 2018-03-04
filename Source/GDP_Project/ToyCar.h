@@ -125,6 +125,7 @@ public:
 	void SetIsActive(bool Value);
 
 	bool GetCanMove() { return bCanMove; }
+	UFUNCTION(BlueprintCallable, Category = "CarMovement")
 	void SetCanMove(bool Value) { bCanMove = Value; }
 
 	bool GetIsInPuzzle() { return bIsInPuzzle; }

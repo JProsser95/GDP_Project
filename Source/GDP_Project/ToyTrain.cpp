@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "GDP_ProjectGameModeBase.h"
 #include "Macros.h"
+#include "Engine/StaticMesh.h"
 
 const int HEIGHT = 0;//height of player above spline
 
@@ -66,6 +67,7 @@ void AToyTrain::BeginPlay()
 		float totalLength = SplineComponent->GetSplineLength();
 
 		float currentLength = 0;
+
 		int sampleLength = 5; //we will sample the spline every "sampleLength" units
 
 		if (numberOfSplinePoints > 1) {//you can also use GetName() to select the spline component you want to process
