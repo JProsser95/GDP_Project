@@ -116,6 +116,9 @@ public:
 	// Respawns the car at the current active safe spot
 	void Respawn();
 
+	// Resets the cars velocity and angular velocity to zero
+	void ResetVelocity();
+
 	// Resets the camera to the be directly behind the car
 	void UpdateCamera(float DeltaTime);
 
