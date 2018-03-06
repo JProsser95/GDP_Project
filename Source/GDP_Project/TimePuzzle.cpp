@@ -53,6 +53,9 @@ ATimePuzzle::ATimePuzzle()
 	bIsOpeningDoor = false;
 	bIsPuzzleComplete = false;
 	iDoorTime = MAX_DOOR_TIMER;
+	ResizeScale = 1.0f;
+	ResizeRate = 2.0f;
+	RingSmallScale = 0.1f;
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +72,7 @@ void ATimePuzzle::BeginPlay()
 	for (int i = 0; i < Actors.Num(); ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(true);
+		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
 	CopyActors = Actors;
@@ -132,6 +136,7 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 	for (int i = 0; i < 3; ++i)
 	{
 		Actors[i]->SetActorHiddenInGame(false);
+		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
 	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
@@ -196,13 +201,20 @@ void ATimePuzzle::PointManage(float DeltaTime)
 	}
 	else 
 	{
-		TArray<UStaticMeshComponent*> Components;
-		Actors[0]->GetComponents<UStaticMeshComponent>(Components);
-		for (int32 i = 0; i<Components.Num(); i++)
-		{
-			UStaticMeshComponent* StaticMeshComponent = Components[i];
-			StaticMeshComponent->SetMaterial(0, CurrentRingMat);
-		}
+		//TArray<UStaticMeshComponent*> Components;
+		//Actors[0]->GetComponents<UStaticMeshComponent>(Components);
+		//for (int32 i = 0; i<Components.Num(); i++)
+		//{
+		//	UStaticMeshComponent* StaticMeshComponent = Components[i];
+		//	StaticMeshComponent->SetMaterial(0, CurrentRingMat);
+		//}
+		float scale = Actors[0]->GetActorScale3D().X;
+		float newScale(scale + (DeltaTime * ResizeRate));
+		if (newScale <= ResizeScale)
+			scale = newScale;
+		else
+			scale = ResizeScale;
+		Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 }
 

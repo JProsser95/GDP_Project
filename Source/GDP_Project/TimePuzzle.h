@@ -70,6 +70,9 @@ public:
 
 private:
 
+	float ResizeScale;
+	float ResizeRate;
+
 	int GetVisibleActors();
 	void PointManage(float DeltaTime);
 	void PuzzleFailed();
