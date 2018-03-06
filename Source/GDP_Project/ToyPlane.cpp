@@ -16,7 +16,7 @@ AToyPlane::AToyPlane()
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false), SWControlPitch(false), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
+	bAlreadyRestarted(false), SWControlPitch(true), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
 	m_eControlType(Controls::ASDW_Arrows), m_ePreviousControlType(m_eControlType)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -336,6 +336,7 @@ void AToyPlane::Throttle(float AxisValue)
 
 void AToyPlane::PitchCamera(float AxisValue)
 {
+	AxisValue = -AxisValue;
 	if (AxisValue != 0.0f)
 		fLastUnFocusTime = GetWorld()->GetTimeSeconds();
 
