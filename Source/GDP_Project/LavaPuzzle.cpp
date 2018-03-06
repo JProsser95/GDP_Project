@@ -43,10 +43,15 @@ void ALavaPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		if (ActorItr->GetIsCurrentSpawnPoint())
 		{
 
-			FVector spawnLocation = ActorItr->GetActorLocation();
-			spawnLocation.Z += 100;
-			OtherActor->SetActorLocationAndRotation(spawnLocation, FRotator(0, 0, 0), false, NULL, ETeleportType::TeleportPhysics);
-			Cast<AToyCar>(OtherActor)->ResetVelocity();
+			//FVector spawnLocation = ActorItr->GetActorLocation();
+			//spawnLocation.Z += 100;
+			//OtherActor->SetActorLocationAndRotation(spawnLocation, FRotator(0, 0, 0), false, NULL, ETeleportType::TeleportPhysics);
+			AToyCar* pToyCar(Cast<AToyCar>(OtherActor));
+			if (pToyCar)
+			{
+				Cast<AToyCar>(OtherActor)->ResetVelocity();
+				Cast<AToyCar>(OtherActor)->Respawn();
+			}
 		}
 	}
 }

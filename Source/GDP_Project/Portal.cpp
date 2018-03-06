@@ -78,5 +78,9 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 
 	OtherActor->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
 
-	Cast<AToyCar>(OtherActor)->ResetVelocity();
+	AToyCar* pToyCar(Cast<AToyCar>(OtherActor));
+	if (pToyCar)
+	{
+		Cast<AToyCar>(OtherActor)->ResetVelocity();
+	}
 }
