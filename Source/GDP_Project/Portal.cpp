@@ -81,6 +81,6 @@ void APortal::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* O
 	AToyCar* pToyCar(Cast<AToyCar>(OtherActor));
 	if (pToyCar)
 	{
-		Cast<AToyCar>(OtherActor)->ResetVelocity();
+		pToyCar->ResetVelocity();
 	}
 }
