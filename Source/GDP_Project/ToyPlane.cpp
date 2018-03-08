@@ -22,9 +22,6 @@ AToyPlane::AToyPlane()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//	PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
-	//	PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
-
 	RotationInterpolation *= 60.0f;
 
 	//Create our components
@@ -34,11 +31,6 @@ AToyPlane::AToyPlane()
 	PlaneBodyMeshComponent->SetRelativeRotation(FRotator(13.5f, 0.0f, 0.0f));
 	possComponent = CreateDefaultSubobject<UPossessableActorComponent>(TEXT("PossessableComponent"));
 	PlaneBodyMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	//PlaneBodyMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AToyPlane::OnToyPlaneOverlap);
-	//PlaneBodyMeshComponent->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, true);
-	//static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialPlane(TEXT("MaterialInstanceDynamic'/Game/Plane/Texture/Plane_Material.Plane_Material'"));
-	//if (MaterialPlane.Object)
-	//	PlaneBodyMeshComponent->SetMaterial(0, MaterialPlane.Object);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Plane/Plane_Plane.Plane_Plane'"));
 	if (MeshAssetBody.Object)
@@ -98,6 +90,7 @@ void AToyPlane::Restart()
 void AToyPlane::BeginPlay()
 {
 	Super::BeginPlay();
+	startTransform = GetTransform();
 }
 
 // Called every frame
@@ -179,6 +172,11 @@ void AToyPlane::Tick(float DeltaTime)
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, fPropRotation));
 
 	UpdateCamera(DeltaTime);
+
+	if (CustomMovementComponent->HitObject() && fSpeed >= MinSpeed)
+	{
+		ResetPlane();
+	}
 }
 
 void AToyPlane::UpdateCamera(float DeltaTime)
@@ -203,11 +201,6 @@ void AToyPlane::UpdateCamera(float DeltaTime)
 UPawnMovementComponent* AToyPlane::GetMovementComponent() const
 {
 	return CustomMovementComponent;
-}
-
-void AToyPlane::OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
-{
-
 }
 
 // Called to bind functionality to input
@@ -380,6 +373,12 @@ void AToyPlane::CameraZoom()
 		OurCameraSpringArm->TargetArmLength = 0.0f;
 		OurCameraSpringArm->bEnableCameraLag = false;
 	}
+}
+
+void AToyPlane::ResetPlane()
+{
+	fSpeed = 0.0f;
+	SetActorTransform(startTransform);
 }
 
 void AToyPlane::UpdateCurrentBoost(float boostIncrement)

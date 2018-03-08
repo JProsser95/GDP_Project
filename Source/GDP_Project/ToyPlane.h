@@ -98,6 +98,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PropRotateSpeed;
 
+	FTransform startTransform;
+
 	UPROPERTY(Category = Camera, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FRotator CameraRotation;
 	FRotator CameraRotationOffset;
@@ -196,10 +198,6 @@ protected:
 	FVector4 MovementInput;
 	FVector2D CameraInput;
 
-	//Collision functions
-	UFUNCTION()
-	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
 	void InterpolateMovementInput(float DeltaTime);
 
 	//Input functions
@@ -215,4 +213,5 @@ protected:
 
 	void EndBoost();
 	void CameraZoom();
+	void ResetPlane();
 };

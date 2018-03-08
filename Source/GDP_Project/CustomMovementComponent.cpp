@@ -2,6 +2,12 @@
 
 #include "CustomMovementComponent.h"
 
+UCustomMovementComponent::UCustomMovementComponent()
+	:m_bHitObject(false)
+{
+
+}
+
 void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -23,6 +29,14 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 		if (Hit.IsValidBlockingHit())
 		{
 			SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
+			m_bHitObject = true;
 		}
+		else
+			m_bHitObject = false;
 	}
 };
+
+bool UCustomMovementComponent::HitObject()
+{
+	return m_bHitObject;
+}
