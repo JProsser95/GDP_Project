@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), MovementDirection(0), TrainState(RunawayTrain)
+	: splinePointer(0), MovementDirection(0), TrainState(RunawayTrain), m_fStationWaitTime(0.0f)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -114,22 +114,31 @@ void AToyTrain::Tick(float DeltaTime)
 	// Handle the updating of the spline pointer
 	static float SplineTimer = 0.0f;
 
-	if (MovementDirection)
+	if (m_fStationWaitTime == 0.0f)
 	{
-		SplineTimer += DeltaTime;
-		if (SplineTimer >= TIMETOUPDATETRAIN)
+		if (MovementDirection)
 		{
-			int iUpdates = (int)(SplineTimer / TIMETOUPDATETRAIN);
-
-			for (int i = 0; i < iUpdates; ++i)
+			SplineTimer += DeltaTime;
+			if (SplineTimer >= TIMETOUPDATETRAIN)
 			{
-				SplineTimer = SplineTimer - TIMETOUPDATETRAIN;
-				UpdateSplinePointer();
+				int iUpdates = (int)(SplineTimer / TIMETOUPDATETRAIN);
+
+				for (int i = 0; i < iUpdates; ++i)
+				{
+					SplineTimer = SplineTimer - TIMETOUPDATETRAIN;
+					UpdateSplinePointer();
+				}
 			}
 		}
+		else
+			SplineTimer = 0.0f;
 	}
 	else
-		SplineTimer = 0.0f;
+	{
+		m_fStationWaitTime -= DeltaTime;
+		if (m_fStationWaitTime < 0.0f)
+			m_fStationWaitTime = 0.0f;
+	}
 
 
 	// Move the train and its carriage
@@ -155,20 +164,21 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
-	case TRAIN_STATES::RunawayTrain2_Failed:
 		AutomatedMovement();
 		break;
 
 	case TRAIN_STATES::RunawayTrain2:
 		if (!AutomatedMovement())
 		{
-			//ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+			ChangeToState(RunawayTrain2_Station);
+			m_fStationWaitTime = STATIONWAITTIME;
 		}
 		break;
 
-	case TRAIN_STATES::RunawayTrain3:
+	case TRAIN_STATES::RunawayTrain2_Station:
 		if (!AutomatedMovement())
 		{
+			//ChangeToState(RunawayTrain2_Station);
 		}
 		break;
 
@@ -243,7 +253,7 @@ void AToyTrain::UpdateCarriages()
 
 bool AToyTrain::OnFailureTrainLine()
 {
-	return TrainState == TRAIN_STATES::RunawayTrain_Failed || TrainState == TRAIN_STATES::RunawayTrain2_Failed;
+	return TrainState == TRAIN_STATES::RunawayTrain_Failed;
 }
 
 bool AToyTrain::TrainPuzzleFailed()

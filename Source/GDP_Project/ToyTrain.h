@@ -14,8 +14,9 @@
 
 #include "ToyTrain.generated.h"
 
-
 #define NUMBEROFTRACKSWITCHERS 2 // Used for the car to weigh down
+
+#define STATIONWAITTIME 5.0f
 
 enum TRAIN_STATES
 {
@@ -23,9 +24,7 @@ enum TRAIN_STATES
 	RunawayTrain_Failed,
 
 	RunawayTrain2,
-	RunawayTrain2_Failed,
-
-	RunawayTrain3,
+	RunawayTrain2_Station,
 
 	TRAIN_STATES_MAX
 };
@@ -63,6 +62,8 @@ private:
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;		// Current state of the train. Used to swap between train lines.
+
+	float m_fStationWaitTime;
 
 	// Variables used in each train state
 	// Runaway train
