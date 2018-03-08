@@ -10,7 +10,6 @@
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
 
-#include "TrackSwappingManager.h"
 #include "PossessionChangerManager.h"
 
 #include "ToyTrain.generated.h"
@@ -27,13 +26,6 @@ enum TRAIN_STATES
 	RunawayTrain2_Failed,
 
 	RunawayTrain3,
-
-	PossessableTrain,
-	PossessableTrain2,
-	PossessableTrain3,
-	PossessableTrain4,
-	PossessableTrain5,
-	PossessableTrain6,
 
 	TRAIN_STATES_MAX
 };
@@ -64,15 +56,10 @@ private:
 
 	bool StartOfCurrentLine();
 	bool EndOfCurrentLine();
-
-	void SetTrainStateToChangeTo(int SwitchActivated);
 	
 	int splinePointer; //this counter is incremented in the Tick() function to move us to the next point on the spline
 	TArray<TArray<FVector>> pathPointLocation;//save sampled point locations into an array
 	TArray<TArray<FQuat>> pathPointRotation;//save sampled point rotations into an array
-	
-	bool Rotating; // Is the train currently rotating?
-	bool CarriageAttached; // Has the carriage been attached to the train?
 
 	int MovementDirection;
 	TRAIN_STATES TrainState;		// Current state of the train. Used to swap between train lines.
@@ -92,10 +79,6 @@ public:
 
 	/** Handle pressing forwards */
 	void MoveForward(float fValue);	
-	// Possess other Actor;
-	void ChangePossesion();
-	// Swap closest track
-	void SwapTrack();
 
 
 	// Trigger functions that can be called from other classes
@@ -120,23 +103,11 @@ protected:
 	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
 
-	UPROPERTY(EditAnywhere)
-	APossessionChangerManager* PossessionChangerManager;
-
-	UPROPERTY(Category = TrackSwapping, EditAnywhere)
-	ATrackSwappingManager* TrackSwappingManager;
-
 	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	TArray<AActor*> SplineBPs;
 
 	UPROPERTY(Category = TrackPieces, EditAnywhere)
 	AActor* Obstacle;
-
-	UPROPERTY(Category = TrackPieces, EditAnywhere)
-	AActor* RotatingTrack;
-
-	UPROPERTY(Category = TrackPieces, EditAnywhere)
-	AActor* BridgePieces[2];
 
 	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	AActor* TrainHouse;
