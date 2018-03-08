@@ -411,24 +411,24 @@ void AToyCar::ResetPositionAndRotation()
 
 void AToyCar::Respawn()
 {
-	if (GetWorld()->GetTimeSeconds() - fLastRespawn >= RespawnDelay)
+	//if (GetWorld()->GetTimeSeconds() - fLastRespawn >= RespawnDelay)
+	//{
+	fLastRespawn = GetWorld()->GetTimeSeconds();
+
+	for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		fLastRespawn = GetWorld()->GetTimeSeconds();
-
-		for (TActorIterator<ARespawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		if (ActorItr->GetIsCurrentSpawnPoint())
 		{
-			if (ActorItr->GetIsCurrentSpawnPoint())
-			{
-				FRotator currentRotation = this->GetActorRotation();
+			FRotator currentRotation = this->GetActorRotation();
 
-				FVector spawnLocation = ActorItr->GetActorLocation();
-				spawnLocation.Z += 100;
-				this->SetActorLocationAndRotation(spawnLocation, FRotator(0.0f, currentRotation.Yaw, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
-				GetWorld()->GetTimeSeconds();
-				ResetVelocity();
-			}
+			FVector spawnLocation = ActorItr->GetActorLocation();
+			spawnLocation.Z += 100;
+			this->SetActorLocationAndRotation(spawnLocation, FRotator(0.0f, currentRotation.Yaw, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
+			GetWorld()->GetTimeSeconds();
+			ResetVelocity();
 		}
 	}
+	//}
 }
 
 void AToyCar::ResetVelocity()
