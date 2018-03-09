@@ -25,6 +25,9 @@ enum TRAIN_STATES
 
 	RunawayTrain2,
 	RunawayTrain2_Station,
+	RunawayTrain2_Failed,
+
+	RunawayTrain3,
 
 	TRAIN_STATES_MAX
 };

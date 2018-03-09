@@ -56,7 +56,7 @@ void AToyTrain::BeginPlay()
 
 		if (!SplineComponent)
 		{
-			UE_LOG(LogTemp, Error, TEXT("No spline component find in actor %d"), i);
+			UE_LOG(LogTemp, Error, TEXT("No spline component found in actor %d"), i);
 			continue;
 		}
 
@@ -164,6 +164,7 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::RunawayTrain_Failed:
+	case TRAIN_STATES::RunawayTrain2_Failed:
 		AutomatedMovement();
 		break;
 
@@ -178,7 +179,14 @@ void AToyTrain::UpdateState()
 	case TRAIN_STATES::RunawayTrain2_Station:
 		if (!AutomatedMovement())
 		{
-			//ChangeToState(RunawayTrain2_Station);
+			ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+		}
+		break;
+
+	case TRAIN_STATES::RunawayTrain3:
+		if (!AutomatedMovement())
+		{
+			//ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
 		}
 		break;
 
@@ -253,7 +261,7 @@ void AToyTrain::UpdateCarriages()
 
 bool AToyTrain::OnFailureTrainLine()
 {
-	return TrainState == TRAIN_STATES::RunawayTrain_Failed;
+	return TrainState == TRAIN_STATES::RunawayTrain_Failed || TrainState == TRAIN_STATES::RunawayTrain2_Failed;
 }
 
 bool AToyTrain::TrainPuzzleFailed()
