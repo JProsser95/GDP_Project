@@ -14,7 +14,8 @@ class GDP_PROJECT_API UToyCarWheelRear : public UVehicleWheel
 {
 	GENERATED_BODY()
 	
-public :
+public:
 	UToyCarWheelRear();
 	void ModifyFriction(float fNewFriction);
+	bool InAir();
 };

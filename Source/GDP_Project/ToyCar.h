@@ -84,6 +84,9 @@ public:
 	UPROPERTY(Category = Rotation, EditAnywhere)
 	bool LimitRotation;
 
+	float m_fTurnAmount;
+	float m_fTimeOnGround;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void UpdatePlanePartsInHUD(int PlanePartNumber);
 
@@ -125,7 +128,7 @@ public:
 	// Resets the camera to the be directly behind the car
 	void UpdateCamera(float DeltaTime);
 
-	void LimitCarRotation();
+	void LimitCarRotation(float DeltaTime);
 
 	bool GetIsActive() { return isActive; }
 	void SetIsActive(bool Value);
@@ -156,6 +159,7 @@ public:
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* AudioComponent;
 
+	bool InAir();
 private:
 
 	Sounds currentSoundCue;
