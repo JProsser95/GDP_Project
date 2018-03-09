@@ -181,12 +181,17 @@ void AToyPlane::Tick(float DeltaTime)
 
 void AToyPlane::UpdateCamera(float DeltaTime)
 {
-	if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
-		CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+	//if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
+	//	CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
 	if (eCameraType == THIRD_PERSON)
 	{
 		if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
-			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+		{
+			if (CameraRotationOffset.Yaw <= 180.0f)
+				CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+			else
+				CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 360.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+		}
 
 		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 0.0f), FRotator(-10.0f + CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
 	}
@@ -194,7 +199,14 @@ void AToyPlane::UpdateCamera(float DeltaTime)
 	{
 		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(10.0f, 0.0f, 17.0f), FRotator(CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
 	}
+
 	CameraRotationOffset.Yaw += CameraInput.X;
+
+	if (CameraRotationOffset.Yaw >= 360.0f)
+		CameraRotationOffset.Yaw -= 360.0f;
+	else if (CameraRotationOffset.Yaw < 0.0f)
+		CameraRotationOffset.Yaw += 360.0f;
+
 	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
 }
 

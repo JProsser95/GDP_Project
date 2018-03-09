@@ -308,11 +308,20 @@ void AToyCar::UpdateCamera(float DeltaTime)
 	//CameraRotation = cameraRot - CameraRotationOffset;
 
 	if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
-		CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+	{
+		if (CameraRotationOffset.Yaw <= 180.0f)
+			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+		else if (CameraRotationOffset.Yaw )
+			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 360.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
+	}
 
 	CameraRotationOffset.Yaw += CameraInput.X;
 	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
 
+	if (CameraRotationOffset.Yaw >= 360.0f)
+		CameraRotationOffset.Yaw -= 360.0f;
+	else if (CameraRotationOffset.Yaw < 0.0f)
+		CameraRotationOffset.Yaw += 360.0f;
 
 	FRotator finalRotation(CameraRot + CameraRotationOffset);
 	finalRotation.Pitch = FMath::Clamp(finalRotation.Pitch, -70.0f, 0.0f);
