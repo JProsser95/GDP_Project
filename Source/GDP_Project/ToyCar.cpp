@@ -214,8 +214,8 @@ void AToyCar::Restart()
 {
 	Super::Restart();
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("ToyCar");
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->ChangeHUD("ToyCar");
 }
 
 // Called to bind functionality to input

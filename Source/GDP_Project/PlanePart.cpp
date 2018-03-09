@@ -8,6 +8,7 @@
 #include "TimePuzzle.h"
 #include "FrictionPuzzle.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "ToyCar.h"
 #include "Macros.h"
 
 
@@ -41,11 +42,6 @@ void APlanePart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*FRotator ActorRotation = this->GetActorRotation();
-	ActorRotation.Pitch += 20 * DeltaTime;
-	this->SetActorRotation(ActorRotation);
-	OUTPUT_FLOAT(ActorRotation.Pitch);*/
-
 	FQuat Quaternion = this->GetActorRotation().Quaternion();
 	// Rotate around the world Z axis:
 	Quaternion *= FQuat(FVector::UpVector, FMath::DegreesToRadians(20.0f * DeltaTime));
@@ -57,6 +53,9 @@ void APlanePart::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor
 {
 	if (/*bIsCollected || */!OtherActor->FindComponentByClass<UPossessableActorComponent>())
 		return;
+
+	AToyCar* pToyCar = CastChecked<AToyCar>(OtherActor);
+	pToyCar->UpdatePlanePartsInHUD(_PartName);
 
 	CollectPart();
 }
@@ -87,8 +86,8 @@ void APlanePart::CollectPart()
 
 	}
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->SetPlanePartCollected(_PartName);
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->SetPlanePartCollected(_PartName);
 
 	this->Destroy();
 }

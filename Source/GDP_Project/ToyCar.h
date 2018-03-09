@@ -84,6 +84,9 @@ public:
 	UPROPERTY(Category = Rotation, EditAnywhere)
 	bool LimitRotation;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void UpdatePlanePartsInHUD(int PlanePartNumber);
+
 protected:
 	virtual void BeginPlay() override;
 
