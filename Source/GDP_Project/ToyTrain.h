@@ -14,7 +14,7 @@
 
 #include "ToyTrain.generated.h"
 
-#define NUMBEROFTRACKSWITCHERS 2 // Used for the car to weigh down
+#define NUMBEROFTRACKSWITCHERS 4 // Used for the car to weigh down
 
 #define STATIONWAITTIME 5.0f
 
@@ -28,6 +28,8 @@ enum TRAIN_STATES
 	RunawayTrain2_Failed,
 
 	RunawayTrain3,
+
+	RunawayTrain4,
 
 	TRAIN_STATES_MAX
 };
@@ -67,6 +69,8 @@ private:
 	TRAIN_STATES TrainState;		// Current state of the train. Used to swap between train lines.
 
 	float m_fStationWaitTime;
+	bool m_bCarriageAttached;
+	bool m_bRotating;
 
 	// Variables used in each train state
 	// Runaway train
@@ -91,8 +95,12 @@ public:
 	// Accessors
 	int GetSplineCounter() { return splinePointer; }
 	TRAIN_STATES GetTrainState() { return TrainState; }
+
 	bool OnFailureTrainLine();
+	bool OnCompletionTrainLine();
+
 	bool TrainPuzzleFailed();
+	bool TrainPuzzleCompleted();
 
 	// Mutators
 	void SetSplineCounter(int iSplineCounter) { splinePointer = iSplineCounter; }
@@ -111,10 +119,7 @@ protected:
 	TArray<AActor*> SplineBPs;
 
 	UPROPERTY(Category = TrackPieces, EditAnywhere)
-	AActor* Obstacle;
-
-	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
-	AActor* TrainHouse;
+	AActor* RotatingTrack;
 
 	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	TArray<AActor*> Carriages;

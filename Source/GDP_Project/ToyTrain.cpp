@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), MovementDirection(0), TrainState(RunawayTrain), m_fStationWaitTime(0.0f)
+	: splinePointer(0), MovementDirection(0), TrainState(RunawayTrain), m_fStationWaitTime(0.0f), m_bCarriageAttached(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -140,13 +140,26 @@ void AToyTrain::Tick(float DeltaTime)
 			m_fStationWaitTime = 0.0f;
 	}
 
-
 	// Move the train and its carriage
-
-	UpdateTrainOnSpline();
+	if (!m_bRotating)
+	{
+		UpdateTrainOnSpline();
+	}
+	else
+	{
+		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
+		RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
+		MoveForward(0.0f); // Make sure the train can't move
+		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
+		{
+			m_bRotating = false;
+			splinePointer = 0;
+			SplineTimer = 0.0f;
+		}
+	}
 
 	//End movement at end of Spline
-	if (MeshComponent->IsOverlappingActor(TrainHouse))
+	if (TrainPuzzleCompleted())
 	{
 		CompleteTrainPuzzle();
 	}
@@ -184,10 +197,16 @@ void AToyTrain::UpdateState()
 		break;
 
 	case TRAIN_STATES::RunawayTrain3:
-		if (!AutomatedMovement())
+		if (!AutomatedMovement() && TrackSwitched[2])
 		{
-			//ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+			ChangeToState(RunawayTrain4);
+			m_bRotating = true;
 		}
+		break;
+
+	case TRAIN_STATES::RunawayTrain4:
+		m_bCarriageAttached = true;
+		AutomatedMovement();
 		break;
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
@@ -218,11 +237,8 @@ void AToyTrain::UpdateSplinePointer()
 {
 	if (MovementDirection == 1)
 	{
-		if (!MeshComponent->IsOverlappingActor(Obstacle))
-		{
-			if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
-				splinePointer = pathPointLocation[TrainState].Num() - 1;
-		}
+		if (++splinePointer >= pathPointLocation[TrainState].Num() - 1)
+			splinePointer = pathPointLocation[TrainState].Num() - 1;
 	}
 	else
 	{
@@ -242,6 +258,9 @@ void AToyTrain::UpdateTrainOnSpline()
 
 void AToyTrain::UpdateCarriages()
 {
+	if (!m_bCarriageAttached)
+		return;
+
 	int carriageSplinePointer = 0;
 	for (int i = 0; i < Carriages.Num(); ++i)
 	{
@@ -264,14 +283,19 @@ bool AToyTrain::OnFailureTrainLine()
 	return TrainState == TRAIN_STATES::RunawayTrain_Failed || TrainState == TRAIN_STATES::RunawayTrain2_Failed;
 }
 
+bool AToyTrain::OnCompletionTrainLine()
+{
+	return TrainState == TRAIN_STATES::RunawayTrain4;
+}
+
 bool AToyTrain::TrainPuzzleFailed()
 {
-	if (OnFailureTrainLine())
-	{
-		return EndOfCurrentLine();
-	}
+	return OnFailureTrainLine() && EndOfCurrentLine();
+}
 
-	return false; // We haven't failed the train puzzle
+bool AToyTrain::TrainPuzzleCompleted()
+{
+	return OnCompletionTrainLine() && EndOfCurrentLine();
 }
 
 void AToyTrain::CompleteTrainPuzzle()
