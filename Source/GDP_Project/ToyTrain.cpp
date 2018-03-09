@@ -3,13 +3,11 @@
 #include "ToyTrain.h"
 #include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
-#include "GDP_ProjectGameModeBase.h"
-#include "Macros.h"
 #include "Engine/StaticMesh.h"
 
 const int HEIGHT = 0;//height of player above spline
 
-#define CARRIAGESPACING 38
+#define CARRIAGESPACING 10
 #define TIMETOUPDATETRAIN 0.012f
 
 // Sets default values
@@ -154,7 +152,7 @@ void AToyTrain::Tick(float DeltaTime)
 		{
 			m_bRotating = false;
 			splinePointer = 0;
-			SplineTimer = 0.0f;
+			SplineTimer = -0.5f;
 		}
 	}
 
@@ -272,7 +270,7 @@ void AToyTrain::UpdateCarriages()
 		}
 		else
 		{
-			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - (RootComponent->GetForwardVector() * 175.0f));
+			Carriages[i]->SetActorLocation(RootComponent->RelativeLocation - (RootComponent->GetForwardVector() * 50.0f));
 			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
@@ -300,7 +298,6 @@ bool AToyTrain::TrainPuzzleCompleted()
 
 void AToyTrain::CompleteTrainPuzzle()
 {
-	OUTPUT_STRING("END");
 	PrimaryActorTick.bCanEverTick = false;
 }
 
