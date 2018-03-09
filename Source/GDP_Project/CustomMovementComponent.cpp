@@ -20,6 +20,8 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 
 	// Get (and then clear) the movement vector that we set in APawnTesting::Tick
 	FVector DesiredMovementThisFrame = ConsumeInputVector() * DeltaTime;
+	FVector StartPos = UpdatedComponent->RelativeLocation;
+
 	if (!DesiredMovementThisFrame.IsNearlyZero())
 	{
 		FHitResult Hit;
@@ -29,7 +31,10 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 		if (Hit.IsValidBlockingHit())
 		{
 			SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
-			m_bHitObject = true;
+			if ((UpdatedComponent->RelativeLocation - StartPos).Size() <= (DesiredMovementThisFrame*0.8f).Size())
+				m_bHitObject = true;
+			else
+				m_bHitObject = false;
 		}
 		else
 			m_bHitObject = false;

@@ -173,7 +173,7 @@ void AToyPlane::Tick(float DeltaTime)
 
 	UpdateCamera(DeltaTime);
 
-	if (CustomMovementComponent->HitObject() && fSpeed >= MinSpeed)
+	if (CustomMovementComponent->HitObject())
 	{
 		ResetPlane();
 	}
@@ -181,8 +181,6 @@ void AToyPlane::Tick(float DeltaTime)
 
 void AToyPlane::UpdateCamera(float DeltaTime)
 {
-	//if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
-	//	CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
 	if (eCameraType == THIRD_PERSON)
 	{
 		if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
