@@ -98,6 +98,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Plane")
 	float PropRotateSpeed;
 
+	FTransform startTransform;
+
 	UPROPERTY(Category = Camera, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FRotator CameraRotation;
 	FRotator CameraRotationOffset;
@@ -138,21 +140,21 @@ public:
 
 	// Accessor for MaximumBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-		float GetMaximumBoost() { return MaximumBoost; }
+	float GetMaximumBoost() { return MaximumBoost; }
 
 	// Accessor for CurrentBoost
 	UFUNCTION(BlueprintPure, Category = "Plane")
-		float GetCurrentBoost() { return CurrentBoost; }
+	float GetCurrentBoost() { return CurrentBoost; }
 
 	// Accessor for isBoosting
 	UFUNCTION(BlueprintPure, Category = "Plane")
-		bool GetIsBoosting() { return IsBoosting; }
+	bool GetIsBoosting() { return IsBoosting; }
 
 	/* Updates current boost
 	* @param Boost The amount the boost of the plane will change
 	*/
 	UFUNCTION(BluePrintCallable, Category = "Plane")
-		void UpdateCurrentBoost(float boostIncrement);
+	void UpdateCurrentBoost(float boostIncrement);
 
 	class UCustomMovementComponent* CustomMovementComponent;
 
@@ -169,25 +171,25 @@ protected:
 
 	// The buleprint for the camera shake 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Plane")
-		TSubclassOf<UCameraShake> CameraShake;
+	TSubclassOf<UCameraShake> CameraShake;
 
 	// Widget class to use for HUD screen
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Plane", Meta = (BlueprintProtected = true))
-		TSubclassOf<class UUSerWidget> HUDWidgetClass;
+	TSubclassOf<class UUSerWidget> HUDWidgetClass;
 
 	// Instance of the HUD
 	UPROPERTY()
-		class UUserWidget* CurrentWidget;
+	class UUserWidget* CurrentWidget;
 
 	UPROPERTY(EditAnywhere)
-		USpringArmComponent* OurCameraSpringArm;
+	USpringArmComponent* OurCameraSpringArm;
 	UCameraComponent* OurCamera;
 
 	// Allows the addition of a static mesh component in the editor
 	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* PlaneBodyMeshComponent;
+	UStaticMeshComponent* PlaneBodyMeshComponent;
 	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* PlanePropMeshComponent;
+	UStaticMeshComponent* PlanePropMeshComponent;
 
 	CameraType eCameraType;
 
@@ -195,10 +197,6 @@ protected:
 	FVector4 TargetInput;
 	FVector4 MovementInput;
 	FVector2D CameraInput;
-
-	//Collision functions
-	UFUNCTION()
-	void OnToyPlaneOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	void InterpolateMovementInput(float DeltaTime);
 
@@ -215,4 +213,5 @@ protected:
 
 	void EndBoost();
 	void CameraZoom();
+	void ResetPlane();
 };

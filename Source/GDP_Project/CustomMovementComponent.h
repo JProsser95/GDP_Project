@@ -11,8 +11,11 @@ class GDP_PROJECT_API UCustomMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 
-public:
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	UCustomMovementComponent();
 
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	bool m_bHitObject;
+public:
+	bool HitObject();
 
 };

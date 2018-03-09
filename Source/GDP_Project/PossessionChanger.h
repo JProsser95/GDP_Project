@@ -9,6 +9,8 @@
 #include "Components/SphereComponent.h"
 #include "PossessionChanger.generated.h"
 
+class UBoxComponent;
+
 UENUM()
 enum class POSSESSABLE_VEHICLES : uint8
 {
@@ -29,6 +31,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Allows the addition of a static mesh component in the editor
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* HotSwapMeshComponent;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* TriggerBox;
 
 public:	
 	// Called every frame

@@ -5,14 +5,30 @@
 #include "ToyCar.h"
 #include "ToyPlane.h"
 #include "ToyTrain.h"
-
+#include "GDP_ProjectGameModeBase.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 APossessionChanger::APossessionChanger()
+	:VehicleToChangeTo(POSSESSABLE_VEHICLES::Plane)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Mesh
+	HotSwapMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HotSwapMeshComponent"));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetHotSwap(TEXT("StaticMesh'/Game/Assets/Hotswap/Hotswap.Hotswap'"));
+	if (MeshAssetHotSwap.Object)
+		HotSwapMeshComponent->SetStaticMesh(MeshAssetHotSwap.Object);
+
+	RootComponent = HotSwapMeshComponent;
+
+	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
+	TriggerBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 100.0f));
+	TriggerBox->SetWorldScale3D(FVector(0.4f, 0.375f, 0.325f));
+	TriggerBox->SetRelativeLocation(FVector (-40.0f, 0.0f, 40.0f));
 }
 
 // Called when the game starts or when spawned
