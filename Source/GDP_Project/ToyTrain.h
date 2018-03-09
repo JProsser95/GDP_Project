@@ -16,7 +16,7 @@
 
 #define NUMBEROFTRACKSWITCHERS 4 // Used for the car to weigh down
 
-#define STATIONWAITTIME 5.0f
+#define STATIONWAITTIME 3.0f
 
 enum TRAIN_STATES
 {
