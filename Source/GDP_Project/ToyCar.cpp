@@ -20,7 +20,6 @@
 #include "PossessableActorComponent.h"
 #include "EngineUtils.h"
 #include "RespawnPoint.h"
-#include "ToyTrain.h"
 #include "Macros.h"
 #include "Sound/SoundCue.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
