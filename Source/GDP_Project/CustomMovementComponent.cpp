@@ -30,7 +30,7 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 		// If we bumped into something, try to slide along it
 		if (Hit.IsValidBlockingHit())
 		{
-			SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
+			SlideAlongSurface(DesiredMovementThisFrame, 1.0f - Hit.Time, Hit.Normal, Hit);
 			if ((UpdatedComponent->RelativeLocation - StartPos).Size() <= (DesiredMovementThisFrame*0.8f).Size())
 				m_bHitObject = true;
 			else

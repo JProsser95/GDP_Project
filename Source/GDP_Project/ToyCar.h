@@ -26,7 +26,7 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	
 	enum Sounds {
 		ENGINE = 0,
-		BREAK  = 1
+		BRAKE  = 1
 	};
 
 	/** Spring arm that will offset the camera */
@@ -55,15 +55,15 @@ public:
 
 	UPROPERTY(Category = Camera, EditAnywhere)
 	float AutoFocusDelay;
-	float fLastUnFocusTime;
+	float m_fLastUnFocusTime;
 
 	UPROPERTY(Category = Reset, EditAnywhere)
 	float RespawnDelay;
-	float fLastRespawn;
+	float m_fLastRespawn;
 
 	/** Are we in reverse gear */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	bool bInReverseGear;
+	bool m_bInReverseGear;
 
 	// Begin Pawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -130,25 +130,18 @@ public:
 
 	void LimitCarRotation(float DeltaTime);
 
-	bool GetIsActive() { return isActive; }
-	void SetIsActive(bool Value);
-
-	bool GetCanMove() { return bCanMove; }
+	bool GetCanMove() { return m_bCanMove; }
 	UFUNCTION(BlueprintCallable, Category = "CarMovement")
-	void SetCanMove(bool Value) { bCanMove = Value; }
+	void SetCanMove(bool Value) { m_bCanMove = Value; }
 
-	bool GetIsInPuzzle() { return bIsInPuzzle; }
-	void SetIsInPuzzle(bool Value) { bIsInPuzzle = Value; }
+	bool GetIsInPuzzle() { return m_bIsInPuzzle; }
+	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; }
 
 	void SetPossessionChangeManager(APossessionChangerManager* PCM) { PossessionChangerManager = PCM; }
 
 	// For the Friction Puzzle
 	void OnSticky();
 	void OffSticky();
-
-	static const FName LookUpBinding;
-	static const FName LookRightBinding;
-	static const FName EngineAudioRPM;
 
 	UPROPERTY(Category = Collider, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CameraParent;
@@ -160,6 +153,7 @@ public:
 	UAudioComponent* AudioComponent;
 
 	bool InAir();
+	void SetLatStiff(float fNewLatStiff);
 private:
 
 	Sounds currentSoundCue;
@@ -167,23 +161,21 @@ private:
 	TArray<USoundCue*> AudioCues;
 
 	/* Are we on a 'slippery' surface */
-	bool bIsLowFriction;
+	bool m_bIsLowFriction;
 	/** Slippery Material instance */
 	UPhysicalMaterial* SlipperyMaterial;
 	/** Non Slippery Material instance */
 	UPhysicalMaterial* NonSlipperyMaterial;
 
 	//Is the car able to currently posses another Pawn
-	bool bCanPosses;
-	bool isActive;
-	bool isBreaking;
+	bool m_bIsBraking;
 	//Set this to false if we don't want the car to be able to move
-	bool bCanMove;
+	bool m_bCanMove;
 
-	bool bIsInPuzzle;
+	bool m_bIsInPuzzle;
 
 	// For the friction puzzle
-	float fSitckyFriction;
+	float m_fStickyFriction;
 
 	FVector2D CameraInput;
 

@@ -12,7 +12,7 @@
 
 // Sets default values
 AToyPlane::AToyPlane()
-	:MinSpeed(400.0f), MaxSpeed(600.0f), MaxBoostSpeed(800.0f), CamShakeSpeed(500.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
+	:MinSpeed(400.0f), MaxSpeed(600.0f), MaxBoostSpeed(800.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
@@ -49,7 +49,7 @@ AToyPlane::AToyPlane()
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f, 0.0f, 0.0f));
-	OurCameraSpringArm->TargetArmLength = 150.f;
+	OurCameraSpringArm->TargetArmLength = 150.0f;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 20.0f;
 
@@ -133,12 +133,6 @@ void AToyPlane::Tick(float DeltaTime)
 		else
 			fSpeed = FMath::Clamp(fSpeed, MinSpeed, MaxBoostSpeed);
 
-	}
-
-	if (fSpeed >= CamShakeSpeed)
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		PC->ClientPlayCameraShake(CameraShake, 1);
 	}
 
 	////Scale our movement input axis values by 100 units per second
@@ -375,7 +369,7 @@ void AToyPlane::CameraZoom()
 	if (eCameraType == FIRST_PERSON) {
 		eCameraType = THIRD_PERSON;
 		OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.0f), FRotator(-20.0f, 0.0f, 0.0f));
-		OurCameraSpringArm->TargetArmLength = 100.f;
+		OurCameraSpringArm->TargetArmLength = 100.0f;
 		OurCameraSpringArm->bEnableCameraLag = true;
 	}
 	else {
