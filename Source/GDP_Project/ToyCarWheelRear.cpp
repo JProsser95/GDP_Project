@@ -30,3 +30,8 @@ void UToyCarWheelRear::ModifyFriction(float fNewFriction)
 {
 	LatStiffValue = fNewFriction;
 }
+
+bool UToyCarWheelRear::InAir()
+{
+	return IsInAir();
+}

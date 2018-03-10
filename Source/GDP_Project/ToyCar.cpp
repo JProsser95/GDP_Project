@@ -25,14 +25,14 @@
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 
-
 AToyCar::AToyCar()
 	:// Reset
 	RespawnDelay(1.5f), fLastRespawn(-RespawnDelay),
 	// Anti flip rotation
-	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true), 
+	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true),
 	// Camera
-	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay)
+	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
+	m_fTurnAmount(0.0f), m_fTimeOnGround(0.0f)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -98,16 +98,17 @@ AToyCar::AToyCar()
 
 	// Adjust the steering 
 	Vehicle4W->SteeringCurve.GetRichCurve()->Reset();
-	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 1.0f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 0.8f);
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(43.0f, 0.7f);
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(120.0f, 0.6f);
 
 	// Transmission	
 	// We want 4wd
 	Vehicle4W->DifferentialSetup.DifferentialType = EVehicleDifferential4W::LimitedSlip_4W;
+	Vehicle4W->DifferentialSetup.FrontRearSplit = 0.85f;
 
 	// Drive the front wheels a little more than the rear
-	Vehicle4W->DifferentialSetup.FrontRearSplit = 0.65;
+	//Vehicle4W->DifferentialSetup.FrontRearSplit = 0.65;
 
 	// Automatic gearbox
 	Vehicle4W->TransmissionSetup.bUseGearAutoBox = true;
@@ -136,7 +137,7 @@ AToyCar::AToyCar()
 	SpringArm->TargetArmLength = 200.0f;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 20.0f;
-	
+
 	// Create the chase camera component 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
@@ -206,7 +207,7 @@ void AToyCar::Tick(float DeltaTime)
 
 	UpdateCamera(DeltaTime);
 
-	LimitCarRotation();
+	LimitCarRotation(DeltaTime);
 }
 
 void AToyCar::Restart()
@@ -257,7 +258,7 @@ void AToyCar::MoveForward(float AxisValue)
 
 void AToyCar::MoveRight(float AxisValue)
 {
-	GetVehicleMovementComponent()->SetSteeringInput(AxisValue);
+	m_fTurnAmount = AxisValue;
 }
 
 void AToyCar::PitchCamera(float AxisValue)
@@ -276,12 +277,12 @@ void AToyCar::YawCamera(float AxisValue)
 
 void AToyCar::OnHandbrakePressed()
 {
-	if (currentSoundCue != BREAK) 
+	if (currentSoundCue != BREAK)
 	{
 		AudioComponent->SetSound(AudioCues[BREAK]);
 		currentSoundCue = BREAK;
 	}
-	if (!AudioComponent->IsPlaying()) 
+	if (!AudioComponent->IsPlaying())
 	{
 		AudioComponent->Play();
 	}
@@ -304,13 +305,13 @@ void AToyCar::UpdateCamera(float DeltaTime)
 {
 
 	FRotator CameraRot = GetActorRotation() + CameraRotation;//SpringArm->GetComponentRotation();
-	//CameraRotation = cameraRot - CameraRotationOffset;
+															 //CameraRotation = cameraRot - CameraRotationOffset;
 
 	if (AutoFocus && (GetWorld()->GetTimeSeconds() - fLastUnFocusTime >= AutoFocusDelay))
 	{
 		if (CameraRotationOffset.Yaw <= 180.0f)
 			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 0.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
-		else if (CameraRotationOffset.Yaw )
+		else if (CameraRotationOffset.Yaw)
 			CameraRotationOffset = CameraRotationOffset + (FRotator(0.0f, 360.0f, 0.0f) - CameraRotationOffset) * DeltaTime;
 	}
 
@@ -328,46 +329,86 @@ void AToyCar::UpdateCamera(float DeltaTime)
 	SpringArm->SetWorldRotation(finalRotation);
 }
 
-void AToyCar::LimitCarRotation()
+bool AToyCar::InAir()
+{
+	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+
+	TArray<UToyCarWheelFront*> frontWheels;
+	TArray<UToyCarWheelRear*> rearWheels;
+
+	frontWheels.Add(Cast<UToyCarWheelFront>(Vehicle4W->Wheels[0]));
+	frontWheels.Add(Cast<UToyCarWheelFront>(Vehicle4W->Wheels[1]));
+	rearWheels.Add(Cast<UToyCarWheelRear>(Vehicle4W->Wheels[2]));
+	rearWheels.Add(Cast<UToyCarWheelRear>(Vehicle4W->Wheels[3]));
+
+	//UVehicleWheel* pWheel = &Vehicle4W->WheelSetups[0].WheelClass;
+
+	if (frontWheels[0] && frontWheels[0]->InAir() &&
+		frontWheels[1] && frontWheels[1]->InAir() &&
+		rearWheels[0] && rearWheels[0]->InAir() &&
+		rearWheels[1] && rearWheels[1]->InAir())
+	{
+		return true;
+	}
+	return false;
+}
+
+void AToyCar::LimitCarRotation(float DeltaTime)
 {
 	if (LimitRotation)
 	{
 		UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 		UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
 
-		FRotator currentRotation(GetActorRotation());
-		FRotator targetRotation(0.0f, currentRotation.Yaw, 0.0f);
-
-		bool rotated(false);
-
-		// Cap pitch
-		if (currentRotation.Pitch > MaxAngle)
+		if (InAir())
 		{
-			rotated = true;
-			//currentRotation.Pitch = rotationCap;
+			pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(0.0f));
+			FRotator currentRotation(GetActorRotation());
+			currentRotation = currentRotation + (FRotator(0.0f, currentRotation.Yaw, 0.0f) - currentRotation) * DeltaTime;
+			SetActorRotation(currentRotation, ETeleportType::TeleportPhysics);
+			GetVehicleMovementComponent()->SetSteeringInput(0.0f);
+			m_fTimeOnGround = 0.0f;
 		}
-		else if (currentRotation.Pitch < -MaxAngle)
+		else
 		{
-			rotated = true;
-			//currentRotation.Pitch = -rotationCap;
-		}
+			m_fTimeOnGround += DeltaTime;
+			if (m_fTimeOnGround >= 0.15f)
+				GetVehicleMovementComponent()->SetSteeringInput(m_fTurnAmount);
 
-		// Cap roll
-		if (currentRotation.Roll > MaxAngle)
-		{
-			rotated = true;
-			//currentRotation.Roll = rotationCap;
-		}
-		else if (currentRotation.Roll < -MaxAngle)
-		{
-			rotated = true;
-			//currentRotation.Roll = -rotationCap;
-		}
+			FRotator currentRotation(GetActorRotation());
+			FRotator targetRotation(0.0f, currentRotation.Yaw, 0.0f);
 
-		if (rotated)
-		{
-			FRotator rotateAmount = (targetRotation - currentRotation).GetNormalized();
-			pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(rotateAmount.Roll, rotateAmount.Pitch, rotateAmount.Yaw)*RotateSpeed);
+			bool rotated(false);
+
+			// Cap pitch
+			if (currentRotation.Pitch > MaxAngle)
+			{
+				rotated = true;
+				//currentRotation.Pitch = rotationCap;
+			}
+			else if (currentRotation.Pitch < -MaxAngle)
+			{
+				rotated = true;
+				//currentRotation.Pitch = -rotationCap;
+			}
+
+			// Cap roll
+			if (currentRotation.Roll > MaxAngle)
+			{
+				rotated = true;
+				//currentRotation.Roll = rotationCap;
+			}
+			else if (currentRotation.Roll < -MaxAngle)
+			{
+				rotated = true;
+				//currentRotation.Roll = -rotationCap;
+			}
+
+			if (rotated)
+			{
+				FRotator rotateAmount = (targetRotation - currentRotation).GetNormalized();
+				pPrimComponent->SetPhysicsAngularVelocityInDegrees(FVector(rotateAmount.Roll, rotateAmount.Pitch, rotateAmount.Yaw)*RotateSpeed);
+			}
 		}
 	}
 }
