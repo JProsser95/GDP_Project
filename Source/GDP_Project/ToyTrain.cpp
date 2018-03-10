@@ -4,6 +4,8 @@
 #include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/StaticMesh.h"
+#include "Components/SplineComponent.h"
+#include "Components/BoxComponent.h"
 
 const int HEIGHT = 0;//height of player above spline
 
@@ -12,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), MovementDirection(0), TrainState(RunawayTrain), m_fStationWaitTime(0.0f), m_bCarriageAttached(false)
+	: splinePointer(0), MovementDirection(-1), TrainState(RunawayTrain), m_fStationWaitTime(0.0f), m_bCarriageAttached(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -26,15 +28,25 @@ AToyTrain::AToyTrain()
 	if (MeshAssetBody.Object)
 		MeshComponent->SetStaticMesh(MeshAssetBody.Object);
 
-	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	OurCameraSpringArm->SetupAttachment(RootComponent);
-	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 100.0f), FRotator(-30.0f, 0.0f, 0.0f));
-	OurCameraSpringArm->TargetArmLength = 700.f;
-	OurCameraSpringArm->bEnableCameraLag = true;
-	OurCameraSpringArm->CameraLagSpeed = 3.0f;
+	//OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
+	//OurCameraSpringArm->SetupAttachment(RootComponent);
+	//OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 100.0f), FRotator(-30.0f, 0.0f, 0.0f));
+	//OurCameraSpringArm->TargetArmLength = 700.f;
+	//OurCameraSpringArm->bEnableCameraLag = true;
+	//OurCameraSpringArm->CameraLagSpeed = 3.0f;
+	//
+	//OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	//OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
-	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
+	StartRaceTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("StartRaceTriggerBox"));
+	StartRaceTriggerBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	StartRaceTriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
+	StartRaceTriggerBox->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	StopWaitingAtStationTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("StopWaitingAtStationTriggerBox"));
+	StopWaitingAtStationTriggerBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	StopWaitingAtStationTriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
+	StopWaitingAtStationTriggerBox->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	for (int i = 0; i < NUMBEROFTRACKSWITCHERS; ++i)
 	{
@@ -89,6 +101,8 @@ void AToyTrain::BeginPlay()
 			}
 		}
 	}
+
+	PlanePart->SetActorHiddenInGame(true);
 }
 
 void AToyTrain::Restart()
@@ -107,59 +121,91 @@ void AToyTrain::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	UpdateState(); // Check train state and update if neccessary
-
-	// Handle the updating of the spline pointer
-	static float SplineTimer = 0.0f;
-
-	if (m_fStationWaitTime == 0.0f)
+	if (MovementDirection != -1)
 	{
-		if (MovementDirection)
-		{
-			SplineTimer += DeltaTime;
-			if (SplineTimer >= TIMETOUPDATETRAIN)
-			{
-				int iUpdates = (int)(SplineTimer / TIMETOUPDATETRAIN);
+		UpdateState(); // Check train state and update if neccessary
 
-				for (int i = 0; i < iUpdates; ++i)
+		// Handle the updating of the spline pointer
+		static float SplineTimer = 0.0f;
+
+		if (m_fStationWaitTime == 0.0f)
+		{
+			if (MovementDirection)
+			{
+				SplineTimer += DeltaTime;
+				if (SplineTimer >= TIMETOUPDATETRAIN)
 				{
-					SplineTimer = SplineTimer - TIMETOUPDATETRAIN;
-					UpdateSplinePointer();
+					int iUpdates = (int)(SplineTimer / TIMETOUPDATETRAIN);
+
+					for (int i = 0; i < iUpdates; ++i)
+					{
+						SplineTimer = SplineTimer - TIMETOUPDATETRAIN;
+						UpdateSplinePointer();
+					}
+				}
+			}
+			else
+				SplineTimer = 0.0f;
+		}
+		else
+		{
+			m_fStationWaitTime -= DeltaTime;
+			if (m_fStationWaitTime < 0.0f)
+				m_fStationWaitTime = 0.0f;
+			else
+			{
+				TArray<UPrimitiveComponent*> components;
+
+				GetOverlappingComponents(components);
+
+				for (UPrimitiveComponent* pComponent : components)
+				{
+					if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+					{
+						m_fStationWaitTime = 0.0f;
+					}
 				}
 			}
 		}
-		else
-			SplineTimer = 0.0f;
-	}
-	else
-	{
-		m_fStationWaitTime -= DeltaTime;
-		if (m_fStationWaitTime < 0.0f)
-			m_fStationWaitTime = 0.0f;
-	}
 
-	// Move the train and its carriage
-	if (!m_bRotating)
-	{
-		UpdateTrainOnSpline();
-	}
-	else
-	{
-		RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
-		RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (30.0f * DeltaTime), 0.0f));
-		MoveForward(0.0f); // Make sure the train can't move
-		if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
+		// Move the train and its carriage
+		if (!m_bRotating)
 		{
-			m_bRotating = false;
-			splinePointer = 0;
-			SplineTimer = -0.5f;
+			UpdateTrainOnSpline();
+		}
+		else
+		{
+			RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
+			RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
+			MoveForward(0.0f); // Make sure the train can't move
+			if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
+			{
+				m_bRotating = false;
+				splinePointer = 0;
+				SplineTimer = -0.5f;
+			}
+		}
+
+		//End movement at end of Spline
+		if (TrainPuzzleCompleted())
+		{
+			CompleteTrainPuzzle();
 		}
 	}
-
-	//End movement at end of Spline
-	if (TrainPuzzleCompleted())
+	else
 	{
-		CompleteTrainPuzzle();
+		TArray<UPrimitiveComponent*> components;
+
+		GetOverlappingComponents(components);
+
+		for (UPrimitiveComponent* pComponent : components)
+		{
+			if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
+			{
+				MovementDirection = 1;
+				return;
+			}
+		}
 	}
 }
 
@@ -299,6 +345,7 @@ bool AToyTrain::TrainPuzzleCompleted()
 void AToyTrain::CompleteTrainPuzzle()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	PlanePart->SetActorHiddenInGame(false);
 }
 
 bool AToyTrain::StartOfCurrentLine()

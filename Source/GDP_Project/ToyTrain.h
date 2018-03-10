@@ -7,10 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
-#include "Components/SplineComponent.h"
-#include "Components/SplineMeshComponent.h"
-
-#include "PossessionChangerManager.h"
+#include "PlanePart.h"
 
 #include "ToyTrain.generated.h"
 
@@ -116,6 +113,12 @@ protected:
 	UCameraComponent* OurCamera;
 
 	UPROPERTY(Category = TrackSwapping, EditAnywhere)
+	UBoxComponent* StartRaceTriggerBox;
+
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
+	UBoxComponent* StopWaitingAtStationTriggerBox;
+
+	UPROPERTY(Category = TrackSwapping, EditAnywhere)
 	TArray<AActor*> SplineBPs;
 
 	UPROPERTY(Category = TrackPieces, EditAnywhere)
@@ -123,4 +126,7 @@ protected:
 
 	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	TArray<AActor*> Carriages;
+
+	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
+	APlanePart* PlanePart;
 };
