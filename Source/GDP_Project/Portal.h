@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ToyCar.h"
 #include "Portal.generated.h"
 
 class UWidgetComponent;
 class UBoxComponent;
 class USceneComponent;
-class AToyCar;
 
 UENUM()
 enum PuzzleName {
