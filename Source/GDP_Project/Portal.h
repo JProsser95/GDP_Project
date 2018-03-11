@@ -9,6 +9,7 @@
 class UWidgetComponent;
 class UBoxComponent;
 class USceneComponent;
+class AToyCar;
 
 UENUM()
 enum PuzzleName {
@@ -50,9 +51,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION(BlueprintCallable)
+	void Teleport();
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AToyCar* pToyCar;
 
 };
