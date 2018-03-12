@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CustomMovementComponent.h"
+#include "Macros.h"
 
 UCustomMovementComponent::UCustomMovementComponent()
 	:m_bHitObject(false)
@@ -25,6 +26,7 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	if (!DesiredMovementThisFrame.IsNearlyZero())
 	{
 		FHitResult Hit;
+
 		SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
 
 		// If we bumped into something, try to slide along it
