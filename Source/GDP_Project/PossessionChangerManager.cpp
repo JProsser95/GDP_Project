@@ -4,7 +4,7 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "ToyCar.h"
-#include "GDP_ProjectGameModeBase.h"
+//#include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
 APossessionChangerManager::APossessionChangerManager()
@@ -39,7 +39,7 @@ void APossessionChangerManager::Tick(float DeltaTime)
 
 void APossessionChangerManager::CheckPossessionPads(bool bChangePossession)
 {
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	for (int i = 0; i < PossessionChangers.Num(); ++i)
 	{
 		if (PossessionChangers[i]->VehicleToChangeFrom == CurrentVehicle)
@@ -51,16 +51,16 @@ void APossessionChangerManager::CheckPossessionPads(bool bChangePossession)
 				{
 					ChangePossession((POSSESSABLE_VEHICLES)iNewVehicle);
 				}
-				else if(GameMode)
-					GameMode->SetVehicleHUD();
+				//else //if(GameMode)
+				//	GameMode->SetVehicleHUD();
 
 				return; // We're done, return out.
 			}
 		}
 	}
 
-	if (GameMode)
-		GameMode->RemoveVehicleHUD();
+	//if (GameMode)
+	//	GameMode->RemoveVehicleHUD();
 }
 
 void APossessionChangerManager::ForceChangePossession(POSSESSABLE_VEHICLES NewVehicle)

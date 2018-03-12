@@ -5,7 +5,7 @@
 #include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Macros.h"
+//#include "Macros.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "CustomMovementComponent.h"
 #include "PossessableActorComponent.h"
@@ -16,8 +16,9 @@ AToyPlane::AToyPlane()
 	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
-	bAlreadyRestarted(false), SWControlPitch(true), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
-	m_eControlType(Controls::ASDW_Arrows), m_ePreviousControlType(m_eControlType)
+	bAlreadyRestarted(false), SWControlPitch(false), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
+	m_eControlType(Controls::ASDW_Simple), m_ePreviousControlType(m_eControlType),
+	m_bCrashed(false), m_fCrashTime(0.0f), m_fRespawnTime(3.0f)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -76,8 +77,8 @@ void AToyPlane::Restart()
 {
 	Super::Restart();
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->ChangeHUD("ToyPlane");
+	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+	//GameMode->ChangeHUD("ToyPlane");
 
 	if (bAlreadyRestarted)
 		bIsActive = true;
@@ -98,6 +99,31 @@ void AToyPlane::Tick(float DeltaTime)
 {
 	if (!bIsActive)
 		return;
+
+	//OUTPUT_INT(int(PlaneBodyMeshComponent->IsSimulatingPhysics()));
+	//OUTPUT_INT(int(RootComponent->IsSimulatingPhysics()));
+
+	UpdateCamera(DeltaTime);
+
+	if (!m_bCrashed && CustomMovementComponent->HitObject())
+	{
+		//if (PlaneBodyMeshComponent->IsSimulatingPhysics())
+		//	return;
+		if (fSpeed > 0.0f)
+		{
+			PlaneBodyMeshComponent->SetSimulatePhysics(true);
+			m_bCrashed = true;
+			m_fCrashTime = 0.0f;
+			return;
+		}
+	}
+	else if (m_bCrashed)
+	{
+		m_fCrashTime += DeltaTime;
+		if (m_fCrashTime >= m_fRespawnTime)
+			ResetPlane();
+		return;
+	}
 
 	Super::Tick(DeltaTime);
 
@@ -150,12 +176,22 @@ void AToyPlane::Tick(float DeltaTime)
 	InterpolateMovementInput(DeltaTime);
 
 	rot1.Pitch = MovementInput.X * PitchAmount * DeltaTime;
-	rot2.Yaw = MovementInput.Y * YawAmount * DeltaTime;
-	rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
-
-	NewRotation = UKismetMathLibrary::ComposeRotators(rot3, NewRotation);
-	NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation);
-	NewRotation = UKismetMathLibrary::ComposeRotators(rot2, NewRotation);
+	if (m_eControlType != Controls::ASDW_Simple)
+	{
+		rot2.Yaw = MovementInput.Y * YawAmount * DeltaTime;
+		rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
+		NewRotation = UKismetMathLibrary::ComposeRotators(rot3, NewRotation);
+		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation);
+		NewRotation = UKismetMathLibrary::ComposeRotators(rot2, NewRotation);
+	}
+	else
+	{
+		//rot2.Yaw = MovementInput.Z * YawAmount * DeltaTime;
+		//rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
+		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation); // += MovementInput.X * -PitchAmount * DeltaTime;
+		NewRotation.Yaw += MovementInput.Z * YawAmount * DeltaTime;
+		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount*0.5f) - NewRotation.Roll) * DeltaTime;
+	}
 
 	SetActorRotation(NewRotation);
 	//SetActorLocation(NewLocation);
@@ -165,12 +201,6 @@ void AToyPlane::Tick(float DeltaTime)
 	fPropRotation += DeltaTime * fSpeed * PropRotateSpeed;
 	PlanePropMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, fPropRotation));
 
-	UpdateCamera(DeltaTime);
-
-	if (CustomMovementComponent->HitObject())
-	{
-		ResetPlane();
-	}
 }
 
 void AToyPlane::UpdateCamera(float DeltaTime)
@@ -244,19 +274,26 @@ void AToyPlane::SetupInput()
 		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Roll);
 		m_PlayerInput->BindAxis("PlaneRoll", this, &AToyPlane::YawCamera);
 	}
+	else if (m_eControlType == Controls::ASDW_Simple)
+	{
+		m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
+		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
+		//m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
+		m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
+		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
+		m_PlayerInput->BindAxis("PlaneThrottleAltArrows", this, &AToyPlane::Throttle);
+	}
 	if (!SWControlPitch)
 		m_PlayerInput->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
 	else
 	{
 		if (m_eControlType == Controls::Keyboard_Mouse)
 		{
-			OUTPUT_STRING("Mouse Controls Confirmed");
 			m_PlayerInput->BindAxis("PlaneThrottleAltMouse", this, &AToyPlane::Throttle);
 			m_PlayerInput->BindAxis("PlanePitchAltMouse", this, &AToyPlane::Pitch);
 		}
 		else if (m_eControlType == Controls::ASDW_Arrows)
 		{
-			OUTPUT_STRING("Arrows Controls Confirmed");
 			m_PlayerInput->BindAxis("PlaneThrottleAltArrows", this, &AToyPlane::Throttle);
 			m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
 		}
@@ -279,7 +316,7 @@ void AToyPlane::FlyTowards(FVector targetPosition, float DeltaTime)
 
 void AToyPlane::InterpolateMovementInput(float DeltaTime)
 {
-	if (!SwapYawAndRoll)
+	if (!SwapYawAndRoll && m_eControlType != Controls::ASDW_Simple)
 	{
 		MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
 		MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
@@ -382,8 +419,13 @@ void AToyPlane::CameraZoom()
 
 void AToyPlane::ResetPlane()
 {
+	m_bCrashed = false;
+	PlaneBodyMeshComponent->SetSimulatePhysics(false);
+	MovementInput = FVector4(0.0f);
 	fSpeed = 0.0f;
-	SetActorTransform(startTransform);
+	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(10.0f, 0.0f, 17.0f), FRotator(CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
+	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
+	SetActorTransform(startTransform, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void AToyPlane::UpdateCurrentBoost(float boostIncrement)

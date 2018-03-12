@@ -6,7 +6,6 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Camera/CameraShake.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -17,7 +16,8 @@ class UPossessableActorComponent;
 UENUM()
 enum class Controls {
 	Keyboard_Mouse	    UMETA(DisplayName = "Keyboard & Mouse"),
-	ASDW_Arrows			UMETA(DisplayName = "ASDW + Arrows")
+	ASDW_Arrows			UMETA(DisplayName = "ASDW + Arrows"),
+	ASDW_Simple			UMETA(DisplayName = "ASDW (Simple)")
 };
 
 UCLASS()
@@ -45,6 +45,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Control Method")
 	Controls m_eControlType;
 	Controls m_ePreviousControlType;
+
+	bool m_bCrashed;
+	float m_fCrashTime;
+	UPROPERTY(EditAnywhere, Category = "Respawn", DisplayName = "Respawn Time")
+	float m_fRespawnTime;
 
 	UPROPERTY(EditAnywhere, Category = "Controls")
 	bool PitchInverted;
@@ -168,10 +173,6 @@ public:
 
 	void StartBoost();
 protected:
-
-	// The buleprint for the camera shake 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Plane")
-	TSubclassOf<UCameraShake> CameraShake;
 
 	// Widget class to use for HUD screen
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Plane", Meta = (BlueprintProtected = true))
