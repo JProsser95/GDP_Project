@@ -44,6 +44,7 @@ protected:
 
 	ACameraDirector* CameraDirector;
 
+	UPROPERTY(BlueprintReadOnly)
 	AToyCar* Car;
 
 	UPROPERTY(EditAnywhere)
@@ -57,10 +58,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	//UFUNCTION()
+	//void OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
 	void PuzzleComplete();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void BeginPuzzle();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void BeginPuzzleTimer(int Time);
@@ -71,17 +75,26 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Timer")
 	void BeginChairTimer();
 
+	UFUNCTION(BlueprintCallable)
+	void PuzzleFailed();
+
+	UFUNCTION(BlueprintCallable)
+	void ActivatePuzzle(AToyCar* toycar);
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsPuzzleTriggered;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsPuzzleComplete;
+
 private:
 
 	float ResizeScale;
 	float ResizeRate;
+	float RingSmallScale;
+
 
 	int GetVisibleActors();
 	void PointManage(float DeltaTime);
-	void PuzzleFailed();
 
-	bool bIsPuzzleTriggered;
-	bool bIsPuzzleComplete;
-
-	float RingSmallScale;
 };
