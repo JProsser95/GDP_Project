@@ -16,6 +16,13 @@ class UPossessableActorComponent;
 class USoundCue;
 class UAudioComponent;
 
+UENUM()
+enum PuzzleName {
+	TIMER				UMETA(DisplayName = "Timer"),
+	FRICTION			UMETA(DisplayName = "Friction"),
+	TRAIN				UMETA(DisplayName = "Plane"),
+};
+
 /**
  * 
  */
@@ -40,7 +47,6 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPossessableActorComponent* PossessableComponent;
-
 
 public:
 
@@ -84,11 +90,25 @@ public:
 	UPROPERTY(Category = Rotation, EditAnywhere)
 	bool LimitRotation;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Hints")
+	bool CanSeeHints;
+
 	float m_fTurnAmount;
 	float m_fTimeOnGround;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void UpdatePlanePartsInHUD(int PlanePartNumber);
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TimerPuzzleCompleted;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool FrictionPuzzleCompleted;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TrainPuzzleCompleted;
+
+	void SetPuzzleCompleted(PuzzleName Name);
 
 protected:
 	virtual void BeginPlay() override;
@@ -135,7 +155,7 @@ public:
 	void SetCanMove(bool Value) { m_bCanMove = Value; }
 
 	bool GetIsInPuzzle() { return m_bIsInPuzzle; }
-	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; }
+	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; CanSeeHints = false; }
 
 	void SetPossessionChangeManager(APossessionChangerManager* PCM) { PossessionChangerManager = PCM; }
 

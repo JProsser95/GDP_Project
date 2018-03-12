@@ -23,7 +23,8 @@ AToyCar::AToyCar()
 	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true),
 	// Camera
 	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(1.0f), m_fLastUnFocusTime(-AutoFocusDelay),
-	m_fTurnAmount(0.0f), m_fTimeOnGround(0.0f)
+	m_fTurnAmount(0.0f), m_fTimeOnGround(0.0f),
+	CanSeeHints(true), TimerPuzzleCompleted(false), FrictionPuzzleCompleted(false), TrainPuzzleCompleted(false)
 {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("SkeletalMesh'/Game/Car/TOYCAR.TOYCAR'"));
@@ -511,4 +512,24 @@ void AToyCar::OnSticky()
 void AToyCar::OffSticky()
 {
 	m_fStickyFriction = 1.0f;
+}
+
+void AToyCar::SetPuzzleCompleted(PuzzleName Name)
+{
+	switch (Name)
+	{
+
+	case TIMER:
+		TimerPuzzleCompleted = true;
+		break;
+
+	case FRICTION:
+		FrictionPuzzleCompleted = true;
+		break;
+
+	case TRAIN:
+		TrainPuzzleCompleted = true;
+		break;
+
+	}
 }

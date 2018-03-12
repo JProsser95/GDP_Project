@@ -8,13 +8,12 @@
 #include "Engine/EngineTypes.h"
 #include "TimePuzzle.generated.h"
 
-class UWidgetComponent;
 class UBoxComponent;
 class UStaticMeshComponent;
 class UCameraComponent;
 class ACameraDirector;
 class AToyCar;
-class UMaterial;
+class APlanePart;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -30,27 +29,22 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	UWidgetComponent* TriggerWidget;
-
-	UPROPERTY(EditAnywhere)
 	UBoxComponent* TriggerBox;
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* Door;
 
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, Category = "RingMaterial")
-	UMaterial* CurrentRingMat;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* Chair;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	APlanePart* PlanePart;
 
 	FTimerHandle DoorTimer;
 
 	ACameraDirector* CameraDirector;
 
 	AToyCar* Car;
-
-	void OpenDoor();
 
 	UPROPERTY(EditAnywhere)
 	TArray<AActor*> Actors;
@@ -68,6 +62,15 @@ public:
 	
 	void PuzzleComplete();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void BeginPuzzleTimer(int Time);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void RemovePuzzleTimer();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Timer")
+	void BeginChairTimer();
+
 private:
 
 	float ResizeScale;
@@ -79,9 +82,6 @@ private:
 
 	bool bIsPuzzleTriggered;
 	bool bIsPuzzleComplete;
-	bool bIsOpeningDoor;
-
-	int iDoorTime;
 
 	float RingSmallScale;
 };
