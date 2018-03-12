@@ -18,8 +18,7 @@
 #include "Macros.h"
 #include "BackgroundMusicManager.h"
 #include "Materials/Material.h"
-
-const int MAX_DOOR_TIMER(5);
+#include "PlanePart.h"
 
 // Sets default values
 ATimePuzzle::ATimePuzzle()
@@ -29,30 +28,25 @@ ATimePuzzle::ATimePuzzle()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	//For testing
-	TriggerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("RespawnWidgetComponent"));
-	TriggerWidget->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<UUserWidget> TWidget(TEXT("/Game/TestingPurpose/TimePuzzle"));
-	TriggerWidget->SetWidgetClass(TWidget.Class);
-	TriggerWidget->SetRelativeLocation(FVector(0, 0, 150.0f));
-	TriggerWidget->SetTwoSided(true);
-
 	//Trigger Box for activating this spawn point
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->SetupAttachment(RootComponent);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ATimePuzzle::OnBeginOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 
-	Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorComponent"));
-	Door->SetupAttachment(RootComponent);
-
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(RootComponent);
 
+	Chair = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	Chair->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	Chair->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAssetBody(TEXT("StaticMesh'/Game/Assets/Chair/KitchenChair.KitchenChair'"));
+	if (MeshAssetBody.Object)
+		Chair->SetStaticMesh(MeshAssetBody.Object);
+
 	bIsPuzzleTriggered = false;
-	bIsOpeningDoor = false;
 	bIsPuzzleComplete = false;
-	iDoorTime = MAX_DOOR_TIMER;
 	ResizeScale = 1.0f;
 	ResizeRate = 2.0f;
 	RingSmallScale = 0.1f;
@@ -75,6 +69,8 @@ void ATimePuzzle::BeginPlay()
 		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
+	
+
 	CopyActors = Actors;
 }
 
@@ -85,36 +81,15 @@ void ATimePuzzle::Tick(float DeltaTime)
 
 	if (bIsPuzzleTriggered) 
 	{
-		AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-		if (GameMode != nullptr)
-		{
-			if (GameMode->GetTimeLeft() <= 0)
-			{
-				GameMode->RemoveTimerWidget();
-				PuzzleFailed();
-			}
-		}
-
 		PointManage(DeltaTime);
 	}
-
-
-	if (bIsOpeningDoor)
-	{
-		FVector DoorLocation = Door->GetComponentLocation();
-		Door->SetWorldLocation(DoorLocation - FVector(0, 0, DeltaTime * 30));
-	}
-
-	//For the widget testing
-	FVector PlayerLoc = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	TriggerWidget->SetRelativeRotation(PlayerRot);
 }
 
 void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	if (bIsPuzzleTriggered || bIsPuzzleComplete)
 		return;
+
 
 	if (!Car)
 	{
@@ -139,22 +114,7 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->BeginTimer();
-}
-
-void ATimePuzzle::OpenDoor()
-{
-	if (--iDoorTime <= 0)
-	{
-		bIsOpeningDoor = false;
-		iDoorTime = MAX_DOOR_TIMER;
-		if (CameraDirector != nullptr)
-			CameraDirector->BeginTimePuzzleCameraChange();
-		if (Car != nullptr)
-			Car->SetCanMove(true);
-		GetWorldTimerManager().ClearTimer(DoorTimer);
-	}
+	BeginPuzzleTimer(60);
 }
 
 void ATimePuzzle::PuzzleComplete()
@@ -165,8 +125,9 @@ void ATimePuzzle::PuzzleComplete()
 	if (CameraDirector != nullptr)
 		CameraDirector->BeginTimePuzzleCameraChange(Car);
 
-	if (Car != nullptr)
-		Car->SetCanMove(false);
+	Chair->SetWorldRotation(FRotator(25.0f, -180.0f, 0.0f));
+	FVector Position = Chair->GetComponentLocation();
+	Chair->SetWorldLocation(Position + FVector(0.0f, 0.0f, 50.0f));
 
 	// Get the Camera Director that is in the scene
 	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -174,12 +135,14 @@ void ATimePuzzle::PuzzleComplete()
 		ActorItr->SetSound(ABackgroundMusicManager::Sounds::MAIN);
 	}
 
-	iDoorTime = MAX_DOOR_TIMER;
-	GetWorldTimerManager().SetTimer(DoorTimer, this, &ATimePuzzle::OpenDoor, 1.0f, true, 0.0f);
-	bIsOpeningDoor = true;
 	Car->SetIsInPuzzle(false);
-	AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->RemoveTimerWidget();
+	Car->SetPuzzleCompleted(PuzzleName::TIMER);
+	Car->CanSeeHints = true;
+
+	//Chair->SetSimulatePhysics(true);
+
+	RemovePuzzleTimer();
+	BeginChairTimer();
 }
 
 void ATimePuzzle::PointManage(float DeltaTime)
@@ -195,19 +158,12 @@ void ATimePuzzle::PointManage(float DeltaTime)
 			Actors[GetVisibleActors() - 1]->SetActorHiddenInGame(false);
 	}
 
-	if (!Actors.Num()) 
+	if (AllPointsCollected())
 	{
 		PuzzleComplete();
 	}
 	else 
 	{
-		//TArray<UStaticMeshComponent*> Components;
-		//Actors[0]->GetComponents<UStaticMeshComponent>(Components);
-		//for (int32 i = 0; i<Components.Num(); i++)
-		//{
-		//	UStaticMeshComponent* StaticMeshComponent = Components[i];
-		//	StaticMeshComponent->SetMaterial(0, CurrentRingMat);
-		//}
 		float scale = Actors[0]->GetActorScale3D().X;
 		float newScale(scale + (DeltaTime * ResizeRate));
 		if (newScale <= ResizeScale)
@@ -236,7 +192,6 @@ bool ATimePuzzle::AllPointsCollected()
 void ATimePuzzle::PuzzleFailed()
 {
 	bIsPuzzleTriggered = false;
-	iDoorTime = MAX_DOOR_TIMER;
 	for (AActor* Actor : Actors)
 	{
 		Actor->SetActorHiddenInGame(true);
@@ -244,3 +199,4 @@ void ATimePuzzle::PuzzleFailed()
 	}
 	Actors = CopyActors;
 }
+

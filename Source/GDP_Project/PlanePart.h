@@ -13,9 +13,7 @@ UENUM()
 enum Part {
 	PROPELLER			UMETA(DisplayName = "Propeller"),
 	HULL				UMETA(DisplayName = "Hull"),
-	LEFT_WING			UMETA(DisplayName = "Left Wing"),
-	RIGHT_WING			UMETA(DisplayName = "Right Wing"),
-	WHEELS				UMETA(DisplayName = "Wheels"),
+	WINGS				UMETA(DisplayName = "Wings"),
 	MAX
 };
 

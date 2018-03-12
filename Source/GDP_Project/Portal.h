@@ -12,17 +12,11 @@ class UBoxComponent;
 class USceneComponent;
 
 UENUM()
-enum PuzzleName {
-	//CAMERA_PUZZLE       UMETA(DisplayName = "Camera/Stealth Puzzle"),
-	//TIMER_PUZZLE		UMETA(DisplayName = "Timer Puzzle"),
-	//FRICTION_PUZZLE		UMETA(DisplayName = "Friction Puzzle"),
-	//LAVA_PUZZLE			UMETA(DisplayName = "Lava Puzzle"),
-	//PLANE_PUZZLE		UMETA(DisplayName = "Plane Puzzle")
+enum RoomName {
 	WARP_ROOM			UMETA(DisplayName = "Warp Room"),
 	LOUNGE				UMETA(DisplayName = "Lounge"),
 	KITCHEN				UMETA(DisplayName = "Kitchen"),
 	PLAYROOM			UMETA(DisplayName = "Playroom")
-
 };
 
 UCLASS()
@@ -45,7 +39,7 @@ protected:
 	UBoxComponent*  PortalTriggerBox;
 
 	UPROPERTY(EditAnywhere, Category = "Name")
-	TEnumAsByte<PuzzleName> _PuzzleName;
+	TEnumAsByte<RoomName> _PuzzleName;
 
 public:
 	// Called every frame

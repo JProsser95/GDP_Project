@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "CleanerObject.h"
 #include "CameraDirector.h"
+#include "ToyCar.h"
 
 
 // Sets default values
@@ -71,4 +72,7 @@ void AWaterGlass::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 
 	FVector location = GlassMesh->GetComponentLocation();
 	GlassMesh->SetWorldLocation(FVector(location.X -20.0f, location.Y, location.Z));
+
+	AToyCar* Car = CastChecked<AToyCar>(OtherActor);
+	Car->SetPuzzleCompleted(PuzzleName::FRICTION);
 }
