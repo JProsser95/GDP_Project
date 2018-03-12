@@ -143,6 +143,7 @@ public:
 	void Respawn();
 
 	// Resets the cars velocity and angular velocity to zero
+	UFUNCTION(BlueprintCallable)
 	void ResetVelocity();
 
 	// Resets the camera to the be directly behind the car

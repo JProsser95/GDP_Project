@@ -31,7 +31,7 @@ ATimePuzzle::ATimePuzzle()
 	//Trigger Box for activating this spawn point
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	TriggerBox->SetupAttachment(RootComponent);
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ATimePuzzle::OnBeginOverlap);
+	//TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ATimePuzzle::OnBeginOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -69,8 +69,6 @@ void ATimePuzzle::BeginPlay()
 		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
-	
-
 	CopyActors = Actors;
 }
 
@@ -85,16 +83,21 @@ void ATimePuzzle::Tick(float DeltaTime)
 	}
 }
 
-void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+//void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+//{
+//	if (bIsPuzzleTriggered || bIsPuzzleComplete)
+//		return;
+//	
+//}
+
+void ATimePuzzle::ActivatePuzzle(AToyCar* toycar)
 {
-	if (bIsPuzzleTriggered || bIsPuzzleComplete)
-		return;
+	//if (!Car)
+	//{
+	//	Car = Cast<AToyCar>(OtherActor);
+	//}
 
-
-	if (!Car)
-	{
-		Car = Cast<AToyCar>(OtherActor);
-	}
+	Car = toycar;
 
 	if (Car->GetIsInPuzzle())
 		return;
@@ -114,7 +117,8 @@ void ATimePuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActo
 		Actors[i]->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
 
-	BeginPuzzleTimer(60);
+	//BeginPuzzleTimer(60);
+	BeginPuzzle();
 }
 
 void ATimePuzzle::PuzzleComplete()
