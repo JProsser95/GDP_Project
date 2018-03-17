@@ -10,6 +10,7 @@
 #include "GDP_ProjectGameModeBase.h"
 #include "ToyCar.h"
 #include "Macros.h"
+#include "AchievementManager.h"
 
 
 // Sets default values
@@ -67,22 +68,27 @@ void APlanePart::CollectPart()
 	{
 	case PROPELLER:
 
-		// Get the Camera Director that is in the scene
-		//for (TActorIterator<ATimePuzzle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		//{
-		//	ActorItr->PuzzleComplete();
-		//}
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->EarnAchievement(AchievementName::PLANE_PROP);
+		}
 		break;
 
 	case HULL:
 
-		//// Get the Camera Director that is in the scene
-		//for (TActorIterator<AFrictionPuzzle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		//{
-		//	ActorItr->PuzzleComplete();
-		//}
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->EarnAchievement(AchievementName::PLANE_HULL);
+		}
 		break;
 
+	case WINGS:
+
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->EarnAchievement(AchievementName::PLANE_WING);
+		}
+		break;
 
 	}
 
