@@ -12,6 +12,7 @@ enum AchievementName
 	PLANE_WING,
 	PLANE_HULL,
 	PLANE_PROP,
+	VASE_BREAK,
 	MAX_SIZE
 };
 
