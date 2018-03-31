@@ -2,7 +2,6 @@
 
 #include "AchievementManager.h"
 
-
 // Sets default values
 AAchievementManager::AAchievementManager()
 {

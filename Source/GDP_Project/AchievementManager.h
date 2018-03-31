@@ -13,6 +13,7 @@ enum AchievementName
 	PLANE_HULL,
 	PLANE_PROP,
 	VASE_BREAK,
+	GOAL,
 	MAX_SIZE
 };
 
