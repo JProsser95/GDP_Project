@@ -2,6 +2,7 @@
 
 #include "TrainPuzzle.h"
 #include "EngineUtils.h"
+#include "AchievementManager.h"
 
 
 // Sets default values
@@ -36,6 +37,10 @@ void ATrainPuzzle::Tick(float DeltaTime)
 
 	if (ToyTrain->TrainPuzzleFailed())
 	{
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
+		}
 		ResetToLastCheckpoint();
 	}
 }

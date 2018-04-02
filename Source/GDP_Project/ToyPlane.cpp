@@ -9,6 +9,8 @@
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "CustomMovementComponent.h"
 #include "PossessableActorComponent.h"
+#include "AchievementManager.h"
+
 
 // Sets default values
 AToyPlane::AToyPlane()
@@ -419,6 +421,10 @@ void AToyPlane::CameraZoom()
 
 void AToyPlane::ResetPlane()
 {
+	for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->EarnAchievement(AchievementName::PLANE_CRASH);
+	}
 	m_bCrashed = false;
 	PlaneBodyMeshComponent->SetSimulatePhysics(false);
 	MovementInput = FVector4(0.0f);

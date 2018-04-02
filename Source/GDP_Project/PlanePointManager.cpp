@@ -4,6 +4,7 @@
 #include "ToyPlane.h"
 #include "Macros.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
+#include "AchievementManager.h"
 
 
 // Sets default values
@@ -47,6 +48,10 @@ void APlanePointManager::Tick(float DeltaTime)
 
 void APlanePointManager::AllPointsCollected(float DeltaTime)
 {
+	for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->EarnAchievement(AchievementName::POPPIN);
+	}
 	ToyPlane->StartBoost();
 	ToyPlane->FlyTowards(FVector(7000.0f, -11000.0f, 1540.0f), DeltaTime);
 }
