@@ -20,22 +20,18 @@ void AAchievementManager::BeginPlay()
 
 	UAchievementSaveGame* LoadGameInstance = Cast<UAchievementSaveGame>(UGameplayStatics::CreateSaveGameObject(UAchievementSaveGame::StaticClass()));
 	LoadGameInstance = Cast<UAchievementSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
-	bIsAchievementAlreadyEarned = LoadGameInstance->bIsAchievementAlreadyEarned;
 
-	if (LoadGameInstance->bIsAchievementAlreadyEarned.Num() != 0)
+	if (LoadGameInstance != NULL)
 	{
 		for (int i(0); i < AchievementName::MAX_SIZE; ++i)
 			bIsAchievementAlreadyEarned.Add(LoadGameInstance->bIsAchievementAlreadyEarned[i]);
 
-		OUTPUT_STRING("LOADED");
 	}
 	else
 	{
 		for (int i(0); i < AchievementName::MAX_SIZE; ++i)
 			bIsAchievementAlreadyEarned.Add(false);
-
-		OUTPUT_STRING("NOT LOADED");
-
+	
 	}
 }
 
