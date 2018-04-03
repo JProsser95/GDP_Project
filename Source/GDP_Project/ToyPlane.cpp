@@ -2,7 +2,6 @@
 
 #include "ToyPlane.h"
 #include "Blueprint/UserWidget.h"
-#include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 //#include "Macros.h"
@@ -10,6 +9,8 @@
 #include "CustomMovementComponent.h"
 #include "PossessableActorComponent.h"
 #include "AchievementManager.h"
+#include "EngineUtils.h"
+#include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 
 
 // Sets default values
