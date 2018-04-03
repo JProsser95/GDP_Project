@@ -175,7 +175,8 @@ void AToyPlane::Tick(float DeltaTime)
 	FRotator rot2(0.0f);
 	FRotator rot3(0.0f);
 
-	InterpolateMovementInput(DeltaTime);
+	//InterpolateMovementInput(DeltaTime);
+
 
 	rot1.Pitch = MovementInput.X * PitchAmount * DeltaTime;
 	if (m_eControlType != Controls::ASDW_Simple)
@@ -192,7 +193,7 @@ void AToyPlane::Tick(float DeltaTime)
 		//rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
 		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation); // += MovementInput.X * -PitchAmount * DeltaTime;
 		NewRotation.Yaw += MovementInput.Z * YawAmount * DeltaTime;
-		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount*0.5f) - NewRotation.Roll) * DeltaTime;
+		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount) - NewRotation.Roll) * DeltaTime;
 	}
 
 	SetActorRotation(NewRotation);
@@ -351,12 +352,12 @@ void AToyPlane::Pitch(float AxisValue)
 	if (PitchInverted)
 		AxisValue *= -1.0f;
 
-	RegisterInput(AxisValue, TargetInput.X);
+	RegisterInput(AxisValue, MovementInput.X);
 }
 
 void AToyPlane::Yaw(float AxisValue)
 {
-	RegisterInput(AxisValue, TargetInput.Y);
+	RegisterInput(AxisValue, MovementInput.Z);
 }
 
 void AToyPlane::Roll(float AxisValue)
