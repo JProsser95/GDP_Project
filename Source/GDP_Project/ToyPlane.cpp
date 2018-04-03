@@ -194,7 +194,7 @@ void AToyPlane::Tick(float DeltaTime)
 		//rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
 		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation); // += MovementInput.X * -PitchAmount * DeltaTime;
 		NewRotation.Yaw += MovementInput.Z * YawAmount * DeltaTime;
-		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount) - NewRotation.Roll) * DeltaTime;
+		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount) - NewRotation.Roll) * DeltaTime * 1.2f;
 	}
 
 	SetActorRotation(NewRotation);
