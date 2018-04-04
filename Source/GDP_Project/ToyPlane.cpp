@@ -2,7 +2,6 @@
 
 #include "ToyPlane.h"
 #include "Blueprint/UserWidget.h"
-#include "GDP_ProjectGameModeBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 //#include "Macros.h"
@@ -10,6 +9,8 @@
 #include "CustomMovementComponent.h"
 #include "PossessableActorComponent.h"
 #include "AchievementManager.h"
+#include "EngineUtils.h"
+#include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 
 
 // Sets default values
@@ -145,7 +146,7 @@ void AToyPlane::Tick(float DeltaTime)
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
 		UpdateCurrentBoost(-DeltaTime * 0.3f * MaximumBoost);
-		FlyTowards(FVector(7000.0f, -12000.0f, 1540.0f), DeltaTime);
+		//FlyTowards(FVector(7000.0f, -12000.0f, 1540.0f), DeltaTime);
 	}
 	else if (fSpeed <= MinSpeed)
 	{
@@ -167,15 +168,12 @@ void AToyPlane::Tick(float DeltaTime)
 	//MovementInput = MovementInput.GetSafeNormal();// *100.0f;
 	FRotator NewRotation(GetActorRotation());
 
-	float fRotateMod(fSpeed / MaxSpeed);
-	if (fRotateMod > 1.0f)
-		fRotateMod = 1.0f;
-
 	FRotator rot1(0.0f);
 	FRotator rot2(0.0f);
 	FRotator rot3(0.0f);
 
-	InterpolateMovementInput(DeltaTime);
+	//InterpolateMovementInput(DeltaTime);
+
 
 	rot1.Pitch = MovementInput.X * PitchAmount * DeltaTime;
 	if (m_eControlType != Controls::ASDW_Simple)
@@ -192,7 +190,12 @@ void AToyPlane::Tick(float DeltaTime)
 		//rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
 		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation); // += MovementInput.X * -PitchAmount * DeltaTime;
 		NewRotation.Yaw += MovementInput.Z * YawAmount * DeltaTime;
-		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount*0.5f) - NewRotation.Roll) * DeltaTime;
+		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount) - NewRotation.Roll) * DeltaTime * 1.2f;
+
+		if (NewRotation.Roll && !MovementInput.Z)
+		{
+			NewRotation.Roll *= 0.975f;
+		}
 	}
 
 	SetActorRotation(NewRotation);
@@ -351,12 +354,12 @@ void AToyPlane::Pitch(float AxisValue)
 	if (PitchInverted)
 		AxisValue *= -1.0f;
 
-	RegisterInput(AxisValue, TargetInput.X);
+	RegisterInput(AxisValue, MovementInput.X);
 }
 
 void AToyPlane::Yaw(float AxisValue)
 {
-	RegisterInput(AxisValue, TargetInput.Y);
+	RegisterInput(AxisValue, MovementInput.Z);
 }
 
 void AToyPlane::Roll(float AxisValue)
