@@ -90,8 +90,8 @@ AToyCar::AToyCar()
 
 	// Adjust the steering 
 	Vehicle4W->SteeringCurve.GetRichCurve()->Reset();
-	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 0.8f);
-	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(43.0f, 0.7f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 0.6f);
+	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(43.0f, 0.6f);
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(120.0f, 0.6f);
 
 	// Transmission	
@@ -242,16 +242,7 @@ void AToyCar::MoveForward(float AxisValue)
 			AudioComponent->FadeOut(1.0f, 0.0f);
 		}
 	}
-	if (!m_bIsBraking)
-	{
-		GetVehicleMovementComponent()->SetThrottleInput(AxisValue * m_fStickyFriction * (int)m_bCanMove);
-		//SetLatStiff(100.0f);
-	}
-	else
-	{
-		//SetLatStiff(0.0f);
-		GetVehicleMovementComponent()->SetThrottleInput(AxisValue * m_fStickyFriction * (int)m_bCanMove);
-	}
+	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * m_fStickyFriction * (int)m_bCanMove);
 }
 
 void AToyCar::MoveRight(float AxisValue)
