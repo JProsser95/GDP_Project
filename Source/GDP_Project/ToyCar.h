@@ -23,6 +23,14 @@ enum PuzzleName {
 	TRAIN				UMETA(DisplayName = "Plane"),
 };
 
+UENUM(BlueprintType)
+enum RoomName {
+	WARP_ROOM			UMETA(DisplayName = "Warp Room"),
+	LOUNGE				UMETA(DisplayName = "Lounge"),
+	KITCHEN				UMETA(DisplayName = "Kitchen"),
+	PLAYROOM			UMETA(DisplayName = "Playroom")
+};
+
 /**
  * 
  */
@@ -108,6 +116,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool TrainPuzzleCompleted;
 
+	UPROPERTY(EditAnywhere, Category = "Name")
+	TEnumAsByte<RoomName> _CurrentRoom;
+
 	void SetPuzzleCompleted(PuzzleName Name);
 
 protected:
@@ -175,7 +186,14 @@ public:
 
 	bool InAir();
 	void SetLatStiff(float fNewLatStiff);
+
+	void SetCurrentRoom(RoomName room) { _CurrentRoom = room; }
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	RoomName GetCurrentRoom() { return _CurrentRoom; }
+
+
 private:
+
 
 	Sounds currentSoundCue;
 

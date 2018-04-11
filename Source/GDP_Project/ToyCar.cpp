@@ -159,6 +159,8 @@ AToyCar::AToyCar()
 	AudioCues.Add(engineSound.Object);
 	AudioCues.Add(breakSound.Object);
 
+	_CurrentRoom = RoomName::WARP_ROOM;
+
 	// Create an audio component, the audio component wraps the Cue
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 
@@ -522,3 +524,4 @@ void AToyCar::SetPuzzleCompleted(PuzzleName Name)
 
 	}
 }
+

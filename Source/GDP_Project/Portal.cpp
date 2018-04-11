@@ -76,5 +76,6 @@ void APortal::Teleport()
 
 	if (pToyCar)
 		pToyCar->ResetVelocity();
+		pToyCar->SetCurrentRoom(_PuzzleName);
 		pToyCar->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
 }
