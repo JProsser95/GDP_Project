@@ -11,13 +11,8 @@ class UWidgetComponent;
 class UBoxComponent;
 class USceneComponent;
 
-UENUM()
-enum RoomName {
-	WARP_ROOM			UMETA(DisplayName = "Warp Room"),
-	LOUNGE				UMETA(DisplayName = "Lounge"),
-	KITCHEN				UMETA(DisplayName = "Kitchen"),
-	PLAYROOM			UMETA(DisplayName = "Playroom")
-};
+
+
 
 UCLASS()
 class GDP_PROJECT_API APortal : public AActor
