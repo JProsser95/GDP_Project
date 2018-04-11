@@ -117,6 +117,10 @@ void AToyPlane::Tick(float DeltaTime)
 			PlaneBodyMeshComponent->SetSimulatePhysics(true);
 			m_bCrashed = true;
 			m_fCrashTime = 0.0f;
+
+			OurCameraSpringArm->bInheritPitch = false;
+			OurCameraSpringArm->bInheritRoll = false;
+			OurCameraSpringArm->bInheritYaw = true;
 			return;
 		}
 	}
@@ -432,7 +436,12 @@ void AToyPlane::ResetPlane()
 	PlaneBodyMeshComponent->SetSimulatePhysics(false);
 	MovementInput = FVector4(0.0f);
 	fSpeed = 0.0f;
+
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(10.0f, 0.0f, 17.0f), FRotator(CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
+	OurCameraSpringArm->bInheritPitch = true;
+	OurCameraSpringArm->bInheritRoll = true;
+	OurCameraSpringArm->bInheritYaw = true;
+
 	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
 	SetActorTransform(startTransform, false, nullptr, ETeleportType::TeleportPhysics);
 	OurCameraSpringArm->CameraLagSpeed = 20.0f;
