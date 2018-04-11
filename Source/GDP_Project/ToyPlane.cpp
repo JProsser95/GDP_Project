@@ -123,6 +123,7 @@ void AToyPlane::Tick(float DeltaTime)
 	else if (m_bCrashed)
 	{
 		m_fCrashTime += DeltaTime;
+
 		if (m_fCrashTime >= m_fRespawnTime)
 			ResetPlane();
 		return;
@@ -172,8 +173,7 @@ void AToyPlane::Tick(float DeltaTime)
 	FRotator rot2(0.0f);
 	FRotator rot3(0.0f);
 
-	//InterpolateMovementInput(DeltaTime);
-
+	InterpolateMovementInput(DeltaTime);
 
 	rot1.Pitch = MovementInput.X * PitchAmount * DeltaTime;
 	if (m_eControlType != Controls::ASDW_Simple)
@@ -190,12 +190,12 @@ void AToyPlane::Tick(float DeltaTime)
 		//rot3.Roll = MovementInput.Z * RollAmount * DeltaTime;
 		NewRotation = UKismetMathLibrary::ComposeRotators(rot1, NewRotation); // += MovementInput.X * -PitchAmount * DeltaTime;
 		NewRotation.Yaw += MovementInput.Z * YawAmount * DeltaTime;
-		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount) - NewRotation.Roll) * DeltaTime * 1.2f;
+		NewRotation.Roll = NewRotation.Roll + ((MovementInput.Z * RollAmount*0.5f) - NewRotation.Roll) * DeltaTime * 2.2f;
 
-		if (NewRotation.Roll && !MovementInput.Z)
-		{
-			NewRotation.Roll *= 0.975f;
-		}
+		//if (NewRotation.Roll && !MovementInput.Z)
+		//{
+		//	NewRotation.Roll *= 0.975f;
+		//}
 	}
 
 	SetActorRotation(NewRotation);
@@ -354,12 +354,12 @@ void AToyPlane::Pitch(float AxisValue)
 	if (PitchInverted)
 		AxisValue *= -1.0f;
 
-	RegisterInput(AxisValue, MovementInput.X);
+	RegisterInput(AxisValue, TargetInput.X);
 }
 
 void AToyPlane::Yaw(float AxisValue)
 {
-	RegisterInput(AxisValue, MovementInput.Z);
+	RegisterInput(AxisValue, TargetInput.Y);
 }
 
 void AToyPlane::Roll(float AxisValue)
@@ -435,6 +435,8 @@ void AToyPlane::ResetPlane()
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(10.0f, 0.0f, 17.0f), FRotator(CameraRotationOffset.Pitch, CameraRotationOffset.Yaw, 0.0f));
 	CameraRotationOffset.Pitch = FMath::Clamp(CameraRotationOffset.Pitch + CameraInput.Y, -70.0f, 15.0f);
 	SetActorTransform(startTransform, false, nullptr, ETeleportType::TeleportPhysics);
+	OurCameraSpringArm->CameraLagSpeed = 20.0f;
+	
 }
 
 void AToyPlane::UpdateCurrentBoost(float boostIncrement)
