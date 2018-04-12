@@ -2,6 +2,8 @@
 
 #include "CeilingFan.h"
 #include "UObject/ConstructorHelpers.h"
+#include "EngineUtils.h"
+#include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 
 // Sets default values
 ACeilingFan::ACeilingFan()
@@ -13,7 +15,7 @@ ACeilingFan::ACeilingFan()
 	//Mesh
 	CeilingCylinderMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CeilingFanCylinderMeshComponent"));
 	CeilingFanMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CeilingFanMeshComponent"));
-	FanAirFlow = CreateDefaultSubobject<UBoxComponent>(TEXT("CeilingFanAirFlow"));
+	//FanAirFlow = CreateDefaultSubobject<UBoxComponent>(TEXT("CeilingFanAirFlow"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> FanCylinder(TEXT("StaticMesh'/Game/Assets/Fan/Fan_Cylinder.Fan_Cylinder'"));
 	if (FanCylinder.Object)
@@ -25,13 +27,13 @@ ACeilingFan::ACeilingFan()
 
 	RootComponent = CeilingCylinderMeshComponent;
 	CeilingFanMeshComponent->AttachToComponent(CeilingCylinderMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-	FanAirFlow->AttachToComponent(CeilingCylinderMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
+	//FanAirFlow->AttachToComponent(CeilingCylinderMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 
 	CeilingFanMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
-	FanAirFlow->SetBoxExtent(FVector(500.0f, 500.0f, 500.0f));
-	FanAirFlow->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
-	FanAirFlow->SetRelativeLocation(FVector(0.0f, 0.0f, -220.0f));
+	//FanAirFlow->SetBoxExtent(FVector(500.0f, 500.0f, 500.0f));
+	//FanAirFlow->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+	//FanAirFlow->SetRelativeLocation(FVector(0.0f, 0.0f, -220.0f));
 	//FanAirFlow->OnComponentBeginOverlap.AddDynamic(this, &ACameraPuzzle::OnBeginOverlap);
 	
 }
@@ -51,19 +53,19 @@ void ACeilingFan::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CeilingFanMeshComponent->SetRelativeRotation(FRotator(0.0f, CeilingFanMeshComponent->GetComponentRotation().Yaw + (DeltaTime * RotationsPerSecond), 0.0f));
 
-	PushPlane(DeltaTime);
+	//PushPlane(DeltaTime);
 }
 
 void ACeilingFan::PushPlane(float DeltaTime)
 {
-	if (FanAirFlow->IsOverlappingActor(ToyPlane))
-	{
-		if (!ToyPlane->GetIsBoosting())
-		{
-			ToyPlane->RotateDown(DeltaTime);
-			ToyPlane->SetActorLocation(ToyPlane->GetActorLocation() - FVector(0.0f, 0.0f, 100.0f * DeltaTime));
-		}
-		else
-			ToyPlane->FlyTowards(FVector(7000.0f, -11000.0f, 1540.0f), DeltaTime);
-	}
+	//if (FanAirFlow->IsOverlappingActor(ToyPlane))
+	//{
+	//	if (!ToyPlane->GetIsBoosting())
+	//	{
+	//		ToyPlane->RotateDown(DeltaTime);
+	//		ToyPlane->SetActorLocation(ToyPlane->GetActorLocation() - FVector(0.0f, 0.0f, 100.0f * DeltaTime));
+	//	}
+	//	else
+	//		ToyPlane->FlyTowards(FVector(7000.0f, -11000.0f, 1540.0f), DeltaTime);
+	//}
 }
