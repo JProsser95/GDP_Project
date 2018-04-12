@@ -142,13 +142,14 @@ void AToyPlane::Tick(float DeltaTime)
 	else if (CurrentBoost > MaximumBoost)
 		CurrentBoost = MaximumBoost;
 
-	if (IsBoosting)
+
+	/*if (IsBoosting)
 	{
 		fSpeed += DeltaTime * BoostSpeedIncrement;
 		UpdateCurrentBoost(-DeltaTime * 0.3f * MaximumBoost);
 		//FlyTowards(FVector(7000.0f, -12000.0f, 1540.0f), DeltaTime);
 	}
-	else if (fSpeed <= MinSpeed)
+	else*/ if (fSpeed <= MinSpeed)
 	{
 		fSpeed += DeltaTime * SpeedIncrement;
 		//fSpeed -= DeltaTime * SpeedIncrement;
@@ -440,6 +441,7 @@ void AToyPlane::ResetPlane()
 void AToyPlane::UpdateCurrentBoost(float boostIncrement)
 {
 	CurrentBoost += boostIncrement;
+	MaxSpeed += 5.0f * boostIncrement;
 }
 
 void AToyPlane::SetIsActive(bool Value)

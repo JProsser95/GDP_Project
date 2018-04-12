@@ -18,12 +18,6 @@ class GDP_PROJECT_API APlanePointManager : public AActor
 {
 	GENERATED_BODY()
 
-	enum PlaneLocation
-	{
-		CENTRE,
-		OUT_WINDOW
-	};
-
 public:
 	// Sets default values for this actor's properties
 	APlanePointManager();
@@ -45,7 +39,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	float BoostIncrement;
 
-	PlaneLocation m_ePlaneLocation;
 	float m_fEndingDelay;
 
 	void AllPointsCollected(float DeltaTime);

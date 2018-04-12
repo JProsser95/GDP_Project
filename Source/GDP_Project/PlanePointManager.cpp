@@ -9,7 +9,7 @@
 
 // Sets default values
 APlanePointManager::APlanePointManager()
-	:ToyPlane(nullptr), BoostIncrement(20.0f), m_ePlaneLocation(CENTRE), m_fEndingDelay(1.0f)
+	:ToyPlane(nullptr), BoostIncrement(20.0f), m_fEndingDelay(1.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -58,21 +58,5 @@ void APlanePointManager::AllPointsCollected(float DeltaTime)
 	for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		ActorItr->EarnAchievement(AchievementName::POPPIN);
-	}
-
-	if (m_ePlaneLocation == CENTRE)
-	{
-		FVector Location(12578.0f, 2053.0f, 1150.0f);
-		if ((ToyPlane->GetActorLocation() - Location).Size() > 15.0f)
-			ToyPlane->FlyTowards(Location, DeltaTime);
-		else
-			m_ePlaneLocation = OUT_WINDOW;
-		
-	}
-
-	else
-	{
-		ToyPlane->StartBoost();
-		ToyPlane->FlyTowards(FVector(12300.0f, -11000.0f, 1150.0f), DeltaTime);
 	}
 }
