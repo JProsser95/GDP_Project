@@ -56,7 +56,12 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 
 			TrainPuzzleStates[i].CarPosition = ToyCar->GetActorLocation();
 			TrainPuzzleStates[i].CarRotation = ToyCar->GetActorRotation();
-			TrainPuzzleStates[i].TrainSplineCounter = ToyTrain->GetSplineCounter();
+
+			if (i == 1)
+				TrainPuzzleStates[i].TrainSplineCounter = 1000;
+			else
+				TrainPuzzleStates[i].TrainSplineCounter = ToyTrain->GetSplineCounter();
+
 			TrainPuzzleStates[i].TrainState = ToyTrain->GetTrainState();
 		}
 	}
@@ -72,6 +77,8 @@ void ATrainPuzzle::ResetToLastCheckpoint()
 			ToyCar->SetActorRotation(FQuat(TrainPuzzleStates[i].CarRotation), ETeleportType::TeleportPhysics);
 			ToyTrain->SetSplineCounter(TrainPuzzleStates[i].TrainSplineCounter);
 			ToyTrain->SetTrainState(TrainPuzzleStates[i].TrainState);
+			if (i == 0) // First trigger
+				ToyTrain->SetMovementDirection(-1);
 			return; // We're done, return out
 		}
 	}

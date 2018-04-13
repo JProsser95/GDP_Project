@@ -194,6 +194,8 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 	else
 	{
+		UpdateTrainOnSpline(); // Incase train hasn't movement previously
+
 		TArray<UPrimitiveComponent*> components;
 
 		GetOverlappingComponents(components);
