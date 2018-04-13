@@ -72,6 +72,8 @@ void ATrainPuzzle::ResetToLastCheckpoint()
 			ToyCar->SetActorRotation(FQuat(TrainPuzzleStates[i].CarRotation), ETeleportType::TeleportPhysics);
 			ToyTrain->SetSplineCounter(TrainPuzzleStates[i].TrainSplineCounter);
 			ToyTrain->SetTrainState(TrainPuzzleStates[i].TrainState);
+			if (i == 0) // First trigger
+				ToyTrain->SetMovementDirection(-1);
 			return; // We're done, return out
 		}
 	}

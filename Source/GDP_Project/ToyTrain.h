@@ -102,6 +102,7 @@ public:
 	// Mutators
 	void SetSplineCounter(int iSplineCounter) { splinePointer = iSplineCounter; }
 	void SetTrainState(TRAIN_STATES eTrainState) { TrainState = eTrainState; }
+	void SetMovementDirection(int iDirection) { MovementDirection = iDirection; }
 
 protected:
 	// Allows the addition of a static mesh componenet in the editor
