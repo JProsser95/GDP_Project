@@ -452,6 +452,7 @@ void AToyPlane::ResetPlane()
 void AToyPlane::UpdateCurrentBoost(float boostIncrement)
 {
 	CurrentBoost += boostIncrement;
+	MinSpeed += 5.0f * boostIncrement;
 	MaxSpeed += 5.0f * boostIncrement;
 }
 
