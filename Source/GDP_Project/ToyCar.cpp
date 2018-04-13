@@ -268,14 +268,17 @@ void AToyCar::YawCamera(float AxisValue)
 
 void AToyCar::OnHandbrakePressed()
 {
-	if (currentSoundCue != BRAKE)
+	if (m_bCanMove)
 	{
-		AudioComponent->SetSound(AudioCues[BRAKE]);
-		currentSoundCue = BRAKE;
-	}
-	if (!AudioComponent->IsPlaying())
-	{
-		AudioComponent->Play();
+		if (currentSoundCue != BRAKE)
+		{
+			AudioComponent->SetSound(AudioCues[BRAKE]);
+			currentSoundCue = BRAKE;
+		}
+		if (!AudioComponent->IsPlaying())
+		{
+			AudioComponent->Play();
+		}
 	}
 
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
