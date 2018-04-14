@@ -16,7 +16,7 @@
 // Sets default values
 AToyPlane::AToyPlane()
 	:MinSpeed(400.0f), MaxSpeed(600.0f), MaxBoostSpeed(800.0f), SpeedIncrement(100.0f), BoostSpeedIncrement(200.0f), PitchAmount(90.0f), YawAmount(90.0f), RollAmount(90.0f), PropRotateSpeed(3.0f),
-	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f),
+	MaximumBoost(100.0f), CurrentBoost(0.0f), MovementInput(0.0f), FrameHack(0),
 	RotationInterpolation(0.03f),
 	AutoFocus(true), AutoFocusDelay(1.0f), fLastUnFocusTime(-AutoFocusDelay),
 	bAlreadyRestarted(false), SWControlPitch(false), SWControlPrevious(SWControlPitch), SwapYawAndRoll(false), PitchInverted(false),
@@ -132,6 +132,15 @@ void AToyPlane::Tick(float DeltaTime)
 			ResetPlane();
 		return;
 	}
+	else if (CustomMovementComponent->HitWindow())
+	{
+		FrameHack = 3;
+		PlaneBodyMeshComponent->SetSimulatePhysics(true);
+	}
+	else if (FrameHack > 0)
+		--FrameHack;
+	else
+		PlaneBodyMeshComponent->SetSimulatePhysics(false);
 
 	Super::Tick(DeltaTime);
 
@@ -454,6 +463,9 @@ void AToyPlane::UpdateCurrentBoost(float boostIncrement)
 	CurrentBoost += boostIncrement;
 	MinSpeed += 5.0f * boostIncrement;
 	MaxSpeed += 5.0f * boostIncrement;
+	if (CurrentBoost >= 100.0f)
+		if (WindowCollision != nullptr)
+			WindowCollision->Destroy();
 }
 
 void AToyPlane::SetIsActive(bool Value)

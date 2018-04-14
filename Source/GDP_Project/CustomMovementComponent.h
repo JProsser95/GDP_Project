@@ -15,7 +15,9 @@ class GDP_PROJECT_API UCustomMovementComponent : public UPawnMovementComponent
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	bool m_bHitObject;
+	bool m_bHitWindow;
 public:
 	bool HitObject();
+	bool HitWindow();
 
 };
