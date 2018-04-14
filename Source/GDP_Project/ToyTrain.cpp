@@ -14,7 +14,7 @@ const int HEIGHT = 0;//height of player above spline
 
 // Sets default values
 AToyTrain::AToyTrain()
-	: splinePointer(0), MovementDirection(-1), TrainState(RunawayTrain), m_fStationWaitTime(0.0f), m_bCarriageAttached(false)
+	: splinePointer(0), MovementDirection(-1), TrainState(RunawayTrain), m_fStationWaitTime(0.0f), m_bCarriageAttached(false), m_bRotating(false), m_bPlanePartAttached(true)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -102,7 +102,8 @@ void AToyTrain::BeginPlay()
 		}
 	}
 
-	PlanePart->SetActorHiddenInGame(true);
+	PlanePart->SetActorEnableCollision(false);
+	UpdatePlanePartLocation();
 }
 
 void AToyTrain::Restart()
@@ -169,22 +170,26 @@ void AToyTrain::Tick(float DeltaTime)
 		}
 
 		// Move the train and its carriage
-		if (!m_bRotating)
+		if (m_bPlanePartAttached)
 		{
-			UpdateTrainOnSpline();
-		}
-		else
-		{
-			RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
-			RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
-			MoveForward(0.0f); // Make sure the train can't move
-			if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
+			if (!m_bRotating)
 			{
-				m_bRotating = false;
-				splinePointer = 0;
-				SplineTimer = -0.5f;
+				UpdateTrainOnSpline();
+			}
+			else
+			{
+				RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
+				RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
+				MoveForward(0.0f); // Make sure the train can't move
+				if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
+				{
+					m_bRotating = false;
+					splinePointer = 0;
+					SplineTimer = -0.5f;
+				}
 			}
 		}
+		UpdatePlanePartLocation();
 
 		//End movement at end of Spline
 		if (TrainPuzzleCompleted())
@@ -255,6 +260,10 @@ void AToyTrain::UpdateState()
 		AutomatedMovement();
 		break;
 
+	case TRAIN_STATES::PlanePartState:
+		AutomatedMovement();
+		break;
+
 	case TRAIN_STATES::TRAIN_STATES_MAX:
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("AToyTrain::UpdateState has attempted to use an invalid TRAIN_STATE"));
@@ -322,6 +331,21 @@ void AToyTrain::UpdateCarriages()
 			Carriages[i]->SetActorRotation(pathPointRotation[TrainState][0]);
 		}
 	}
+
+}
+
+void AToyTrain::UpdatePlanePartLocation()
+{
+	if (m_bPlanePartAttached)
+	{
+		PlanePart->SetActorLocation(Carriages[0]->GetActorLocation() + FVector(45.0f, 0.0f, 60.0f));
+		PlanePart->SetActorRotation(Carriages[0]->GetActorRotation() + FRotator(90.0f, 0.0f, 90.0f));
+	}
+	else
+	{
+		PlanePart->SetActorLocation(pathPointLocation[TrainState][splinePointer]);
+		PlanePart->SetActorRotation(pathPointRotation[TrainState][splinePointer]);
+	}
 }
 
 bool AToyTrain::OnFailureTrainLine()
@@ -346,8 +370,10 @@ bool AToyTrain::TrainPuzzleCompleted()
 
 void AToyTrain::CompleteTrainPuzzle()
 {
-	PrimaryActorTick.bCanEverTick = false;
-	PlanePart->SetActorHiddenInGame(false);
+	TrainState = PlanePartState;
+	splinePointer = 0;
+	PlanePart->SetActorEnableCollision(true);
+	m_bPlanePartAttached = false;
 }
 
 bool AToyTrain::StartOfCurrentLine()

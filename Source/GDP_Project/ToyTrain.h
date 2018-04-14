@@ -28,6 +28,8 @@ enum TRAIN_STATES
 
 	RunawayTrain4,
 
+	PlanePartState,
+
 	TRAIN_STATES_MAX
 };
 
@@ -53,6 +55,7 @@ private:
 	void UpdateSplinePointer();
 	void UpdateTrainOnSpline();
 	void UpdateCarriages();
+	void UpdatePlanePartLocation();
 	void CompleteTrainPuzzle();
 
 	bool StartOfCurrentLine();
@@ -68,6 +71,7 @@ private:
 	float m_fStationWaitTime;
 	bool m_bCarriageAttached;
 	bool m_bRotating;
+	bool m_bPlanePartAttached;
 
 	// Variables used in each train state
 	// Runaway train
