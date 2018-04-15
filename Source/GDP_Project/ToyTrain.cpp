@@ -260,10 +260,12 @@ void AToyTrain::UpdateState()
 		{
 			ChangeToState(RunawayTrain4);
 			m_bRotating = true;
+			m_pToyCar->LookAtComponent(RootComponent);
 		}
 		else if(TrackSwitched[2])
 		{
 			m_pToyCar->SetCanMove(false);
+			m_pToyCar->LookAtComponent(RootComponent);
 		}
 		break;
 
@@ -273,7 +275,10 @@ void AToyTrain::UpdateState()
 		if (splinePointer >= 350)
 		{
 			m_pToyCar->SetCanMove(true);
+			m_pToyCar->LookAtComponent();
 		}
+		else
+			m_pToyCar->LookAtComponent(RootComponent);
 		break;
 
 	case TRAIN_STATES::PlanePartState:

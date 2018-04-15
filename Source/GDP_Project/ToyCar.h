@@ -195,6 +195,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	RoomName GetCurrentRoom() { return _CurrentRoom; }
 
+	void LookAtComponent(USceneComponent* targetActor = nullptr);
 
 private:
 
