@@ -46,6 +46,8 @@ void APortal::Teleport()
 {
 	FOutputDeviceNull ar;
 
+	FRotator rotation = FRotator(0, 0, 0);
+
 	// This switch can be removed if anyone can figure out how to pass an argument using FOutputDevice!
 	switch (_PuzzleName)
 	{
@@ -59,6 +61,7 @@ void APortal::Teleport()
 	case LOUNGE:
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowLounge"), ar, NULL, true);
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
+		rotation = FRotator(0, 270, 0);
 		break;
 
 	case PLAYROOM:
@@ -70,6 +73,7 @@ void APortal::Teleport()
 	case KITCHEN:
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("ShowKitchen"), ar, NULL, true);
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideWarpRoom"), ar, NULL, true);
+		rotation = FRotator(0, 270, 0);
 		break;
 	}
 
@@ -77,5 +81,5 @@ void APortal::Teleport()
 	if (pToyCar)
 		pToyCar->ResetVelocity();
 		pToyCar->SetCurrentRoom(_PuzzleName);
-		pToyCar->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), FRotator(0.0f, 0.0f, 0.0f), false, NULL, ETeleportType::TeleportPhysics);
+		pToyCar->SetActorLocationAndRotation(PortalEndPoint->GetComponentLocation(), rotation, false, NULL, ETeleportType::TeleportPhysics);
 }
