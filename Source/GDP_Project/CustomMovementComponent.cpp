@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CustomMovementComponent.h"
-#include "Macros.h"
+#include "Runtime/Engine/Classes/Components/PrimitiveComponent.h"
+//#include "Runtime/Engine/Classes/Components/DestructibleComponent.h"
 
 UCustomMovementComponent::UCustomMovementComponent()
 	:m_bHitObject(false)
@@ -23,6 +24,9 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	FVector DesiredMovementThisFrame = ConsumeInputVector() * DeltaTime;
 	FVector StartPos = UpdatedComponent->RelativeLocation;
 
+	m_bHitObject = false;
+	m_bHitWindow = false;
+
 	if (!DesiredMovementThisFrame.IsNearlyZero())
 	{
 		FHitResult Hit;
@@ -32,18 +36,33 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 		// If we bumped into something, try to slide along it
 		if (Hit.IsValidBlockingHit())
 		{
-			SlideAlongSurface(DesiredMovementThisFrame, 1.0f - Hit.Time, Hit.Normal, Hit);
-			if ((UpdatedComponent->RelativeLocation - StartPos).Size() <= (DesiredMovementThisFrame*0.8f).Size())
-				m_bHitObject = true;
-			else
+			if (Hit.Component != nullptr)
+			{
 				m_bHitObject = false;
+
+				if (Hit.Component->ComponentHasTag("Window"))
+				{
+					m_bHitWindow = true;
+					//Hit.Component
+					//UDestructibleComponent* test = Hit.Component->GetDestructibleComponent();
+				}
+				//Hit.Component->AddImpulse
+				SlideAlongSurface(DesiredMovementThisFrame, 1.0f - Hit.Time, Hit.Normal, Hit);
+				if ((UpdatedComponent->RelativeLocation - StartPos).Size() <= (DesiredMovementThisFrame*0.8f).Size())
+					m_bHitObject = !m_bHitWindow;
+				else
+					m_bHitObject = false;
+			}
 		}
-		else
-			m_bHitObject = false;
 	}
 };
 
 bool UCustomMovementComponent::HitObject()
 {
 	return m_bHitObject;
+}
+
+bool UCustomMovementComponent::HitWindow()
+{
+	return m_bHitWindow;
 }

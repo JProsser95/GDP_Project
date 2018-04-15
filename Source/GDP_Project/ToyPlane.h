@@ -192,6 +192,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PlanePropMeshComponent;
 
+	UPROPERTY(EditAnywhere)
+	AActor* WindowCollision;
+
 	CameraType eCameraType;
 
 	//Input variables
@@ -215,4 +218,6 @@ protected:
 	void EndBoost();
 	void CameraZoom();
 	void ResetPlane();
+
+	int FrameHack;
 };
