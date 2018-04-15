@@ -11,6 +11,8 @@
 #include "PossessableActorComponent.h"
 #include "EngineUtils.h"
 #include "RespawnPoint.h"
+#include "Runtime/Engine/Classes/Engine/SpotLight.h"
+#include "Runtime/Engine/Classes/Components/LightComponent.h"
 //#include "Macros.h"
 
 #include "Sound/SoundCue.h"
@@ -180,6 +182,24 @@ void AToyCar::BeginPlay()
 
 	AudioComponent->SetSound(AudioCues[ENGINE]);
 	currentSoundCue = ENGINE;
+	if (GetWorld() != nullptr)
+	{
+		lightLeft = GetWorld()->SpawnActor<ASpotLight>(ASpotLight::StaticClass());
+		lightLeft->SetEnabled(true);
+		lightLeft->SetBrightness(50000.0f);
+		lightLeft->SetMobility(EComponentMobility::Movable);
+		lightLeft->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		lightLeft->SetActorRelativeLocation(FVector(41.0f, -4.0f, 15.0f));
+		lightLeft->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+
+		lightRight = GetWorld()->SpawnActor<ASpotLight>(ASpotLight::StaticClass());
+		lightRight->SetEnabled(true);
+		lightRight->SetBrightness(50000.0f);
+		lightRight->SetMobility(EComponentMobility::Movable);
+		lightRight->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		lightRight->SetActorRelativeLocation(FVector(41.0f, 16.0f, 15.0f));
+		lightRight->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	}
 }
 
 // Called every frame
