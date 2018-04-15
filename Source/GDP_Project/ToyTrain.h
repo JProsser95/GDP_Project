@@ -15,6 +15,8 @@
 
 #define STATIONWAITTIME 3.0f
 
+class AToyCar;
+
 enum TRAIN_STATES
 {
 	RunawayTrain,
@@ -134,4 +136,6 @@ protected:
 
 	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	APlanePart* PlanePart;
+
+	AToyCar* m_pToyCar;
 };

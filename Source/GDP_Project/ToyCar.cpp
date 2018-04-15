@@ -303,7 +303,7 @@ void AToyCar::OnHandbrakePressed()
 
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
 	m_bIsBraking = true;
-	SetLatStiff(30.0f);
+	SetLatStiff(50.0f);
 }
 
 void AToyCar::OnHandbrakeReleased()
@@ -526,6 +526,28 @@ void AToyCar::OnSticky()
 void AToyCar::OffSticky()
 {
 	m_fStickyFriction = 1.0f;
+}
+
+void AToyCar::LookAtComponent(USceneComponent* targetActor)
+{
+	if (targetActor != nullptr)
+	{
+		//Camera->SetupAttachment(targetActor);
+		Camera->SetRelativeRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+		Camera->RelativeRotation.Pitch = 0.0f;
+		CameraInput = FVector2D(0.0f, 0.0f);
+		CameraRotationOffset = FRotator(0.0f);
+		m_fLastUnFocusTime = 0.0f;
+		//Camera->bUsePawnControlRotation = false;
+		//Camera->FieldOfView = 90.0f;
+	}
+	else
+	{
+		//Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+		Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
+		//Camera->bUsePawnControlRotation = false;
+		//Camera->FieldOfView = 90.0f;
+	}
 }
 
 void AToyCar::SetPuzzleCompleted(PuzzleName Name)

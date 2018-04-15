@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ToyTrain.h"
+#include "ToyCar.h"
 #include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/StaticMesh.h"
@@ -104,6 +105,13 @@ void AToyTrain::BeginPlay()
 
 	PlanePart->SetActorEnableCollision(false);
 	UpdatePlanePartLocation();
+
+	// Get the ToyCar that is now in the scene
+	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		m_pToyCar = *ActorItr;
+	}
+
 }
 
 void AToyTrain::Restart()
@@ -181,10 +189,10 @@ void AToyTrain::Tick(float DeltaTime)
 				RootComponent->SetWorldRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
 				RotatingTrack->SetActorRotation(FRotator(0.0f, RootComponent->GetComponentRotation().Yaw - (45.0f * DeltaTime), 0.0f));
 				MoveForward(0.0f); // Make sure the train can't move
+				splinePointer = 0;
 				if (FMath::Abs(RootComponent->GetComponentRotation().Yaw - pathPointRotation[TrainState][splinePointer].Rotator().Yaw) < 1.0f)
 				{
 					m_bRotating = false;
-					splinePointer = 0;
 					SplineTimer = -0.5f;
 				}
 			}
@@ -252,16 +260,30 @@ void AToyTrain::UpdateState()
 		{
 			ChangeToState(RunawayTrain4);
 			m_bRotating = true;
+			m_pToyCar->LookAtComponent(RootComponent);
+		}
+		else if(TrackSwitched[2])
+		{
+			m_pToyCar->SetCanMove(false);
+			m_pToyCar->LookAtComponent(RootComponent);
 		}
 		break;
 
 	case TRAIN_STATES::RunawayTrain4:
 		m_bCarriageAttached = true;
 		AutomatedMovement();
+		if (splinePointer >= 350)
+		{
+			m_pToyCar->SetCanMove(true);
+			m_pToyCar->LookAtComponent();
+		}
+		else
+			m_pToyCar->LookAtComponent(RootComponent);
 		break;
 
 	case TRAIN_STATES::PlanePartState:
 		AutomatedMovement();
+		m_pToyCar->SetPuzzleCompleted(PuzzleName::TRAIN);
 		break;
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
