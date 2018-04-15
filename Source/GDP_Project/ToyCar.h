@@ -15,6 +15,7 @@ class UWidgetComponent;
 class UPossessableActorComponent;
 class USoundCue;
 class UAudioComponent;
+class ASpotLight;
 
 UENUM()
 enum PuzzleName {
@@ -183,6 +184,9 @@ public:
 
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* AudioComponent;
+
+	ASpotLight* lightLeft;
+	ASpotLight* lightRight;
 
 	bool InAir();
 	void SetLatStiff(float fNewLatStiff);
