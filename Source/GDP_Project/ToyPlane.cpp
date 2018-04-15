@@ -266,49 +266,11 @@ void AToyPlane::SetupInput()
 	//PlayerInputComponent->BindAction("PlaneBoost", IE_Released, this, &AToyPlane::EndBoost);
 	m_PlayerInput->BindAction("PlaneCameraZoom", IE_Released, this, &AToyPlane::CameraZoom);
 
-	if (m_eControlType == Controls::ASDW_Arrows)
-	{
-		m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
-		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
-		if (!SWControlPitch)
-			m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
-		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
-		m_PlayerInput->BindAxis("PlaneRoll", this, &AToyPlane::Roll);
-	}
-	else if (m_eControlType == Controls::Keyboard_Mouse)
-	{
-		if (!SWControlPitch)
-			m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::Pitch);
-		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::Yaw);
-		m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::PitchCamera);
-		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Roll);
-		m_PlayerInput->BindAxis("PlaneRoll", this, &AToyPlane::YawCamera);
-	}
-	else if (m_eControlType == Controls::ASDW_Simple)
-	{
-		m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
-		m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
-		//m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
-		m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
-		m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
-		m_PlayerInput->BindAxis("PlaneThrottleAltArrows", this, &AToyPlane::Throttle);
-	}
-	if (!SWControlPitch)
-		m_PlayerInput->BindAxis("PlaneThrottle", this, &AToyPlane::Throttle);
-	else
-	{
-		if (m_eControlType == Controls::Keyboard_Mouse)
-		{
-			m_PlayerInput->BindAxis("PlaneThrottleAltMouse", this, &AToyPlane::Throttle);
-			m_PlayerInput->BindAxis("PlanePitchAltMouse", this, &AToyPlane::Pitch);
-		}
-		else if (m_eControlType == Controls::ASDW_Arrows)
-		{
-			m_PlayerInput->BindAxis("PlaneThrottleAltArrows", this, &AToyPlane::Throttle);
-			m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
-		}
-
-	}
+	m_PlayerInput->BindAxis("PlaneCameraPitch", this, &AToyPlane::PitchCamera);
+	m_PlayerInput->BindAxis("PlaneCameraYaw", this, &AToyPlane::YawCamera);
+	m_PlayerInput->BindAxis("PlanePitch", this, &AToyPlane::Pitch);
+	//m_PlayerInput->BindAxis("PlanePitchAltArrows", this, &AToyPlane::Pitch);
+	m_PlayerInput->BindAxis("PlaneYaw", this, &AToyPlane::Yaw);
 }
 
 void AToyPlane::RotateDown(float DeltaTime)
@@ -326,26 +288,11 @@ void AToyPlane::FlyTowards(FVector targetPosition, float DeltaTime)
 
 void AToyPlane::InterpolateMovementInput(float DeltaTime)
 {
-	if (!SwapYawAndRoll && m_eControlType != Controls::ASDW_Simple)
-	{
-		MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Y, RotationInterpolation * DeltaTime);
-		MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Z, RotationInterpolation * DeltaTime);
-	}
-	else
-	{
-		MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Z, RotationInterpolation * DeltaTime);
-		MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Y, RotationInterpolation * DeltaTime);
-	}
-	//if (!SwapSwAndArrows)
-	{
-		MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
-		MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);
-	}
-	/*else
-	{
-		MovementInput.X = FMath::Lerp(MovementInput.X, -TargetInput.W, RotationInterpolation * DeltaTime);
-		MovementInput.W = FMath::Lerp(MovementInput.W, -TargetInput.X, RotationInterpolation * DeltaTime);
-	}*/
+	MovementInput.Y = FMath::Lerp(MovementInput.Y, TargetInput.Z, RotationInterpolation * DeltaTime);
+	MovementInput.Z = FMath::Lerp(MovementInput.Z, TargetInput.Y, RotationInterpolation * DeltaTime);
+	
+	MovementInput.X = FMath::Lerp(MovementInput.X, TargetInput.X, RotationInterpolation * DeltaTime);
+	MovementInput.W = FMath::Lerp(MovementInput.W, TargetInput.W, RotationInterpolation * DeltaTime);
 }
 
 void AToyPlane::RegisterInput(float AxisValue, float& input)
