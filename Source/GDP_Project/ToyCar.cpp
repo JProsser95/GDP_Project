@@ -538,24 +538,37 @@ void AToyCar::LookAtComponent(float DeltaTime, USceneComponent* targetActor)
 {
 	if (targetActor != nullptr)
 	{
+		FVector targetPosition(FVector(0.0f, 0.0f, 50.0f));
 		FRotator targetRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+
+		FVector previousPosition(Camera->RelativeLocation);
 		FRotator previousRotation(Camera->RelativeRotation);
-		
+
+		targetPosition = previousPosition + (targetPosition - previousPosition) * DeltaTime*2.0f;
 		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+
 		Camera->SetRelativeRotation(targetRotation);
-		
-		Camera->RelativeRotation.Pitch = 0.0f;
+		Camera->SetRelativeLocation(targetPosition);
+
+		CameraRotation.Pitch = 0.0f;
 		CameraInput = FVector2D(0.0f, 0.0f);
 		CameraRotationOffset = FRotator(0.0f);
 		m_fLastUnFocusTime = 0.0f;
 	}
 	else
 	{
+		CameraRotation.Pitch = -20.0f;
+		FVector targetPosition(FVector(0.0f, 0.0f, 0.0f));
 		FRotator targetRotation(FRotator(10.0f, 0.0f, 0.0f));
+
+		FVector previousPosition(Camera->RelativeLocation);
 		FRotator previousRotation(Camera->RelativeRotation);
 
+		targetPosition = previousPosition + (targetPosition - previousPosition) * DeltaTime*2.0f;
 		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+
 		Camera->SetRelativeRotation(targetRotation);
+		Camera->SetRelativeLocation(targetPosition);
 	}
 }
 
