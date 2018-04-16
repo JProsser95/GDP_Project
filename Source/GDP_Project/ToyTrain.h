@@ -49,7 +49,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void UpdateState();
+	void UpdateState(float DeltaTime);
 	void ChangeToState(TRAIN_STATES newState);
 
 	bool AutomatedMovement(); // returns false if the train can't move

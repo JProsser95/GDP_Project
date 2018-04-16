@@ -207,10 +207,6 @@ void AToyCar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//FVector PlayerLoc = Camera->GetComponentLocation();
-	//FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	//ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
-
 	// Setup the flag to say we are in reverse gear
 	m_bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
@@ -528,25 +524,28 @@ void AToyCar::OffSticky()
 	m_fStickyFriction = 1.0f;
 }
 
-void AToyCar::LookAtComponent(USceneComponent* targetActor)
+void AToyCar::LookAtComponent(float DeltaTime, USceneComponent* targetActor)
 {
 	if (targetActor != nullptr)
 	{
-		//Camera->SetupAttachment(targetActor);
-		Camera->SetRelativeRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+		FRotator targetRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+		FRotator previousRotation(Camera->RelativeRotation);
+		
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+		Camera->SetRelativeRotation(targetRotation);
+		
 		Camera->RelativeRotation.Pitch = 0.0f;
 		CameraInput = FVector2D(0.0f, 0.0f);
 		CameraRotationOffset = FRotator(0.0f);
 		m_fLastUnFocusTime = 0.0f;
-		//Camera->bUsePawnControlRotation = false;
-		//Camera->FieldOfView = 90.0f;
 	}
 	else
 	{
-		//Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-		Camera->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
-		//Camera->bUsePawnControlRotation = false;
-		//Camera->FieldOfView = 90.0f;
+		FRotator targetRotation(FRotator(10.0f, 0.0f, 0.0f));
+		FRotator previousRotation(Camera->RelativeRotation);
+
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+		Camera->SetRelativeRotation(targetRotation);
 	}
 }
 

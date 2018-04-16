@@ -132,7 +132,7 @@ void AToyTrain::Tick(float DeltaTime)
 
 	if (MovementDirection != -1)
 	{
-		UpdateState(); // Check train state and update if neccessary
+		UpdateState(DeltaTime); // Check train state and update if neccessary
 
 		// Handle the updating of the spline pointer
 		static float SplineTimer = 0.0f;
@@ -224,7 +224,7 @@ void AToyTrain::Tick(float DeltaTime)
 	}
 }
 
-void AToyTrain::UpdateState()
+void AToyTrain::UpdateState(float DeltaTime)
 {
 	switch (TrainState)
 	{
@@ -260,12 +260,12 @@ void AToyTrain::UpdateState()
 		{
 			ChangeToState(RunawayTrain4);
 			m_bRotating = true;
-			m_pToyCar->LookAtComponent(RootComponent);
+			m_pToyCar->LookAtComponent(DeltaTime, RootComponent);
 		}
 		else if(TrackSwitched[2])
 		{
 			m_pToyCar->SetCanMove(false);
-			m_pToyCar->LookAtComponent(RootComponent);
+			m_pToyCar->LookAtComponent(DeltaTime, RootComponent);
 		}
 		break;
 
@@ -275,10 +275,10 @@ void AToyTrain::UpdateState()
 		if (splinePointer >= 350)
 		{
 			m_pToyCar->SetCanMove(true);
-			m_pToyCar->LookAtComponent();
+			m_pToyCar->LookAtComponent(DeltaTime);
 		}
 		else
-			m_pToyCar->LookAtComponent(RootComponent);
+			m_pToyCar->LookAtComponent(DeltaTime, RootComponent);
 		break;
 
 	case TRAIN_STATES::PlanePartState:
