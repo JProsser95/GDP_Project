@@ -284,6 +284,7 @@ void AToyTrain::UpdateState(float DeltaTime)
 	case TRAIN_STATES::PlanePartState:
 		AutomatedMovement();
 		m_pToyCar->SetPuzzleCompleted(PuzzleName::TRAIN);
+		PlanePart->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
 		break;
 
 	case TRAIN_STATES::TRAIN_STATES_MAX:
@@ -365,8 +366,19 @@ void AToyTrain::UpdatePlanePartLocation()
 	}
 	else
 	{
-		PlanePart->SetActorLocation(pathPointLocation[TrainState][splinePointer]);
-		PlanePart->SetActorRotation(pathPointRotation[TrainState][splinePointer]);
+		if (!EndOfCurrentLine())
+		{
+			PlanePart->SetActorLocation(pathPointLocation[TrainState][splinePointer]);
+			PlanePart->SetActorRotation(pathPointRotation[TrainState][splinePointer]);
+			PlanePart->SetActorScale3D(
+				FVector(
+					FMath::Clamp<float>(
+						float(splinePointer) / float(pathPointLocation[TrainState].Num() - 1),
+					0.45f,
+					1.0f)
+				)
+			);
+		}
 	}
 }
 
