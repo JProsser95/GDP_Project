@@ -15,6 +15,8 @@
 
 #define STATIONWAITTIME 3.0f
 
+class AToyCar;
+
 enum TRAIN_STATES
 {
 	RunawayTrain,
@@ -47,7 +49,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void UpdateState();
+	void UpdateState(float DeltaTime);
 	void ChangeToState(TRAIN_STATES newState);
 
 	bool AutomatedMovement(); // returns false if the train can't move
@@ -134,4 +136,6 @@ protected:
 
 	UPROPERTY(Category = PuzzlePieces, EditAnywhere)
 	APlanePart* PlanePart;
+
+	AToyCar* m_pToyCar;
 };

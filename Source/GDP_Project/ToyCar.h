@@ -166,7 +166,7 @@ public:
 
 	bool GetCanMove() { return m_bCanMove; }
 	UFUNCTION(BlueprintCallable, Category = "CarMovement")
-	void SetCanMove(bool Value) { m_bCanMove = Value; }
+	void SetCanMove(bool Value) { m_bCanMove = Value; if (!Value) ResetVelocity(); }
 
 	bool GetIsInPuzzle() { return m_bIsInPuzzle; }
 	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; CanSeeHints = false; }
@@ -196,6 +196,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	RoomName GetCurrentRoom() { return _CurrentRoom; }
 
+	void LookAtComponent(float DeltaTime, USceneComponent* targetActor = nullptr);
 
 private:
 	UPROPERTY(EditAnywhere, DisplayName = "Headlight Trigger")

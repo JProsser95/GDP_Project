@@ -207,10 +207,6 @@ void AToyCar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//FVector PlayerLoc = Camera->GetComponentLocation();
-	//FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerLoc);
-	//ChangeVehicleWidget->SetRelativeRotation(PlayerRot);
-
 	// Setup the flag to say we are in reverse gear
 	m_bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
@@ -313,7 +309,7 @@ void AToyCar::OnHandbrakePressed()
 
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
 	m_bIsBraking = true;
-	SetLatStiff(30.0f);
+	SetLatStiff(50.0f);
 }
 
 void AToyCar::OnHandbrakeReleased()
@@ -536,6 +532,31 @@ void AToyCar::OnSticky()
 void AToyCar::OffSticky()
 {
 	m_fStickyFriction = 1.0f;
+}
+
+void AToyCar::LookAtComponent(float DeltaTime, USceneComponent* targetActor)
+{
+	if (targetActor != nullptr)
+	{
+		FRotator targetRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+		FRotator previousRotation(Camera->RelativeRotation);
+		
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+		Camera->SetRelativeRotation(targetRotation);
+		
+		Camera->RelativeRotation.Pitch = 0.0f;
+		CameraInput = FVector2D(0.0f, 0.0f);
+		CameraRotationOffset = FRotator(0.0f);
+		m_fLastUnFocusTime = 0.0f;
+	}
+	else
+	{
+		FRotator targetRotation(FRotator(10.0f, 0.0f, 0.0f));
+		FRotator previousRotation(Camera->RelativeRotation);
+
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+		Camera->SetRelativeRotation(targetRotation);
+	}
 }
 
 void AToyCar::SetPuzzleCompleted(PuzzleName Name)
