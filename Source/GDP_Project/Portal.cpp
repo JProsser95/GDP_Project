@@ -40,6 +40,11 @@ void APortal::BeginPlay()
 void APortal::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (pToyCar && PlanePartsRequired > 0)
+	{
+		this->SetActorEnableCollision(pToyCar->NumberOfPuzzlesCompleted() >= PlanePartsRequired);
+	}
 }
 
 void APortal::Teleport()

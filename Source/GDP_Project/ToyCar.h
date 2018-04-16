@@ -171,6 +171,8 @@ public:
 	bool GetIsInPuzzle() { return m_bIsInPuzzle; }
 	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; CanSeeHints = false; }
 
+	int NumberOfPuzzlesCompleted() { return TimerPuzzleCompleted + FrictionPuzzleCompleted + TrainPuzzleCompleted; }
+
 	void SetPossessionChangeManager(APossessionChangerManager* PCM) { PossessionChangerManager = PCM; }
 
 	// For the Friction Puzzle
