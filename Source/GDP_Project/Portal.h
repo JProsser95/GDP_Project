@@ -46,4 +46,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AToyCar* pToyCar;
 
+	UPROPERTY(EditAnywhere)
+	int PlanePartsRequired;
+
 };
