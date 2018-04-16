@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
 #include "PossessionChangerManager.h"
+#include "Engine/TriggerBox.h"
 #include "ToyCar.generated.h"
 
 class UPhysicalMaterial;
@@ -197,8 +198,9 @@ public:
 
 
 private:
-
-
+	UPROPERTY(EditAnywhere, DisplayName = "Headlight Trigger")
+	ATriggerBox* m_pHeadlightArea;
+	
 	Sounds currentSoundCue;
 
 	TArray<USoundCue*> AudioCues;

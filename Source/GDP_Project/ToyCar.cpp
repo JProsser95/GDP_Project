@@ -185,7 +185,7 @@ void AToyCar::BeginPlay()
 	if (GetWorld() != nullptr)
 	{
 		lightLeft = GetWorld()->SpawnActor<ASpotLight>(ASpotLight::StaticClass());
-		lightLeft->SetEnabled(true);
+		lightLeft->SetEnabled(false);
 		lightLeft->SetBrightness(50000.0f);
 		lightLeft->SetMobility(EComponentMobility::Movable);
 		lightLeft->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -193,7 +193,7 @@ void AToyCar::BeginPlay()
 		lightLeft->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
 		lightRight = GetWorld()->SpawnActor<ASpotLight>(ASpotLight::StaticClass());
-		lightRight->SetEnabled(true);
+		lightRight->SetEnabled(false);
 		lightRight->SetBrightness(50000.0f);
 		lightRight->SetMobility(EComponentMobility::Movable);
 		lightRight->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -214,6 +214,16 @@ void AToyCar::Tick(float DeltaTime)
 	// Setup the flag to say we are in reverse gear
 	m_bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
+	if (m_pHeadlightArea->IsOverlappingActor(this))
+	{
+		lightLeft->SetEnabled(true);
+		lightRight->SetEnabled(true);
+	}
+	else
+	{
+		lightLeft->SetEnabled(false);
+		lightRight->SetEnabled(false);
+	}
 	// Update physics material
 	//UpdatePhysicsMaterial();
 
