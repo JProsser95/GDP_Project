@@ -200,6 +200,8 @@ void AToyCar::BeginPlay()
 		lightRight->SetActorRelativeLocation(FVector(41.0f, 16.0f, 15.0f));
 		lightRight->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	}
+
+	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
 // Called every frame
