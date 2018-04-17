@@ -20,6 +20,9 @@ void ATrainPuzzle::BeginPlay()
 	
 	TrainPuzzleStates.SetNum(Triggers.Num()); // This makes sure that there are the same number of states and triggers
 
+	CameraNumber = 0;
+	ShowingFailureCamera = false;
+
 	// Get the ToyCar that is now in the scene
 	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
@@ -33,6 +36,9 @@ void ATrainPuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (ShowingFailureCamera)
+		return;
+
 	CheckAndUpdateTriggers();
 
 	if (ToyTrain->TrainPuzzleFailed())
@@ -41,7 +47,8 @@ void ATrainPuzzle::Tick(float DeltaTime)
 		{
 			ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
 		}
-		ResetToLastCheckpoint();
+		ShowingFailureCamera = true;
+		RunFailureCamera(CameraNumber);
 	}
 }
 
@@ -77,6 +84,7 @@ void ATrainPuzzle::ResetToLastCheckpoint()
 			ToyCar->SetActorRotation(FQuat(TrainPuzzleStates[i].CarRotation), ETeleportType::TeleportPhysics);
 			ToyTrain->SetSplineCounter(TrainPuzzleStates[i].TrainSplineCounter);
 			ToyTrain->SetTrainState(TrainPuzzleStates[i].TrainState);
+			ShowingFailureCamera = false;
 			if (i == 0) // First trigger
 				ToyTrain->SetMovementDirection(-1);
 			return; // We're done, return out
