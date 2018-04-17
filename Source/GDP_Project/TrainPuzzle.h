@@ -39,6 +39,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
 	void ResetToLastCheckpoint();
 
 	TArray<TrainPuzzleState> TrainPuzzleStates;
@@ -51,4 +52,19 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	AToyTrain* ToyTrain;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Cameras")
+	void RunFailureCamera(int CameraNumber);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCameraNumber() { ++CameraNumber; }
+
+	UFUNCTION(BlueprintCallable)
+	AToyCar* GetToyCar() { return ToyCar; }
+
+private:
+
+	int CameraNumber;
+
+	bool ShowingFailureCamera;
 };
