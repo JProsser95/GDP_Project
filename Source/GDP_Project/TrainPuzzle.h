@@ -35,6 +35,9 @@ protected:
 
 	void CheckAndUpdateTriggers();
 
+	const float m_fFailDelay = 2.0f;
+
+	float m_fFailCounter;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -7,6 +7,7 @@
 
 // Sets default values
 ATrainPuzzle::ATrainPuzzle()
+	:m_fFailCounter(0.0f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -34,14 +35,24 @@ void ATrainPuzzle::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckAndUpdateTriggers();
-
-	if (ToyTrain->TrainPuzzleFailed())
+	if (ToyTrain->TrainPuzzleFailing())
 	{
-		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		//ToyTrain->GetToyCar()->LookTo(1.0f, ToyTrain->GetRootComponent());
+		//ToyTrain->
+	}
+	else if (ToyTrain->TrainPuzzleFailed())
+	{
+		m_fFailCounter += DeltaTime;
+		if (m_fFailCounter >= m_fFailDelay)
 		{
-			ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
+			m_fFailCounter = 0.0f;
+			for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+			{
+				ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
+			}
+			ResetToLastCheckpoint();
+			//ToyTrain->GetToyCar()->LookTo(1.0f, nullptr);
 		}
-		ResetToLastCheckpoint();
 	}
 }
 

@@ -91,6 +91,7 @@ public:
 	/** Handle pressing forwards */
 	void MoveForward(float fValue);	
 
+	AToyCar* GetToyCar() { return m_pToyCar; }
 
 	// Trigger functions that can be called from other classes
 	void TrackSwitcherHit(int TrackSwitchNumber);
@@ -102,6 +103,7 @@ public:
 	bool OnFailureTrainLine();
 	bool OnCompletionTrainLine();
 
+	bool TrainPuzzleFailing();
 	bool TrainPuzzleFailed();
 	bool TrainPuzzleCompleted();
 
