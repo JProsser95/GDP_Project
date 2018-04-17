@@ -202,6 +202,9 @@ void ATimePuzzle::PuzzleFailed()
 		Actor->SetActorHiddenInGame(true);
 		Actor->SetActorRelativeScale3D(FVector(RingSmallScale));
 	}
+
+	Car->SetIsInPuzzle(false);
+	
 	Actors = CopyActors;
 }
 
