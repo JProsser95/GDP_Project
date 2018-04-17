@@ -40,8 +40,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-		void ResetToLastCheckpoint();
-
+  void ResetToLastCheckpoint();
+  
 	TArray<TrainPuzzleState> TrainPuzzleStates;
 
 	UPROPERTY(EditAnywhere)
@@ -61,6 +61,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		AToyCar* GetToyCar() { return ToyCar; }
+
 
 private:
 
