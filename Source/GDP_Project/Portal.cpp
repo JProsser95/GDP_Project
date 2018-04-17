@@ -61,6 +61,8 @@ void APortal::Teleport()
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideLounge"), ar, NULL, true);
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HidePlayroom"), ar, NULL, true);
 		GetLevel()->GetLevelScriptActor()->CallFunctionByNameWithArguments(TEXT("HideKitchen"), ar, NULL, true);
+		rotation = FRotator(0, 180, 0);
+
 		break;
 
 	case LOUNGE:
