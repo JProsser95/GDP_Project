@@ -372,10 +372,7 @@ void AToyTrain::UpdatePlanePartLocation()
 			PlanePart->SetActorRotation(pathPointRotation[TrainState][splinePointer]);
 			PlanePart->SetActorScale3D(
 				FVector(
-					FMath::Clamp<float>(
-						float(splinePointer) / float(pathPointLocation[TrainState].Num() - 1),
-					0.45f,
-					1.0f)
+					FMath::Clamp<float>(float(splinePointer) / float(pathPointLocation[TrainState].Num() - 1), 0.45f, 1.0f)
 				)
 			);
 		}
@@ -390,6 +387,11 @@ bool AToyTrain::OnFailureTrainLine()
 bool AToyTrain::OnCompletionTrainLine()
 {
 	return TrainState == TRAIN_STATES::RunawayTrain4;
+}
+
+bool AToyTrain::TrainPuzzleFailing()
+{
+	return OnFailureTrainLine() && !EndOfCurrentLine();
 }
 
 bool AToyTrain::TrainPuzzleFailed()

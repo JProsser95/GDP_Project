@@ -13,10 +13,10 @@
 #include "RespawnPoint.h"
 #include "Runtime/Engine/Classes/Engine/SpotLight.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
-//#include "Macros.h"
-
+#include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AToyCar::AToyCar()
 	:// Reset
@@ -534,16 +534,61 @@ void AToyCar::OffSticky()
 	m_fStickyFriction = 1.0f;
 }
 
+void AToyCar::LookTo(float DeltaTime, USceneComponent* targetActor)
+{
+	if (targetActor != nullptr)
+	{
+		FVector from(RootComponent->GetComponentLocation());
+		FVector to(targetActor->GetComponentLocation());
+		
+		FVector targetPosition(to - from);
+		FRotator targetRotation((to - (from + FVector(0.0f, 0.0f, 150.0f))).Rotation());
+
+		targetRotation = UKismetMathLibrary::ComposeRotators(targetRotation, RootComponent->GetComponentRotation().GetInverse());
+
+		FVector previousPosition(Camera->RelativeLocation);
+		FRotator previousRotation(Camera->RelativeRotation);
+
+		targetPosition = previousPosition + (targetPosition - previousPosition) * DeltaTime;
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime;
+
+		Camera->SetRelativeRotation(targetRotation);
+		Camera->SetRelativeLocation(targetPosition);
+
+		CameraRotation.Pitch = 0.0f;
+		CameraInput = FVector2D(0.0f, 0.0f);
+		CameraRotationOffset = FRotator(0.0f);
+		m_fLastUnFocusTime = 0.0f;
+	}
+	else
+	{
+		CameraRotation.Pitch = -20.0f;
+		FVector targetPosition(FVector(0.0f, 0.0f, 0.0f));
+		FRotator targetRotation(FRotator(10.0f, 0.0f, 0.0f));
+
+		FVector previousPosition(Camera->RelativeLocation);
+		FRotator previousRotation(Camera->RelativeRotation);
+
+		targetPosition = previousPosition + (targetPosition - previousPosition) * DeltaTime*2.0f;
+		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
+
+		Camera->SetRelativeRotation(targetRotation);
+		Camera->SetRelativeLocation(targetPosition);
+	}
+}
+
 void AToyCar::LookAtComponent(float DeltaTime, USceneComponent* targetActor)
 {
 	if (targetActor != nullptr)
 	{
 		FVector targetPosition(FVector(0.0f, 0.0f, 50.0f));
-		FRotator targetRotation((RootComponent->GetComponentLocation() - targetActor->GetComponentLocation()).Rotation());
+		FRotator targetRotation((targetActor->GetComponentLocation() - UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation()).Rotation());
+
+		targetRotation = UKismetMathLibrary::ComposeRotators(targetRotation, RootComponent->GetComponentRotation().GetInverse());
 
 		FVector previousPosition(Camera->RelativeLocation);
 		FRotator previousRotation(Camera->RelativeRotation);
-
+		
 		targetPosition = previousPosition + (targetPosition - previousPosition) * DeltaTime*2.0f;
 		targetRotation = previousRotation + (targetRotation - previousRotation) * DeltaTime*2.0f;
 

@@ -24,8 +24,8 @@ UCLASS()
 class GDP_PROJECT_API ATrainPuzzle : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ATrainPuzzle();
 
@@ -35,32 +35,33 @@ protected:
 
 	void CheckAndUpdateTriggers();
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ResetToLastCheckpoint();
-
+  void ResetToLastCheckpoint();
+  
 	TArray<TrainPuzzleState> TrainPuzzleStates;
-	
-	UPROPERTY(EditAnywhere)
-	TArray<ATriggerBox*> Triggers;
 
 	UPROPERTY(EditAnywhere)
-	AToyCar* ToyCar;
+		TArray<ATriggerBox*> Triggers;
 
 	UPROPERTY(EditAnywhere)
-	AToyTrain* ToyTrain;
+		AToyCar* ToyCar;
+
+	UPROPERTY(EditAnywhere)
+		AToyTrain* ToyTrain;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Cameras")
-	void RunFailureCamera(int CameraNumber);
+		void RunFailureCamera(int CameraNumber);
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateCameraNumber() { ++CameraNumber; }
+		void UpdateCameraNumber() { ++CameraNumber; }
 
 	UFUNCTION(BlueprintCallable)
-	AToyCar* GetToyCar() { return ToyCar; }
+		AToyCar* GetToyCar() { return ToyCar; }
+
 
 private:
 

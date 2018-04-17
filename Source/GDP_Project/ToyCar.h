@@ -197,7 +197,7 @@ public:
 	void SetCurrentRoom(RoomName room) { _CurrentRoom = room; }
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	RoomName GetCurrentRoom() { return _CurrentRoom; }
-
+	void LookTo(float DeltaTime, USceneComponent* targetActor);
 	void LookAtComponent(float DeltaTime, USceneComponent* targetActor = nullptr);
 
 private:
