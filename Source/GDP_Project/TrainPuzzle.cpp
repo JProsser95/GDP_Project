@@ -64,6 +64,8 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 			TrainPuzzleStates[i].CarPosition = ToyCar->GetActorLocation();
 			TrainPuzzleStates[i].CarRotation = ToyCar->GetActorRotation();
 
+			++CameraNumber;
+
 			if (i == 1)
 				TrainPuzzleStates[i].TrainSplineCounter = 1000;
 			else
