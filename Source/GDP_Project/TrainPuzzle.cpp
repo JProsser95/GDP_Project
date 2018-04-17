@@ -7,9 +7,8 @@
 
 // Sets default values
 ATrainPuzzle::ATrainPuzzle()
-	:m_fFailCounter(0.0f)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -18,8 +17,11 @@ ATrainPuzzle::ATrainPuzzle()
 void ATrainPuzzle::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	TrainPuzzleStates.SetNum(Triggers.Num()); // This makes sure that there are the same number of states and triggers
+
+	CameraNumber = 0;
+	ShowingFailureCamera = false;
 
 	// Get the ToyCar that is now in the scene
 	for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -34,25 +36,19 @@ void ATrainPuzzle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (ShowingFailureCamera)
+		return;
+
 	CheckAndUpdateTriggers();
-	if (ToyTrain->TrainPuzzleFailing())
+
+	if (ToyTrain->TrainPuzzleFailed())
 	{
-		//ToyTrain->GetToyCar()->LookTo(1.0f, ToyTrain->GetRootComponent());
-		//ToyTrain->
-	}
-	else if (ToyTrain->TrainPuzzleFailed())
-	{
-		m_fFailCounter += DeltaTime;
-		if (m_fFailCounter >= m_fFailDelay)
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
-			m_fFailCounter = 0.0f;
-			for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-			{
-				ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
-			}
-			ResetToLastCheckpoint();
-			//ToyTrain->GetToyCar()->LookTo(1.0f, nullptr);
+			ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
 		}
+		ShowingFailureCamera = true;
+		RunFailureCamera(CameraNumber);
 	}
 }
 
@@ -67,6 +63,8 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 
 			TrainPuzzleStates[i].CarPosition = ToyCar->GetActorLocation();
 			TrainPuzzleStates[i].CarRotation = ToyCar->GetActorRotation();
+
+			++CameraNumber;
 
 			if (i == 1)
 				TrainPuzzleStates[i].TrainSplineCounter = 1000;
@@ -88,10 +86,10 @@ void ATrainPuzzle::ResetToLastCheckpoint()
 			ToyCar->SetActorRotation(FQuat(TrainPuzzleStates[i].CarRotation), ETeleportType::TeleportPhysics);
 			ToyTrain->SetSplineCounter(TrainPuzzleStates[i].TrainSplineCounter);
 			ToyTrain->SetTrainState(TrainPuzzleStates[i].TrainState);
+			ShowingFailureCamera = false;
 			if (i == 0) // First trigger
 				ToyTrain->SetMovementDirection(-1);
 			return; // We're done, return out
 		}
 	}
 }
-
