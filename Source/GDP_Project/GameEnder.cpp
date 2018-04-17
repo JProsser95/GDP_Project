@@ -4,9 +4,11 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
+#include "GDP_ProjectGameModeBase.h"
 
 // Sets default values
 AGameEnder::AGameEnder()
+	: fTimer(3.0f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,14 +32,28 @@ void AGameEnder::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TArray<UPrimitiveComponent*> components;
-
-	this->GetOverlappingComponents(components);
-
-	for (UPrimitiveComponent* pComponent : components)
+	if (fTimer == 3.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Game has been completed!"));
-		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+		TArray<UPrimitiveComponent*> components;
+
+		this->GetOverlappingComponents(components);
+
+		for (UPrimitiveComponent* pComponent : components)
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("Game has been completed!"));
+			AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
+			GameMode->SetHintHUD("Victory Achieved");
+			fTimer -= DeltaTime;
+		}
+
+	}
+	else
+	{
+		if (fTimer <= 0.0f)
+			UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+
+		fTimer -= DeltaTime;
 	}
 }
 
