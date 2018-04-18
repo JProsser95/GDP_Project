@@ -12,6 +12,9 @@
 #include "Macros.h"
 #include "AchievementManager.h"
 
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+
 
 // Sets default values
 APlanePart::APlanePart()
@@ -30,6 +33,19 @@ APlanePart::APlanePart()
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &APlanePart::OnBeginOverlap);
 	TriggerBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> collectSound(TEXT("/Game/Sounds/Yeah_Cue"));
+
+	CollectSound = collectSound.Object;
+
+	// Create an audio component, the audio component wraps the Cue
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+	// I don't want the sound playing the moment it's created.
+	AudioComponent->bAutoActivate = false;
+
+	AudioComponent->SetSound(CollectSound);
+
+	AudioComponent->SetVolumeMultiplier(2.0f);
 }
 
 // Called when the game starts or when spawned
@@ -57,6 +73,10 @@ void APlanePart::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AActor
 
 	AToyCar* pToyCar = CastChecked<AToyCar>(OtherActor);
 	pToyCar->UpdatePlanePartsInHUD(_PartName);
+
+	AudioComponent->Play();
+
+	UE_LOG(LogTemp, Warning, TEXT("Sound should be playing"));
 
 	CollectPart();
 }
@@ -95,5 +115,7 @@ void APlanePart::CollectPart()
 	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
 	//GameMode->SetPlanePartCollected(_PartName);
 
-	this->Destroy();
+	//this->Destroy();
+	this->SetActorEnableCollision(false);
+	this->SetActorHiddenInGame(true);
 }
