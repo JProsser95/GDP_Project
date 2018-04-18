@@ -59,8 +59,7 @@ void APlanePointManager::Tick(float DeltaTime)
 				GetWorld()->DestroyActor(Actors[i]);
 				Actors.RemoveAt(i);
 
-				if (!AudioComponent->IsPlaying())
-					AudioComponent->Play();
+				AudioComponent->Play();
 			}
 		}
 	}
