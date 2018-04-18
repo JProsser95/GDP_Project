@@ -55,8 +55,10 @@ ATimePuzzle::ATimePuzzle()
 	RingSmallScale = 0.1f;
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> powerUpSound(TEXT("/Game/Sounds/Power_Up_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> chairSound(TEXT("/Game/Sounds/Chair_Cue"));
 
 	PowerUpSound = powerUpSound.Object;
+	ChairSound = chairSound.Object;
 
 	// Create an audio component, the audio component wraps the Cue
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
@@ -142,6 +144,9 @@ void ATimePuzzle::PuzzleComplete()
 {
 	bIsPuzzleTriggered = false;
 	bIsPuzzleComplete = true;
+
+	AudioComponent->SetSound(ChairSound);
+	AudioComponent->Play();
 
 	if (CameraDirector != nullptr)
 		CameraDirector->BeginTimePuzzleCameraChange(Car);

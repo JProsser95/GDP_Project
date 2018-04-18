@@ -56,6 +56,7 @@ protected:
 
 	UAudioComponent* AudioComponent;
 	USoundCue* PowerUpSound;
+	USoundCue* ChairSound;
 
 	bool AllPointsCollected();
 
