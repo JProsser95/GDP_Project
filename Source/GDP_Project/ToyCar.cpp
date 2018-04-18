@@ -269,7 +269,7 @@ void AToyCar::MoveForward(float AxisValue)
 				AudioComponent->FadeIn(1.0f, 0.6f);
 		}
 		else {
-			AudioComponent->FadeOut(1.0f, 0.0f);
+			AudioComponent->FadeOut(1.5f, 0.0f);
 		}
 	}
 	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * m_fStickyFriction * (int)m_bCanMove);
