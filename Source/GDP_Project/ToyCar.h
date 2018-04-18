@@ -186,7 +186,10 @@ public:
 	APossessionChangerManager* PossessionChangerManager;
 
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAudioComponent* AudioComponent;
+	UAudioComponent* EngineAudioComponent;
+
+	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* BrakeAudioComponent;
 
 	ASpotLight* lightLeft;
 	ASpotLight* lightRight;
@@ -203,9 +206,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, DisplayName = "Headlight Trigger")
 	ATriggerBox* m_pHeadlightArea;
-	
-	CarSounds currentSoundCue;
-	
+		
 	TArray<USoundCue*> AudioCues;
 
 	/* Are we on a 'slippery' surface */
@@ -226,6 +227,8 @@ private:
 	float m_fStickyFriction;
 
 	FVector2D CameraInput;
+
+	float GetToyCarSpeed();
 
 public:
 	/** Returns SpringArm subobject **/

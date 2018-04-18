@@ -165,12 +165,19 @@ AToyCar::AToyCar()
 	_CurrentRoom = RoomName::WARP_ROOM;
 
 	// Create an audio component, the audio component wraps the Cue
-	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	EngineAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudioComponent"));
+	BrakeAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("BrakeAudioComponent"));
 
-	// I don't want the sound playing the moment it's created.
-	AudioComponent->bAutoActivate = false;
+	EngineAudioComponent->VolumeMultiplier = 1.0f;
+	BrakeAudioComponent->VolumeMultiplier = 1.0f;
+
+	// I don't want the brake sound playing the moment it's created.
+	EngineAudioComponent->bAutoActivate = false;
+	BrakeAudioComponent->bAutoActivate = false;
+
 	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
-	AudioComponent->SetupAttachment(RootComponent);
+	EngineAudioComponent->SetupAttachment(RootComponent);
+	BrakeAudioComponent->SetupAttachment(RootComponent);
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -181,8 +188,11 @@ void AToyCar::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AudioComponent->SetSound(AudioCues[ENGINE]);
-	currentSoundCue = ENGINE;
+	EngineAudioComponent->SetSound(AudioCues[CarSounds::ENGINE]);
+	BrakeAudioComponent->SetSound(AudioCues[CarSounds::BRAKE]);
+
+	EngineAudioComponent->Play();
+
 	if (GetWorld() != nullptr)
 	{
 		lightLeft = GetWorld()->SpawnActor<ASpotLight>(ASpotLight::StaticClass());
@@ -203,6 +213,15 @@ void AToyCar::BeginPlay()
 	}
 
 	GetWorld()->GetFirstPlayerController()->Possess(this);
+}
+
+float AToyCar::GetToyCarSpeed()
+{
+	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+	UPrimitiveComponent* pPrimComponent = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
+	FVector movementSpeed(pPrimComponent->GetPhysicsLinearVelocity());
+	movementSpeed.Z = 0.0f;
+	return movementSpeed.Size();
 }
 
 // Called every frame
@@ -229,6 +248,11 @@ void AToyCar::Tick(float DeltaTime)
 	UpdateCamera(DeltaTime);
 
 	LimitCarRotation(DeltaTime);
+
+	float newVolume(GetToyCarSpeed() / 1000.0f);
+
+	EngineAudioComponent->AdjustVolume(0.0f, newVolume);
+	BrakeAudioComponent->AdjustVolume(0.0f, newVolume*1.2f);
 }
 
 void AToyCar::Restart()
@@ -259,20 +283,6 @@ void AToyCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AToyCar::MoveForward(float AxisValue)
 {
-	if (!m_bIsBraking && m_bCanMove)
-	{
-		if (AxisValue > 0) {
-			if (currentSoundCue != ENGINE) {
-				AudioComponent->SetSound(AudioCues[ENGINE]);
-				currentSoundCue = ENGINE;
-			}
-			if (!AudioComponent->IsPlaying())
-				AudioComponent->FadeIn(1.0f, 0.6f);
-		}
-		else {
-			AudioComponent->FadeOut(1.5f, 0.0f);
-		}
-	}
 	GetVehicleMovementComponent()->SetThrottleInput(AxisValue * m_fStickyFriction * (int)m_bCanMove);
 }
 
@@ -297,18 +307,7 @@ void AToyCar::YawCamera(float AxisValue)
 
 void AToyCar::OnHandbrakePressed()
 {
-	if (m_bCanMove)
-	{
-		if (currentSoundCue != BRAKE)
-		{
-			AudioComponent->SetSound(AudioCues[BRAKE]);
-			currentSoundCue = BRAKE;
-		}
-		if (!AudioComponent->IsPlaying())
-		{
-			AudioComponent->Play();
-		}
-	}
+	BrakeAudioComponent->Play();
 
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
 	m_bIsBraking = true;
@@ -317,6 +316,8 @@ void AToyCar::OnHandbrakePressed()
 
 void AToyCar::OnHandbrakeReleased()
 {
+	BrakeAudioComponent->Stop();
+
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
 	m_bIsBraking = false;
 	SetLatStiff(100.0f);
