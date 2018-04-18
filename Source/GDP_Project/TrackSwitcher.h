@@ -7,6 +7,9 @@
 #include "ToyTrain.h"
 #include "TrackSwitcher.generated.h"
 
+class USoundCue;
+class UAudioComponent;
+
 UCLASS()
 class GDP_PROJECT_API ATrackSwitcher : public AActor
 {
@@ -30,4 +33,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	int TrackSwitchNumber;
 	
+	UAudioComponent* AudioComponent;
+	USoundCue* ButtonSound;
 };
