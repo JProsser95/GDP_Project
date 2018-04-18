@@ -171,10 +171,12 @@ void ATimePuzzle::PointManage(float DeltaTime)
 	{
 		float scale = Actors[0]->GetActorScale3D().X;
 		float newScale(scale + (DeltaTime * ResizeRate));
+
 		if (newScale <= ResizeScale)
 			scale = newScale;
 		else
 			scale = ResizeScale;
+
 		Actors[0]->SetActorRelativeScale3D(FVector(scale));
 	}
 }
