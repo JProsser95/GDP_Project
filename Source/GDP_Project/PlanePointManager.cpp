@@ -5,6 +5,9 @@
 #include "Macros.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "AchievementManager.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -13,6 +16,20 @@ APlanePointManager::APlanePointManager()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> powerUpSound(TEXT("/Game/Sounds/Power_Up_Cue"));
+
+	PowerUpSound = powerUpSound.Object;
+
+	// Create an audio component, the audio component wraps the Cue
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+	// I don't want the sound playing the moment it's created.
+	AudioComponent->bAutoActivate = false;
+
+	AudioComponent->SetSound(PowerUpSound);
+
+	AudioComponent->SetVolumeMultiplier(2.0f);
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +58,9 @@ void APlanePointManager::Tick(float DeltaTime)
 				ToyPlane->UpdateCurrentBoost(BoostIncrement);
 				GetWorld()->DestroyActor(Actors[i]);
 				Actors.RemoveAt(i);
+
+				if (!AudioComponent->IsPlaying())
+					AudioComponent->Play();
 			}
 		}
 	}
