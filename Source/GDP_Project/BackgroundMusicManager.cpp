@@ -25,11 +25,13 @@ ABackgroundMusicManager::ABackgroundMusicManager()
 	static ConstructorHelpers::FObjectFinder<USoundCue> BackgroundSound(TEXT("/Game/Sounds/Background_Audio_Cue"));
 	static ConstructorHelpers::FObjectFinder<USoundCue> CameraPuzzleSound(TEXT("/Game/Sounds/CameraPuzzle_Cue"));
 	static ConstructorHelpers::FObjectFinder<USoundCue> TimerPuzzleSound(TEXT("/Game/Sounds/TimePuzzle_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> TrainPuzzleSound(TEXT("/Game/Sounds/Train_Cue"));
 
 
 	AudioCues.Add(BackgroundSound.Object);
 	AudioCues.Add(CameraPuzzleSound.Object);
 	AudioCues.Add(TimerPuzzleSound.Object);
+	AudioCues.Add(TrainPuzzleSound.Object);
 
 } 
 
@@ -50,10 +52,10 @@ void ABackgroundMusicManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABackgroundMusicManager::SetSound(Sounds sound)
+void ABackgroundMusicManager::SetSound(Sounds sound, float FadeInTime)
 {
 	AudioComponent->FadeOut(1.0f, 0.6f);
 	AudioComponent->SetSound(AudioCues[sound]);
-	AudioComponent->FadeIn(1.0f);
+	AudioComponent->FadeIn(FadeInTime);
 	currentSoundCue = sound;
 }

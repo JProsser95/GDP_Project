@@ -7,6 +7,7 @@
 #include "Engine/StaticMesh.h"
 #include "Components/SplineComponent.h"
 #include "Components/BoxComponent.h"
+#include "BackgroundMusicManager.h"
 
 const int HEIGHT = 0;//height of player above spline
 
@@ -351,7 +352,7 @@ void AToyTrain::UpdatePlanePartLocation()
 	}
 	else
 	{
-		if (!EndOfCurrentLine())
+		if (!EndOfCurrentLine() && PlanePart)
 		{
 			PlanePart->SetActorLocation(pathPointLocation[TrainState][splinePointer]);
 			PlanePart->SetActorRotation(pathPointRotation[TrainState][splinePointer]);
