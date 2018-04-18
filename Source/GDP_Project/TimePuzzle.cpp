@@ -106,7 +106,7 @@ void ATimePuzzle::ActivatePuzzle(AToyCar* toycar)
 	// Get the Camera Director that is in the scene
 	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		ActorItr->SetSound(ABackgroundMusicManager::Sounds::TIMER_PUZZLE);
+		ActorItr->SetSound(Sounds::TIMER_PUZZLE);
 	}
 
 	Car->SetIsInPuzzle(true);
@@ -137,7 +137,7 @@ void ATimePuzzle::PuzzleComplete()
 	// Get the Camera Director that is in the scene
 	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		ActorItr->SetSound(ABackgroundMusicManager::Sounds::MAIN);
+		ActorItr->SetSound(Sounds::MAIN);
 	}
 
 	Car->SetIsInPuzzle(false);

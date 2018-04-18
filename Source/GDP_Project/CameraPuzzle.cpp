@@ -145,7 +145,7 @@ void ACameraPuzzle::OnBeginOverlap(class UPrimitiveComponent* HitComp, class AAc
 
 	for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		ActorItr->SetSound(ABackgroundMusicManager::Sounds::CAMERA_PUZZLE);
+		ActorItr->SetSound(Sounds::CAMERA_PUZZLE);
 	}
 
 	bIsActive = true;

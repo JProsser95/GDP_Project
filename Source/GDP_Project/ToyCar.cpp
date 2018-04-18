@@ -17,6 +17,7 @@
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "BackgroundMusicManager.h"
 
 AToyCar::AToyCar()
 	:// Reset
@@ -634,6 +635,10 @@ void AToyCar::SetPuzzleCompleted(PuzzleName Name)
 
 	case TRAIN:
 		TrainPuzzleCompleted = true;
+		for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->SetSound(Sounds::MAIN);
+		}
 		break;
 
 	}

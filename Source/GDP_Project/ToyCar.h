@@ -41,7 +41,7 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 {
 	GENERATED_BODY()
 	
-	enum Sounds {
+	enum CarSounds {
 		ENGINE = 0,
 		BRAKE  = 1
 	};
@@ -204,8 +204,8 @@ private:
 	UPROPERTY(EditAnywhere, DisplayName = "Headlight Trigger")
 	ATriggerBox* m_pHeadlightArea;
 	
-	Sounds currentSoundCue;
-
+	CarSounds currentSoundCue;
+	
 	TArray<USoundCue*> AudioCues;
 
 	/* Are we on a 'slippery' surface */
