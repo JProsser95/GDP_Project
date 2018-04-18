@@ -163,16 +163,9 @@ void AToyTrain::Tick(float DeltaTime)
 				m_fStationWaitTime = 0.0f;
 			else
 			{
-				TArray<UPrimitiveComponent*> components;
-
-				GetOverlappingComponents(components);
-
-				for (UPrimitiveComponent* pComponent : components)
+				if (m_pToyCar && this->IsOverlappingActor(m_pToyCar))
 				{
-					if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
-					{
-						m_fStationWaitTime = 0.0f;
-					}
+					m_fStationWaitTime = 0.0f;
 				}
 			}
 		}
@@ -209,17 +202,9 @@ void AToyTrain::Tick(float DeltaTime)
 	{
 		UpdateTrainOnSpline(); // Incase train hasn't movement previously
 
-		TArray<UPrimitiveComponent*> components;
-
-		GetOverlappingComponents(components);
-
-		for (UPrimitiveComponent* pComponent : components)
+		if (m_pToyCar && this->IsOverlappingActor(m_pToyCar))
 		{
-			if (pComponent->GetCollisionObjectType() == ECollisionChannel::ECC_Vehicle)
-			{
-				MovementDirection = 1;
-				return;
-			}
+			MovementDirection = 1;
 		}
 	}
 }

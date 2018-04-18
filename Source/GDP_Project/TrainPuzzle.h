@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Engine/TriggerBox.h"
+#include "Components/BoxComponent.h"
 
 #include "ToyCar.h"
 #include "ToyTrain.h"
@@ -40,27 +41,30 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-  void ResetToLastCheckpoint();
+	void ResetToLastCheckpoint();
   
 	TArray<TrainPuzzleState> TrainPuzzleStates;
 
 	UPROPERTY(EditAnywhere)
-		TArray<ATriggerBox*> Triggers;
+	TArray<ATriggerBox*> Triggers;
 
 	UPROPERTY(EditAnywhere)
-		AToyCar* ToyCar;
+	UBoxComponent* PuzzleResetBox;
 
 	UPROPERTY(EditAnywhere)
-		AToyTrain* ToyTrain;
+	AToyCar* ToyCar;
+
+	UPROPERTY(EditAnywhere)
+	AToyTrain* ToyTrain;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Cameras")
-		void RunFailureCamera(int CameraNumber);
+	void RunFailureCamera(int CameraNumber);
 
 	UFUNCTION(BlueprintCallable)
-		void UpdateCameraNumber() { ++CameraNumber; }
+	void UpdateCameraNumber() { ++CameraNumber; }
 
 	UFUNCTION(BlueprintCallable)
-		AToyCar* GetToyCar() { return ToyCar; }
+	AToyCar* GetToyCar() { return ToyCar; }
 
 
 private:

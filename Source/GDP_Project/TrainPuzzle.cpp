@@ -11,6 +11,11 @@ ATrainPuzzle::ATrainPuzzle()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	PuzzleResetBox = CreateDefaultSubobject<UBoxComponent>(TEXT("PuzzleResetBoxTriggerBox"));
+	PuzzleResetBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	PuzzleResetBox->SetBoxExtent(FVector(100.0f, 100.0f, 10.0f));
+	PuzzleResetBox->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +46,15 @@ void ATrainPuzzle::Tick(float DeltaTime)
 
 	CheckAndUpdateTriggers();
 
+	if (ToyCar && PuzzleResetBox->IsOverlappingActor(ToyCar))
+	{
+		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->EarnAchievement(AchievementName::OFF_THE_RAILS);
+		}
+		ResetToLastCheckpoint();
+	}
+
 	if (ToyTrain->TrainPuzzleFailed())
 	{
 		for (TActorIterator<AAchievementManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -64,7 +78,7 @@ void ATrainPuzzle::CheckAndUpdateTriggers()
 			TrainPuzzleStates[i].CarPosition = ToyCar->GetActorLocation();
 			TrainPuzzleStates[i].CarRotation = ToyCar->GetActorRotation();
 
-			++CameraNumber;
+			CameraNumber = i;
 
 			if (i == 1)
 				TrainPuzzleStates[i].TrainSplineCounter = 1000;
