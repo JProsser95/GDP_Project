@@ -634,10 +634,13 @@ void AToyCar::SetPuzzleCompleted(PuzzleName Name)
 		break;
 
 	case TRAIN:
-		TrainPuzzleCompleted = true;
-		for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		if (!TrainPuzzleCompleted)
 		{
-			ActorItr->SetSound(Sounds::MAIN);
+			TrainPuzzleCompleted = true;
+			for (TActorIterator<ABackgroundMusicManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+			{
+				ActorItr->SetSound(Sounds::MAIN);
+			}
 		}
 		break;
 
