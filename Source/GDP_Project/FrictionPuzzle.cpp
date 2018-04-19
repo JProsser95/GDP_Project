@@ -62,7 +62,7 @@ AFrictionPuzzle::AFrictionPuzzle()
 
 	AudioComponent->SetSound(SplashSound);
 
-	AudioComponent->SetVolumeMultiplier(2.0f);
+	AudioComponent->SetVolumeMultiplier(4.0f);
 }
 
 // Called when the game starts or when spawned
