@@ -10,7 +10,6 @@
 #include "CleanerObject.h"
 #include "Camera/CameraComponent.h"
 #include "CameraDirector.h"
-#include "Macros.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GDP_ProjectGameModeBase.h"
@@ -60,7 +59,6 @@ AFrictionPuzzle::AFrictionPuzzle()
 	// I don't want the sound playing the moment it's created.
 	AudioComponent->bAutoActivate = false;
 
-	AudioComponent->SetSound(SplashSound);
 
 	AudioComponent->SetVolumeMultiplier(4.0f);
 }
@@ -69,6 +67,7 @@ AFrictionPuzzle::AFrictionPuzzle()
 void AFrictionPuzzle::BeginPlay()
 {
 	Super::BeginPlay();
+	AudioComponent->SetSound(SplashSound);
 	
 	// Get the Camera Director that is in the scene
 	for (TActorIterator<ACameraDirector> ActorItr(GetWorld()); ActorItr; ++ActorItr)

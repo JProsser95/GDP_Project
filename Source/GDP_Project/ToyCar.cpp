@@ -659,5 +659,6 @@ void AToyCar::SetPuzzleCompleted(PuzzleName Name)
 		break;
 
 	}
-}
 
+	SetIsInPuzzle(false);
+}

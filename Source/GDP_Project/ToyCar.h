@@ -169,6 +169,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CarMovement")
 	void SetCanMove(bool Value) { m_bCanMove = Value; if (!Value) ResetVelocity(); }
 
+	UFUNCTION(BlueprintCallable)
 	bool GetIsInPuzzle() { return m_bIsInPuzzle; }
 	void SetIsInPuzzle(bool Value) { m_bIsInPuzzle = Value; CanSeeHints = false; }
 
@@ -225,6 +226,7 @@ private:
 	//Set this to false if we don't want the car to be able to move
 	bool m_bCanMove;
 
+	UPROPERTY(EditAnywhere)
 	bool m_bIsInPuzzle;
 
 	// For the friction puzzle

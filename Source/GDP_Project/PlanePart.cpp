@@ -92,6 +92,10 @@ void APlanePart::CollectPart()
 		{
 			ActorItr->EarnAchievement(AchievementName::PLANE_PROP);
 		}
+		for (TActorIterator<AToyCar> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->SetPuzzleCompleted(PuzzleName::TRAIN);
+		}
 		break;
 
 	case HULL:
