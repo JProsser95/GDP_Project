@@ -14,6 +14,8 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GDP_ProjectGameModeBase.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 const int MAX_CUTAWAY_TIMER(4);
 
@@ -47,6 +49,20 @@ AFrictionPuzzle::AFrictionPuzzle()
 	bIsCarStuck = false;
 	bCameraChanged = false;
 	iCameraTime = MAX_CUTAWAY_TIMER;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> waterSound(TEXT("/Game/Sounds/Water_Cue"));
+
+	SplashSound = waterSound.Object;
+
+	// Create an audio component, the audio component wraps the Cue
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+	// I don't want the sound playing the moment it's created.
+	AudioComponent->bAutoActivate = false;
+
+	AudioComponent->SetSound(SplashSound);
+
+	AudioComponent->SetVolumeMultiplier(2.0f);
 }
 
 // Called when the game starts or when spawned
@@ -106,6 +122,7 @@ void AFrictionPuzzle::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 void AFrictionPuzzle::CleanSticky()
 {
 	StickyFloor->DestroyComponent();
+	AudioComponent->Play();
 }
 
 void AFrictionPuzzle::ChangeCamera()
