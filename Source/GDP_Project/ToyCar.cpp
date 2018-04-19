@@ -26,7 +26,7 @@ AToyCar::AToyCar()
 	MaxAngle(85.0f), RotateSpeed(2.0f), LimitRotation(true),
 	// Camera
 	CameraRotation(-20.0f, 0.0f, 0.0f), AutoFocus(true), AutoFocusDelay(1.0f), m_fLastUnFocusTime(-AutoFocusDelay),
-	m_fTurnAmount(0.0f), m_fTimeOnGround(0.0f),
+	m_fTurnAmount(0.0f), m_fTimeOnGround(0.0f), m_fPreviousCarSpeed(0.0f),
 	CanSeeHints(true), TimerPuzzleCompleted(false), FrictionPuzzleCompleted(false), TrainPuzzleCompleted(false)
 {
 	// Car mesh
@@ -47,7 +47,6 @@ AToyCar::AToyCar()
 	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
 	check(Vehicle4W->WheelSetups.Num() == 4);
-
 
 	float RearForwardDistance(24.0f);
 	float FrontForwardDistance(-18.0f);
@@ -158,26 +157,32 @@ AToyCar::AToyCar()
 	// Load our Sound Cue for the propeller sound we created in the editor... 
 	static ConstructorHelpers::FObjectFinder<USoundCue> engineSound(TEXT("/Game/Sounds/Car_Engine_Cue"));
 	static ConstructorHelpers::FObjectFinder<USoundCue> breakSound(TEXT("/Game/Sounds/Car_Break_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> carHitSound(TEXT("/Game/Sounds/RC_Car_Impact_Cue"));
 
 	AudioCues.Add(engineSound.Object);
 	AudioCues.Add(breakSound.Object);
+	AudioCues.Add(carHitSound.Object);
 
 	_CurrentRoom = RoomName::WARP_ROOM;
 
 	// Create an audio component, the audio component wraps the Cue
 	EngineAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudioComponent"));
 	BrakeAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("BrakeAudioComponent"));
+	CarHitAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("CarHitAudioComponent"));
 
 	EngineAudioComponent->VolumeMultiplier = 1.0f;
 	BrakeAudioComponent->VolumeMultiplier = 1.0f;
+	CarHitAudioComponent->VolumeMultiplier = 1.0f;
 
 	// I don't want the brake sound playing the moment it's created.
 	EngineAudioComponent->bAutoActivate = false;
 	BrakeAudioComponent->bAutoActivate = false;
+	CarHitAudioComponent->bAutoActivate = false;
 
 	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
 	EngineAudioComponent->SetupAttachment(RootComponent);
 	BrakeAudioComponent->SetupAttachment(RootComponent);
+	CarHitAudioComponent->SetupAttachment(RootComponent);
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -190,6 +195,7 @@ void AToyCar::BeginPlay()
 
 	EngineAudioComponent->SetSound(AudioCues[CarSounds::ENGINE]);
 	BrakeAudioComponent->SetSound(AudioCues[CarSounds::BRAKE]);
+	CarHitAudioComponent->SetSound(AudioCues[CarSounds::CARHIT]);
 
 	EngineAudioComponent->Play();
 
@@ -248,11 +254,19 @@ void AToyCar::Tick(float DeltaTime)
 	UpdateCamera(DeltaTime);
 
 	LimitCarRotation(DeltaTime);
-
+	float carSpeed(GetToyCarSpeed());
 	float newVolume(GetToyCarSpeed() / 1000.0f);
 
 	EngineAudioComponent->AdjustVolume(0.0f, newVolume);
 	BrakeAudioComponent->AdjustVolume(0.0f, newVolume*1.2f);
+
+	if (m_fPreviousCarSpeed >= 200.0f && carSpeed/m_fPreviousCarSpeed <= 0.5f)
+	{
+		CarHitAudioComponent->AdjustVolume(0.0f, ((m_fPreviousCarSpeed-200.0f) / 800.0f));
+		CarHitAudioComponent->Play();
+		UE_LOG(LogTemp, Warning, TEXT("Speed: %f, Previous Speed: %f"), carSpeed, m_fPreviousCarSpeed);
+	}
+	m_fPreviousCarSpeed = carSpeed;
 }
 
 void AToyCar::Restart()
