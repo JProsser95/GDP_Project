@@ -238,6 +238,11 @@ void AToyTrain::UpdateState(float DeltaTime)
 		if (!AutomatedMovement())
 		{
 			ChangeToState(TrackSwitched[1] ? RunawayTrain3 : RunawayTrain2_Failed);
+			if (TrackSwitched[2])
+			{
+				m_pToyCar->SetCanMove(false);
+				m_pToyCar->LookAtComponent(DeltaTime, RootComponent);
+			}
 		}
 		break;
 
@@ -246,6 +251,7 @@ void AToyTrain::UpdateState(float DeltaTime)
 		{
 			ChangeToState(RunawayTrain4);
 			m_bRotating = true;
+			m_pToyCar->SetCanMove(false);
 			m_pToyCar->LookAtComponent(DeltaTime, RootComponent);
 		}
 		else if(TrackSwitched[2])
