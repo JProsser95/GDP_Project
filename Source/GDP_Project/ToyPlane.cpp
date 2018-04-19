@@ -10,6 +10,8 @@
 #include "PossessableActorComponent.h"
 #include "AchievementManager.h"
 #include "EngineUtils.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 
 
@@ -74,17 +76,31 @@ AToyPlane::AToyPlane()
 	// Create an instance of our movement component, and tell it to update our root component.
 	CustomMovementComponent = CreateDefaultSubobject<UCustomMovementComponent>(TEXT("CustomMovementComponent"));
 	CustomMovementComponent->UpdatedComponent = RootComponent;
+
+	// Create an audio component, the audio component wraps the Cue
+	PlaneAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PlaneAudioComponent"));
+	PlaneAudioComponent->VolumeMultiplier = 1.0f;
+
+	PlaneAudioComponent->bAutoActivate = false;
+
+	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
+	PlaneAudioComponent->SetupAttachment(RootComponent);
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> planeSound(TEXT("/Game/Sounds/Plane_Propeller_Cue"));
+
+	PlaneAudioComponent->SetSound(planeSound.Object);
+
 }
 
 void AToyPlane::Restart()
 {
 	Super::Restart();
 
-	//AGDP_ProjectGameModeBase* GameMode = (AGDP_ProjectGameModeBase*)GetWorld()->GetAuthGameMode();
-	//GameMode->ChangeHUD("ToyPlane");
-
 	if (bAlreadyRestarted)
+	{
 		bIsActive = true;
+		PlaneAudioComponent->Play();
+	}
 	else
 		bAlreadyRestarted = true;
 

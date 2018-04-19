@@ -257,14 +257,13 @@ void AToyCar::Tick(float DeltaTime)
 	float carSpeed(GetToyCarSpeed());
 	float newVolume(GetToyCarSpeed() / 1000.0f);
 
-	EngineAudioComponent->AdjustVolume(0.0f, newVolume);
+	EngineAudioComponent->AdjustVolume(0.0f, newVolume*0.5f);
 	BrakeAudioComponent->AdjustVolume(0.0f, newVolume*1.2f);
 
 	if (m_fPreviousCarSpeed >= 200.0f && carSpeed/m_fPreviousCarSpeed <= 0.5f)
 	{
 		CarHitAudioComponent->AdjustVolume(0.0f, ((m_fPreviousCarSpeed-200.0f) / 800.0f));
 		CarHitAudioComponent->Play();
-		UE_LOG(LogTemp, Warning, TEXT("Speed: %f, Previous Speed: %f"), carSpeed, m_fPreviousCarSpeed);
 	}
 	m_fPreviousCarSpeed = carSpeed;
 }
