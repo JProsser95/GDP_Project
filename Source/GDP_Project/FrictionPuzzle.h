@@ -9,6 +9,8 @@
 class UBoxComponent;
 class UCameraComponent;
 class ACameraDirector;
+class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class GDP_PROJECT_API AFrictionPuzzle : public AActor
@@ -39,7 +41,8 @@ protected:
 
 	FTimerHandle CameraTimer;
 
-
+	UAudioComponent* AudioComponent;
+	USoundCue* SplashSound;
 
 public:	
 	// Called every frame

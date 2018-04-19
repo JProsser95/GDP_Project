@@ -19,6 +19,8 @@
 #include "BackgroundMusicManager.h"
 #include "Materials/Material.h"
 #include "PlanePart.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -51,6 +53,22 @@ ATimePuzzle::ATimePuzzle()
 	ResizeScale = 1.0f;
 	ResizeRate = 2.0f;
 	RingSmallScale = 0.1f;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> powerUpSound(TEXT("/Game/Sounds/Power_Up_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> chairSound(TEXT("/Game/Sounds/Chair_Cue"));
+
+	PowerUpSound = powerUpSound.Object;
+	ChairSound = chairSound.Object;
+
+	// Create an audio component, the audio component wraps the Cue
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+	// I don't want the sound playing the moment it's created.
+	AudioComponent->bAutoActivate = false;
+
+	AudioComponent->SetSound(PowerUpSound);
+
+	AudioComponent->SetVolumeMultiplier(2.0f);
 }
 
 // Called when the game starts or when spawned
@@ -127,6 +145,9 @@ void ATimePuzzle::PuzzleComplete()
 	bIsPuzzleTriggered = false;
 	bIsPuzzleComplete = true;
 
+	AudioComponent->SetSound(ChairSound);
+	AudioComponent->Play();
+
 	if (CameraDirector != nullptr)
 		CameraDirector->BeginTimePuzzleCameraChange(Car);
 
@@ -159,6 +180,7 @@ void ATimePuzzle::PointManage(float DeltaTime)
 	{
 		Actors[0]->SetActorHiddenInGame(true);
 		Actors.RemoveAt(0);
+		AudioComponent->Play();
 		if (Actors.Num())
 			Actors[GetVisibleActors() - 1]->SetActorHiddenInGame(false);
 	}

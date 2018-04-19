@@ -12,6 +12,8 @@
 
 
 //class AToyPlane;
+class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class GDP_PROJECT_API APlanePointManager : public AActor
@@ -35,6 +37,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	AToyPlane* ToyPlane;
+
+	UAudioComponent* AudioComponent;
+	USoundCue* PowerUpSound;
 
 	UPROPERTY(EditAnywhere)
 	float BoostIncrement;

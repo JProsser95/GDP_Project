@@ -9,6 +9,9 @@
 class UStaticMeshComponent;
 class UBoxComponent;
 
+class USoundCue;
+class UAudioComponent;
+
 UENUM()
 enum Part {
 	PROPELLER			UMETA(DisplayName = "Propeller"),
@@ -35,6 +38,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent*  TriggerBox;
+
+	UAudioComponent* AudioComponent;
+	USoundCue* CollectSound;
 
 public:	
 	// Called every frame

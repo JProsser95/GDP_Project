@@ -14,6 +14,8 @@ class UCameraComponent;
 class ACameraDirector;
 class AToyCar;
 class APlanePart;
+class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class GDP_PROJECT_API ATimePuzzle : public AActor
@@ -51,6 +53,10 @@ protected:
 	TArray<AActor*> Actors;
 
 	TArray<AActor*> CopyActors;
+
+	UAudioComponent* AudioComponent;
+	USoundCue* PowerUpSound;
+	USoundCue* ChairSound;
 
 	bool AllPointsCollected();
 

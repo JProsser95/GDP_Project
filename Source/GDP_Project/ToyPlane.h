@@ -12,6 +12,8 @@
 #include "ToyPlane.generated.h"
 
 class UPossessableActorComponent;
+class USoundCue;
+class UAudioComponent;
 
 UENUM()
 enum class Controls {
@@ -41,6 +43,8 @@ private:
 		FIRST_PERSON,
 		THIRD_PERSON
 	};
+
+	UAudioComponent* PlaneAudioComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Controls", DisplayName = "Control Method")
 	Controls m_eControlType;

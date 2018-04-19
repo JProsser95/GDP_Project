@@ -43,7 +43,8 @@ class GDP_PROJECT_API AToyCar : public AWheeledVehicle
 	
 	enum CarSounds {
 		ENGINE = 0,
-		BRAKE  = 1
+		BRAKE  = 1,
+		CARHIT = 2
 	};
 
 	/** Spring arm that will offset the camera */
@@ -186,7 +187,13 @@ public:
 	APossessionChangerManager* PossessionChangerManager;
 
 	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAudioComponent* AudioComponent;
+	UAudioComponent* EngineAudioComponent;
+
+	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* BrakeAudioComponent;
+
+	UPROPERTY(Category = Sound, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* CarHitAudioComponent;
 
 	ASpotLight* lightLeft;
 	ASpotLight* lightRight;
@@ -203,9 +210,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, DisplayName = "Headlight Trigger")
 	ATriggerBox* m_pHeadlightArea;
-	
-	CarSounds currentSoundCue;
-	
+		
 	TArray<USoundCue*> AudioCues;
 
 	/* Are we on a 'slippery' surface */
@@ -227,6 +232,9 @@ private:
 
 	FVector2D CameraInput;
 
+	float GetToyCarSpeed();
+
+	float m_fPreviousCarSpeed;
 public:
 	/** Returns SpringArm subobject **/
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
