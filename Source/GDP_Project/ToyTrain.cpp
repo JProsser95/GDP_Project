@@ -215,6 +215,7 @@ void AToyTrain::UpdateState(float DeltaTime)
 	switch (TrainState)
 	{
 	case TRAIN_STATES::RunawayTrain:
+		m_pToyCar->SetIsInPuzzle(true);
 		if (!AutomatedMovement())
 		{
 			ChangeToState(TrackSwitched[0] ? RunawayTrain2 : RunawayTrain_Failed);
@@ -275,7 +276,6 @@ void AToyTrain::UpdateState(float DeltaTime)
 
 	case TRAIN_STATES::PlanePartState:
 		AutomatedMovement();
-		m_pToyCar->SetPuzzleCompleted(PuzzleName::TRAIN);
 		PlanePart->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
 		break;
 
